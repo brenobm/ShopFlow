@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BrenoMachado.SmartShopping.ViewModels"
              x:Class="BrenoMachado.SmartShopping.Views.DashboardPage"
+             x:Name="ThisPage"
              Title="{Binding Title}"
              BackgroundColor="#F9FAFB">
 
@@ -21,17 +22,17 @@
                             <SwipeItems>
                                 <SwipeItem Text="Edit"
                                            BackgroundColor="#F59E0B"
-                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=EditListCommand}"
+                                           Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.EditListCommand}"
                                            CommandParameter="{Binding .}"/>
                                 <SwipeItem Text="Delete"
                                            BackgroundColor="#EF4444"
-                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=DeleteListCommand}"
+                                           Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.DeleteListCommand}"
                                            CommandParameter="{Binding .}"/>
                             </SwipeItems>
                         </SwipeView.RightItems>
                         <Frame CornerRadius="10" HasShadow="True" BorderColor="Transparent" Padding="0">
                             <Frame.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=OpenListCommand}"
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.OpenListCommand}"
                                                       CommandParameter="{Binding .}" />
                             </Frame.GestureRecognizers>
                             <Grid Padding="15" BackgroundColor="White">
