@@ -1,0 +1,7 @@
+<Project>
+  <Target Name="_DetectAppManifest" BeforeTargets="CompileAppManifest" Condition="'$(TargetFrameworkIdentifier)' == 'Xamarin.iOS' or '$(TargetFrameworkIdentifier)' == 'Microsoft.iOS'">
+    <PropertyGroup>
+      <_AppManifestPath>Platforms\iOS\Info.plist</_AppManifestPath>
+    </PropertyGroup>
+  </Target>
+</Project>
