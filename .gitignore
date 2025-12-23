@@ -1,0 +1,80 @@
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.cache
+*_i.c
+*_p.c
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Core
+**/Properties/launchSettings.json
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Tooling
+_ReSharper*/
+*.ReSharper
+*.DotSettings.user
+
+# Mobile
+.gradle/
+*.apk
+*.ap_
+*.aab
+*.dex
+*.keystore
+
+# Mac/iOS
+.DS_Store
+*.app
+*.ipa
+*.dSYM/
+
+# Other
+thumbs.db
+ehthumbs.db
+desktop.ini

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BrenoMachado.SmartShopping.ViewModels"
+             x:Class="BrenoMachado.SmartShopping.Views.DashboardPage"
+             Title="{Binding Title}"
+             BackgroundColor="#F9FAFB">
+
+    <Grid RowDefinitions="*, Auto">
+        <CollectionView Grid.Row="0" 
+                        ItemsSource="{Binding Lists}"
+                        SelectionMode="None"
+                        Margin="10">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="10"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame CornerRadius="10" HasShadow="True" BorderColor="Transparent" Padding="0">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=OpenListCommand}"
+                                                  CommandParameter="{Binding .}" />
+                        </Frame.GestureRecognizers>
+                        <Grid Padding="15" BackgroundColor="White">
+                            <Label Text="{Binding Name}" 
+                                   FontSize="18" 
+                                   TextColor="#1F2937" 
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Grid.Row="1"
+                Text="+"
+                Command="{Binding AddListCommand}"
+                BackgroundColor="#2563EB"
+                TextColor="White"
+                CornerRadius="30"
+                HeightRequest="60"
+                WidthRequest="60"
+                FontSize="30"
+                Margin="20"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Shadow="{Shadow Brush=Black, Offset='0,5', Radius=5, Opacity=0.2}"/>
+    </Grid>
+</ContentPage>

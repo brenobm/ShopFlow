@@ -1,0 +1,114 @@
+using System.Collections.ObjectModel;
+using System.Windows.Input;
+using BrenoMachado.SmartShopping.Models;
+using BrenoMachado.SmartShopping.Services;
+
+namespace BrenoMachado.SmartShopping.ViewModels
+{
+    [QueryProperty(nameof(ListId), "Id")]
+    public class ActiveListViewModel : BaseViewModel
+    {
+        private readonly IDatabaseService _databaseService;
+        
+        string _listId;
+        public string ListId
+        {
+            get => _listId;
+            set
+            {
+                _listId = value;
+                LoadListDetailsAsync(value); 
+            }
+        }
+        
+        ShoppingList _currentList;
+        public ShoppingList CurrentList
+        {
+            get => _currentList;
+            set
+            {
+                _currentList = value;
+                OnPropertyChanged();
+                if(_currentList != null) Title = _currentList.Name;
+            }
+        }
+
+        public ObservableCollection<ShoppingItem> Items { get; } = new();
+
+        public ICommand AddItemCommand { get; }
+        public ICommand TogglePurchasedCommand { get; }
+        public ICommand DeleteItemCommand { get; }
+
+        public ActiveListViewModel(IDatabaseService databaseService)
+        {
+            _databaseService = databaseService;
+            AddItemCommand = new Command(async () => await AddItemAsync());
+            TogglePurchasedCommand = new Command<ShoppingItem>(async (item) => await TogglePurchasedAsync(item));
+            DeleteItemCommand = new Command<ShoppingItem>(async (item) => await DeleteItemAsync(item));
+        }
+
+        async void LoadListDetailsAsync(string id)
+        {
+            try
+            {
+                CurrentList = await _databaseService.GetListAsync(id);
+                await LoadItemsAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading list: {ex.Message}");
+            }
+        }
+
+        async Task LoadItemsAsync()
+        {
+             if (CurrentList == null) return;
+             
+             var items = await _databaseService.GetItemsAsync(CurrentList.Id);
+             Items.Clear();
+             foreach(var item in items)
+             {
+                 Items.Add(item);
+             }
+        }
+
+        async Task AddItemAsync()
+        {
+             string name = await Shell.Current.DisplayPromptAsync("New Item", "Enter item name");
+             if (string.IsNullOrWhiteSpace(name)) return;
+
+             var newItem = new ShoppingItem 
+             { 
+                 Name = name.Trim(),
+                 ListId = CurrentList.Id,
+                 Category = "Uncategorized" // Placeholder
+             };
+             
+             await _databaseService.SaveItemAsync(newItem);
+             await LoadItemsAsync();
+        }
+
+        async Task TogglePurchasedAsync(ShoppingItem item)
+        {
+            if (item == null) return;
+            item.IsPurchased = !item.IsPurchased;
+            item.PurchasedAt = item.IsPurchased ? DateTime.UtcNow : null;
+            
+            await _databaseService.SaveItemAsync(item);
+            await LoadItemsAsync(); // Refresh to sort
+            
+            // Voice feedback could go here
+        }
+
+        async Task DeleteItemAsync(ShoppingItem item)
+        {
+            if(item == null) return;
+            bool confirm = await Shell.Current.DisplayAlert("Delete", $"Remove {item.Name}?", "Yes", "No");
+            if(confirm)
+            {
+                await _databaseService.DeleteItemAsync(item);
+                Items.Remove(item);
+            }
+        }
+    }
+}
