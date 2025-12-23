@@ -95,5 +95,10 @@ namespace BrenoMachado.SmartShopping.Services
             await Init();
             await _database.DeleteAsync(item);
         }
+        public async Task<List<ShoppingItem>> GetPurchasedItemsAsync()
+        {
+            await Init();
+            return await _database.Table<ShoppingItem>().Where(i => i.IsPurchased).ToListAsync();
+        }
     }
 }

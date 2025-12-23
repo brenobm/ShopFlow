@@ -7,8 +7,36 @@
              Title="{Binding Title}"
              BackgroundColor="#F9FAFB">
 
-    <Grid RowDefinitions="*, Auto">
+    <Grid RowDefinitions="Auto, *">
+        <!-- Suggestions -->
         <CollectionView Grid.Row="0"
+                        ItemsSource="{Binding Suggestions}"
+                        HeightRequest="50"
+                        Margin="10,5"
+                        SelectionMode="None">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Padding="12,6" BackgroundColor="#DBEAFE" CornerRadius="20" BorderColor="Transparent" HasShadow="False">
+                        <Label Text="{Binding .}" TextColor="#1E40AF" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.AddSuggestionCommand}"
+                                                  CommandParameter="{Binding .}"/>
+                        </Frame.GestureRecognizers>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.Triggers>
+                <DataTrigger TargetType="CollectionView" Binding="{Binding Suggestions.Count}" Value="0">
+                    <Setter Property="IsVisible" Value="False"/>
+                    <Setter Property="HeightRequest" Value="0"/>
+                </DataTrigger>
+            </CollectionView.Triggers>
+        </CollectionView>
+
+        <CollectionView Grid.Row="1"
                         ItemsSource="{Binding Items}"
                         SelectionMode="None"
                         Margin="0,0,0,80">
@@ -62,8 +90,9 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Grid.Row="0"
+        <Button Grid.Row="1"
                 Text="🎤"
+                Command="{Binding ListenCommand}"
                 BackgroundColor="#059669"
                 TextColor="White"
                 CornerRadius="30"
@@ -75,7 +104,7 @@
                 VerticalOptions="End"
                 Shadow="{Shadow Brush=Black, Offset='0,5', Radius=5, Opacity=0.2}"/>
                 
-        <Button Grid.Row="0"
+        <Button Grid.Row="1"
                 Text="+"
                 Command="{Binding AddItemCommand}"
                 BackgroundColor="#2563EB"

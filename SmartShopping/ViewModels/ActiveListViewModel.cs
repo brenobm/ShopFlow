@@ -34,19 +34,28 @@ namespace BrenoMachado.SmartShopping.ViewModels
         }
 
         public ObservableCollection<ShoppingItem> Items { get; } = new();
+        public ObservableCollection<string> Suggestions { get; } = new();
 
         public ICommand AddItemCommand { get; }
         public ICommand TogglePurchasedCommand { get; }
         public ICommand EditItemCommand { get; }
         public ICommand DeleteItemCommand { get; }
+        public ICommand AddSuggestionCommand { get; }
 
-        public ActiveListViewModel(IDatabaseService databaseService)
+        public ICommand ListenCommand { get; }
+        
+        private readonly ISmartService _smartService;
+
+        public ActiveListViewModel(IDatabaseService databaseService, IVoiceService voiceService, ISmartService smartService)
         {
             _databaseService = databaseService;
+            _smartService = smartService;
+            ListenCommand = new Command(async () => await ListenAsync(voiceService));
             AddItemCommand = new Command(async () => await AddItemAsync());
             TogglePurchasedCommand = new Command<ShoppingItem>(async (item) => await TogglePurchasedAsync(item));
             EditItemCommand = new Command<ShoppingItem>(async (item) => await EditItemAsync(item));
             DeleteItemCommand = new Command<ShoppingItem>(async (item) => await DeleteItemAsync(item));
+            AddSuggestionCommand = new Command<string>(async (name) => await AddSuggestionAsync(name));
         }
 
         async void LoadListDetailsAsync(string id)
@@ -72,6 +81,35 @@ namespace BrenoMachado.SmartShopping.ViewModels
              {
                  Items.Add(item);
              }
+             await LoadSuggestionsAsync();
+        }
+
+        async Task LoadSuggestionsAsync()
+        {
+            var suggestions = await _smartService.GetSuggestionsAsync();
+            Suggestions.Clear();
+            foreach(var s in suggestions)
+            {
+                if(!Items.Any(i => i.Name.Equals(s, StringComparison.OrdinalIgnoreCase))) // Don't suggest if already in list
+                {
+                    Suggestions.Add(s);
+                }
+            }
+        }
+
+        async Task AddSuggestionAsync(string name)
+        {
+             if (string.IsNullOrWhiteSpace(name)) return;
+
+             var newItem = new ShoppingItem 
+             { 
+                 Name = name.Trim(),
+                 ListId = CurrentList.Id,
+                 Category = "Smart Suggestion"
+             };
+             
+             await _databaseService.SaveItemAsync(newItem);
+             await LoadItemsAsync(); // Will reload suggestions too
         }
 
         async Task AddItemAsync()
@@ -83,7 +121,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
              { 
                  Name = name.Trim(),
                  ListId = CurrentList.Id,
-                 Category = "Uncategorized" // Placeholder
+                 Category = "Uncategorized"
              };
              
              await _databaseService.SaveItemAsync(newItem);
@@ -121,6 +159,33 @@ namespace BrenoMachado.SmartShopping.ViewModels
             {
                 await _databaseService.DeleteItemAsync(item);
                 Items.Remove(item);
+            }
+        }
+        async Task ListenAsync(IVoiceService voiceService)
+        {
+            try 
+            {
+                var text = await voiceService.ListenAsync();
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    // Add item directly
+                     var newItem = new ShoppingItem 
+                     { 
+                         Name = text.Trim(), // Capitalize first letter logic could go here
+                         ListId = CurrentList.Id,
+                         Category = "Voice Added"
+                     };
+                     
+                     await _databaseService.SaveItemAsync(newItem);
+                     await LoadItemsAsync();
+                     
+                     // Feedback
+                     await Shell.Current.DisplayAlert("Voice Input", $"Added '{text}'", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                 await Shell.Current.DisplayAlert("Error", $"Voice error: {ex.Message}", "OK");
             }
         }
     }

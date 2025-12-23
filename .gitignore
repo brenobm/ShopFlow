@@ -78,3 +78,7 @@ _ReSharper*/
 thumbs.db
 ehthumbs.db
 desktop.ini
+
+# Temporary Error Logs
+build_error_*.txt
+error_*.txt
