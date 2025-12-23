@@ -16,19 +16,33 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame CornerRadius="10" HasShadow="True" BorderColor="Transparent" Padding="0">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=OpenListCommand}"
-                                                  CommandParameter="{Binding .}" />
-                        </Frame.GestureRecognizers>
-                        <Grid Padding="15" BackgroundColor="White">
-                            <Label Text="{Binding Name}" 
-                                   FontSize="18" 
-                                   TextColor="#1F2937" 
-                                   FontAttributes="Bold"
-                                   VerticalOptions="Center"/>
-                        </Grid>
-                    </Frame>
+                    <SwipeView>
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem Text="Edit"
+                                           BackgroundColor="#F59E0B"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=EditListCommand}"
+                                           CommandParameter="{Binding .}"/>
+                                <SwipeItem Text="Delete"
+                                           BackgroundColor="#EF4444"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=DeleteListCommand}"
+                                           CommandParameter="{Binding .}"/>
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+                        <Frame CornerRadius="10" HasShadow="True" BorderColor="Transparent" Padding="0">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=OpenListCommand}"
+                                                      CommandParameter="{Binding .}" />
+                            </Frame.GestureRecognizers>
+                            <Grid Padding="15" BackgroundColor="White">
+                                <Label Text="{Binding Name}" 
+                                       FontSize="18" 
+                                       TextColor="#1F2937" 
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+                        </Frame>
+                    </SwipeView>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

@@ -15,6 +15,8 @@ namespace BrenoMachado.SmartShopping.ViewModels
         public ICommand LoadListsCommand { get; }
         public ICommand AddListCommand { get; }
         public ICommand OpenListCommand { get; }
+        public ICommand EditListCommand { get; }
+        public ICommand DeleteListCommand { get; }
 
         public DashboardViewModel(IDatabaseService databaseService)
         {
@@ -24,6 +26,8 @@ namespace BrenoMachado.SmartShopping.ViewModels
             LoadListsCommand = new Command(async () => await LoadListsAsync());
             AddListCommand = new Command(async () => await AddListAsync());
             OpenListCommand = new Command<ShoppingList>(async (list) => await OpenListAsync(list));
+            EditListCommand = new Command<ShoppingList>(async (list) => await EditListAsync(list));
+            DeleteListCommand = new Command<ShoppingList>(async (list) => await DeleteListAsync(list));
         }
 
         async Task LoadListsAsync()
@@ -56,6 +60,28 @@ namespace BrenoMachado.SmartShopping.ViewModels
              var newList = new ShoppingList { Name = name.Trim() };
              await _databaseService.SaveListAsync(newList);
              await LoadListsAsync();
+        }
+
+        async Task EditListAsync(ShoppingList list)
+        {
+            if (list == null) return;
+            string name = await Shell.Current.DisplayPromptAsync("Edit List", "Enter new list name", initialValue: list.Name);
+            if (string.IsNullOrWhiteSpace(name) || name == list.Name) return;
+
+            list.Name = name.Trim();
+            await _databaseService.SaveListAsync(list);
+            await LoadListsAsync();
+        }
+
+        async Task DeleteListAsync(ShoppingList list)
+        {
+            if (list == null) return;
+            bool confirm = await Shell.Current.DisplayAlert("Delete", $"Delete list '{list.Name}'?", "Yes", "No");
+            if (confirm)
+            {
+                await _databaseService.DeleteListAsync(list);
+                await LoadListsAsync();
+            }
         }
 
         async Task OpenListAsync(ShoppingList list)

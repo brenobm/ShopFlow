@@ -37,6 +37,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
 
         public ICommand AddItemCommand { get; }
         public ICommand TogglePurchasedCommand { get; }
+        public ICommand EditItemCommand { get; }
         public ICommand DeleteItemCommand { get; }
 
         public ActiveListViewModel(IDatabaseService databaseService)
@@ -44,6 +45,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
             _databaseService = databaseService;
             AddItemCommand = new Command(async () => await AddItemAsync());
             TogglePurchasedCommand = new Command<ShoppingItem>(async (item) => await TogglePurchasedAsync(item));
+            EditItemCommand = new Command<ShoppingItem>(async (item) => await EditItemAsync(item));
             DeleteItemCommand = new Command<ShoppingItem>(async (item) => await DeleteItemAsync(item));
         }
 
@@ -98,6 +100,17 @@ namespace BrenoMachado.SmartShopping.ViewModels
             await LoadItemsAsync(); // Refresh to sort
             
             // Voice feedback could go here
+        }
+
+        async Task EditItemAsync(ShoppingItem item)
+        {
+             if (item == null) return;
+             string name = await Shell.Current.DisplayPromptAsync("Edit Item", "Enter item name", initialValue: item.Name);
+             if (string.IsNullOrWhiteSpace(name) || name == item.Name) return;
+
+             item.Name = name.Trim();
+             await _databaseService.SaveItemAsync(item);
+             await LoadItemsAsync();
         }
 
         async Task DeleteItemAsync(ShoppingItem item)
