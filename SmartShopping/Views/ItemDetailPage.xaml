@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BrenoMachado.SmartShopping.ViewModels"
+             x:Class="BrenoMachado.SmartShopping.Views.ItemDetailPage"
+             Title="{Binding Title}"
+             BackgroundColor="#F9FAFB">
+
+    <Grid RowDefinitions="*, Auto" Padding="20">
+        <VerticalStackLayout Spacing="20">
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Item Name" FontAttributes="Bold" TextColor="#374151"/>
+                <Entry Text="{Binding Name}" 
+                       Placeholder="e.g., Bananas"
+                       BackgroundColor="White"
+                       HeightRequest="50"/>
+            </VerticalStackLayout>
+            
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Category" FontAttributes="Bold" TextColor="#374151"/>
+                <CollectionView ItemsSource="{Binding Categories}"
+                                SelectionMode="Single"
+                                SelectedItem="{Binding SelectedCategory}"
+                                HeightRequest="300">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="10" HeightRequest="45">
+                                <Label Text="{Binding .}" 
+                                       VerticalOptions="Center" 
+                                       TextColor="#4B5563"/>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal" />
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="#DBEAFE" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,20,0,0">
+            <Button Text="Cancel" 
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="#EF4444"
+                    TextColor="White"/>
+            <Button Grid.Column="1"
+                    Text="Save" 
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="#2563EB"
+                    TextColor="White"/>
+        </Grid>
+    </Grid>
+</ContentPage>

@@ -10,6 +10,7 @@ namespace BrenoMachado.SmartShopping.Services
         Task DeleteListAsync(ShoppingList list);
         
         Task<List<ShoppingItem>> GetItemsAsync(string listId);
+        Task<ShoppingItem> GetItemAsync(string itemId);
         Task SaveItemAsync(ShoppingItem item);
         Task DeleteItemAsync(ShoppingItem item);
         

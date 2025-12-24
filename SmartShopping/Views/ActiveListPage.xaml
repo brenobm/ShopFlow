@@ -39,7 +39,18 @@
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding Items}"
                         SelectionMode="None"
+                        IsGrouped="True"
                         Margin="0,0,0,80">
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding Name}"
+                           BackgroundColor="#F3F4F6"
+                           TextColor="#111827"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           Padding="15,10"/>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <SwipeView>

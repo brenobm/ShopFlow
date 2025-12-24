@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BrenoMachado.SmartShopping.ViewModels"
+             x:Class="BrenoMachado.SmartShopping.Views.SettingsPage"
+             Title="{Binding Title}"
+             BackgroundColor="#F9FAFB">
+
+    <StackLayout Padding="20" Spacing="20">
+        <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
+            <StackLayout Spacing="10">
+                <Label Text="Data Management" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
+                <Label Text="Clear all your shopping lists and items. This cannot be undone." TextColor="#6B7280" FontSize="14"/>
+                <Button Text="Clear All Data" 
+                        Command="{Binding ClearDataCommand}"
+                        BackgroundColor="#EF4444"
+                        TextColor="White"/>
+            </StackLayout>
+        </Frame>
+
+        <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
+            <StackLayout Spacing="5">
+                 <Label Text="About" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
+                 <Label Text="Smart Shopping" FontSize="16" TextColor="#111827"/>
+                 <Label Text="{Binding Version, StringFormat='Version {0}'}" TextColor="#6B7280"/>
+            </StackLayout>
+        </Frame>
+    </StackLayout>
+</ContentPage>

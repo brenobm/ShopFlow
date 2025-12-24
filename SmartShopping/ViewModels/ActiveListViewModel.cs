@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using BrenoMachado.SmartShopping.Models;
 using BrenoMachado.SmartShopping.Services;
+using BrenoMachado.SmartShopping.Views;
 
 namespace BrenoMachado.SmartShopping.ViewModels
 {
@@ -33,7 +34,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
             }
         }
 
-        public ObservableCollection<ShoppingItem> Items { get; } = new();
+        public ObservableCollection<ShoppingItemGroup> Items { get; } = new();
         public ObservableCollection<string> Suggestions { get; } = new();
 
         public ICommand AddItemCommand { get; }
@@ -63,12 +64,17 @@ namespace BrenoMachado.SmartShopping.ViewModels
             try
             {
                 CurrentList = await _databaseService.GetListAsync(id);
-                await LoadItemsAsync();
+                // LoadItemsAsync(); // Refresh() will be called by OnAppearing
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading list: {ex.Message}");
             }
+        }
+
+        public async Task RefreshAsync()
+        {
+            await LoadItemsAsync();
         }
 
         async Task LoadItemsAsync()
@@ -77,9 +83,14 @@ namespace BrenoMachado.SmartShopping.ViewModels
              
              var items = await _databaseService.GetItemsAsync(CurrentList.Id);
              Items.Clear();
-             foreach(var item in items)
+             
+             var groups = items.GroupBy(i => i.Category ?? "Uncategorized")
+                               .Select(g => new ShoppingItemGroup(g.Key, g))
+                               .OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999);
+
+             foreach(var group in groups)
              {
-                 Items.Add(item);
+                 Items.Add(group);
              }
              await LoadSuggestionsAsync();
         }
@@ -88,9 +99,10 @@ namespace BrenoMachado.SmartShopping.ViewModels
         {
             var suggestions = await _smartService.GetSuggestionsAsync();
             Suggestions.Clear();
+            var allItems = Items.SelectMany(g => g).ToList();
             foreach(var s in suggestions)
             {
-                if(!Items.Any(i => i.Name.Equals(s, StringComparison.OrdinalIgnoreCase))) // Don't suggest if already in list
+                if(!allItems.Any(i => i.Name.Equals(s, StringComparison.OrdinalIgnoreCase))) // Don't suggest if already in list
                 {
                     Suggestions.Add(s);
                 }
@@ -114,18 +126,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
 
         async Task AddItemAsync()
         {
-             string name = await Shell.Current.DisplayPromptAsync("New Item", "Enter item name");
-             if (string.IsNullOrWhiteSpace(name)) return;
-
-             var newItem = new ShoppingItem 
-             { 
-                 Name = name.Trim(),
-                 ListId = CurrentList.Id,
-                 Category = "Uncategorized"
-             };
-             
-             await _databaseService.SaveItemAsync(newItem);
-             await LoadItemsAsync();
+             await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?ListId={CurrentList.Id}");
         }
 
         async Task TogglePurchasedAsync(ShoppingItem item)
@@ -143,12 +144,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
         async Task EditItemAsync(ShoppingItem item)
         {
              if (item == null) return;
-             string name = await Shell.Current.DisplayPromptAsync("Edit Item", "Enter item name", initialValue: item.Name);
-             if (string.IsNullOrWhiteSpace(name) || name == item.Name) return;
-
-             item.Name = name.Trim();
-             await _databaseService.SaveItemAsync(item);
-             await LoadItemsAsync();
+             await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?ItemId={item.Id}&ListId={CurrentList.Id}");
         }
 
         async Task DeleteItemAsync(ShoppingItem item)
@@ -158,7 +154,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
             if(confirm)
             {
                 await _databaseService.DeleteItemAsync(item);
-                Items.Remove(item);
+                await LoadItemsAsync();
             }
         }
         async Task ListenAsync(IVoiceService voiceService)

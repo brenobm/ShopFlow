@@ -7,6 +7,10 @@
              Title="{Binding Title}"
              BackgroundColor="#F9FAFB">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="⚙️" Command="{Binding GoToSettingsCommand}" />
+    </ContentPage.ToolbarItems>
+
     <Grid RowDefinitions="*, Auto">
         <CollectionView Grid.Row="0" 
                         ItemsSource="{Binding Lists}"

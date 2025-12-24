@@ -9,5 +9,14 @@ namespace BrenoMachado.SmartShopping.Views
             InitializeComponent();
             BindingContext = viewModel;
         }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            if(BindingContext is ActiveListViewModel vm)
+            {
+                await vm.RefreshAsync();
+            }
+        }
     }
 }

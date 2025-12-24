@@ -17,6 +17,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
         public ICommand OpenListCommand { get; }
         public ICommand EditListCommand { get; }
         public ICommand DeleteListCommand { get; }
+        public ICommand GoToSettingsCommand { get; }
 
         public DashboardViewModel(IDatabaseService databaseService)
         {
@@ -28,6 +29,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
             OpenListCommand = new Command<ShoppingList>(async (list) => await OpenListAsync(list));
             EditListCommand = new Command<ShoppingList>(async (list) => await EditListAsync(list));
             DeleteListCommand = new Command<ShoppingList>(async (list) => await DeleteListAsync(list));
+            GoToSettingsCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(Views.SettingsPage)));
         }
 
         async Task LoadListsAsync()

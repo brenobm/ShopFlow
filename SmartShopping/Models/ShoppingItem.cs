@@ -15,5 +15,20 @@ namespace BrenoMachado.SmartShopping.Models
         public string Category { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? PurchasedAt { get; set; }
+
+        public static List<string> DefaultCategories = new List<string>
+        {
+            "Uncategorized",
+            "Produce",
+            "Dairy & Eggs",
+            "Meat & Poultry",
+            "Bakery",
+            "Frozen Foods",
+            "Pantry",
+            "Beverages",
+            "Household",
+            "Personal Care",
+            "Other"
+        };
     }
 }

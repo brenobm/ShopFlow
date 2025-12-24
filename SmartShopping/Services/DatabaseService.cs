@@ -72,6 +72,12 @@ namespace BrenoMachado.SmartShopping.Services
                             .ToListAsync();
         }
 
+        public async Task<ShoppingItem> GetItemAsync(string itemId)
+        {
+            await Init();
+            return await _database.Table<ShoppingItem>().Where(i => i.Id == itemId).FirstOrDefaultAsync();
+        }
+
         public async Task SaveItemAsync(ShoppingItem item)
         {
             await Init();

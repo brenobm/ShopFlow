@@ -32,10 +32,14 @@ public static class MauiProgram
         // ViewModels
         builder.Services.AddSingleton<DashboardViewModel>();
         builder.Services.AddTransient<ActiveListViewModel>();
+        builder.Services.AddTransient<ItemDetailViewModel>();
+        builder.Services.AddTransient<SettingsViewModel>();
 
         // Views
         builder.Services.AddSingleton<DashboardPage>();
         builder.Services.AddTransient<ActiveListPage>();
+        builder.Services.AddTransient<ItemDetailPage>();
+        builder.Services.AddTransient<SettingsPage>();
 
 		return builder.Build();
 	}
