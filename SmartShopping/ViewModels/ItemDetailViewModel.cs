@@ -10,10 +10,12 @@ namespace BrenoMachado.SmartShopping.ViewModels
     public class ItemDetailViewModel : BaseViewModel
     {
         private readonly IDatabaseService _databaseService;
+        private readonly ISyncService _syncService;
 
-        public ItemDetailViewModel(IDatabaseService databaseService)
+        public ItemDetailViewModel(IDatabaseService databaseService, ISyncService syncService)
         {
             _databaseService = databaseService;
+            _syncService = syncService;
 
             SaveCommand = new Command(async () => await SaveAsync());
             CancelCommand = new Command(async () => await CancelAsync());
@@ -116,12 +118,14 @@ namespace BrenoMachado.SmartShopping.ViewModels
                     Category = SelectedCategory
                 };
                 await _databaseService.SaveItemAsync(newItem);
+                await _syncService.PushItemAsync(newItem);
             }
             else
             {
                 _existingItem.Name = Name.Trim();
                 _existingItem.Category = SelectedCategory;
                 await _databaseService.SaveItemAsync(_existingItem);
+                await _syncService.PushItemAsync(_existingItem);
             }
 
             await Shell.Current.GoToAsync("..");

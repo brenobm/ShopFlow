@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BrenoMachado.SmartShopping.ViewModels"
+             x:Class="BrenoMachado.SmartShopping.Views.LoginPage"
+             Title="{Binding Title}"
+             BackgroundColor="#F3F4F6">
+
+    <StackLayout Padding="30" Spacing="20" VerticalOptions="Center">
+        
+        <Image Source="appicon.svg" HeightRequest="100" Margin="0,0,0,20"/>
+
+        <Entry Placeholder="Username" Text="{Binding Username}" BackgroundColor="White"/>
+        
+        <Entry Placeholder="Email" Text="{Binding Email}" IsVisible="{Binding IsSignUp}" BackgroundColor="White" Keyboard="Email"/>
+        
+        <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True" BackgroundColor="White"/>
+
+        <Button Text="Login" 
+                Command="{Binding LoginCommand}" 
+                IsVisible="{Binding IsLogin}"
+                BackgroundColor="#2563EB" 
+                TextColor="White"/>
+
+        <Button Text="Sign Up" 
+                Command="{Binding SignUpCommand}" 
+                IsVisible="{Binding IsSignUp}"
+                BackgroundColor="#10B981" 
+                TextColor="White"/>
+
+        <Button Text="{Binding IsSignUp, StringFormat='Already have an account? Login'}" 
+                Command="{Binding ToggleModeCommand}"
+                BackgroundColor="Transparent"
+                TextColor="#2563EB"
+                IsVisible="{Binding IsSignUp}"/>
+
+        <Button Text="{Binding IsLogin, StringFormat='Need an account? Sign Up'}" 
+                Command="{Binding ToggleModeCommand}"
+                BackgroundColor="Transparent"
+                TextColor="#2563EB"
+                IsVisible="{Binding IsLogin}"/>
+                
+        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#2563EB"/>
+
+    </StackLayout>
+</ContentPage>

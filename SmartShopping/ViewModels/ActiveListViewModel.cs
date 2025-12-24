@@ -47,6 +47,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
         public ICommand ToggleShoppingModeCommand { get; }
         
         private readonly ISmartService _smartService;
+        private readonly ISyncService _syncService;
 
         bool _isShoppingMode;
         public bool IsShoppingMode
@@ -60,10 +61,11 @@ namespace BrenoMachado.SmartShopping.ViewModels
             }
         }
 
-        public ActiveListViewModel(IDatabaseService databaseService, IVoiceService voiceService, ISmartService smartService)
+        public ActiveListViewModel(IDatabaseService databaseService, IVoiceService voiceService, ISmartService smartService, ISyncService syncService)
         {
             _databaseService = databaseService;
             _smartService = smartService;
+            _syncService = syncService;
             ListenCommand = new Command(async () => await ListenAsync(voiceService));
             AddItemCommand = new Command(async () => await AddItemAsync());
             TogglePurchasedCommand = new Command<ShoppingItem>(async (item) => await TogglePurchasedAsync(item));
@@ -140,6 +142,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
              };
              
              await _databaseService.SaveItemAsync(newItem);
+             await _syncService.PushItemAsync(newItem);
              await LoadItemsAsync(); // Will reload suggestions too
         }
 
@@ -155,6 +158,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
             item.PurchasedAt = item.IsPurchased ? DateTime.UtcNow : null;
             
             await _databaseService.SaveItemAsync(item);
+            await _syncService.PushItemAsync(item);
             await LoadItemsAsync(); // Refresh to sort
             
             // Voice feedback could go here
@@ -173,6 +177,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
             if(confirm)
             {
                 await _databaseService.DeleteItemAsync(item);
+                await _syncService.DeleteItemAsync(item.Id);
                 await LoadItemsAsync();
             }
         }
@@ -192,6 +197,7 @@ namespace BrenoMachado.SmartShopping.ViewModels
                      };
                      
                      await _databaseService.SaveItemAsync(newItem);
+                     await _syncService.PushItemAsync(newItem);
                      await LoadItemsAsync();
                      
                      // Feedback

@@ -28,18 +28,22 @@ public static class MauiProgram
         builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
         builder.Services.AddSingleton<IVoiceService, VoiceService>();
         builder.Services.AddSingleton<ISmartService, SmartService>();
+        builder.Services.AddSingleton<IAuthService, AuthService>();
+        builder.Services.AddSingleton<ISyncService, SyncService>();
 
         // ViewModels
         builder.Services.AddSingleton<DashboardViewModel>();
         builder.Services.AddTransient<ActiveListViewModel>();
         builder.Services.AddTransient<ItemDetailViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
+        builder.Services.AddTransient<LoginViewModel>();
 
         // Views
         builder.Services.AddSingleton<DashboardPage>();
         builder.Services.AddTransient<ActiveListPage>();
         builder.Services.AddTransient<ItemDetailPage>();
         builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<LoginPage>();
 
 		return builder.Build();
 	}

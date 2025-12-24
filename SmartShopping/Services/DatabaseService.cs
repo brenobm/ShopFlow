@@ -5,7 +5,7 @@ namespace BrenoMachado.SmartShopping.Services
 {
     public class DatabaseService : IDatabaseService
     {
-        SQLiteAsyncConnection _database;
+        SQLiteAsyncConnection? _database;
 
         async Task Init()
         {
