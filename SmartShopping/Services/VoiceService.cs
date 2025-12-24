@@ -10,27 +10,48 @@ namespace BrenoMachado.SmartShopping.Services
 
         public async Task<string> ListenAsync()
         {
-            var isGranted = await _speechToText.RequestPermissions(CancellationToken.None);
-            if (!isGranted)
+            try
             {
-                await Shell.Current.DisplayAlert("Permission Denied", "Microphone permission is required for voice control.", "OK");
+                var isGranted = await _speechToText.RequestPermissions(CancellationToken.None);
+                if (!isGranted)
+                {
+                    await Shell.Current.DisplayAlert("Permission Denied", "Microphone permission is required for voice control. Please check your system settings.", "OK");
+                    return null;
+                }
+
+#if IOS
+                var audioSession = AVFoundation.AVAudioSession.SharedInstance();
+                audioSession.SetCategory(AVFoundation.AVAudioSessionCategory.PlayAndRecord, AVFoundation.AVAudioSessionCategoryOptions.DefaultToSpeaker);
+                audioSession.SetActive(true);
+#endif
+
+                var recognitionResult = await _speechToText.ListenAsync(
+                    CultureInfo.CurrentCulture,
+                    new Progress<string>(partialText => 
+                    {
+                        // Optional: handle partial results
+                    }), 
+                    CancellationToken.None);
+
+                if (recognitionResult.IsSuccessful)
+                {
+                    return recognitionResult.Text;
+                }
+                else
+                {
+                    if (recognitionResult.Exception != null)
+                    {
+                         await Shell.Current.DisplayAlert("Recognition Error", $"Error: {recognitionResult.Exception.Message}", "OK");
+                    }
+                }
+
                 return null;
             }
-
-            var recognitionResult = await _speechToText.ListenAsync(
-                CultureInfo.CurrentCulture,
-                new Progress<string>(partialText => 
-                {
-                    // Optional: handle partial results
-                }), 
-                CancellationToken.None);
-
-            if (recognitionResult.IsSuccessful)
+            catch (Exception ex)
             {
-                return recognitionResult.Text;
+                await Shell.Current.DisplayAlert("Voice Error", $"An internal error occurred: {ex.Message}", "OK");
+                return null;
             }
-
-            return null;
         }
 
         public void CancelSpeech()
