@@ -20,9 +20,23 @@ namespace BrenoMachado.SmartShopping.Services
                 }
 
 #if IOS
-                var audioSession = AVFoundation.AVAudioSession.SharedInstance();
-                audioSession.SetCategory(AVFoundation.AVAudioSessionCategory.PlayAndRecord, AVFoundation.AVAudioSessionCategoryOptions.DefaultToSpeaker);
-                audioSession.SetActive(true);
+                try
+                {
+                    var audioSession = AVFoundation.AVAudioSession.SharedInstance();
+                    audioSession.SetCategory(AVFoundation.AVAudioSessionCategory.PlayAndRecord, AVFoundation.AVAudioSessionCategoryOptions.DefaultToSpeaker);
+                    audioSession.SetActive(true);
+                    
+                    if (!audioSession.InputAvailable)
+                    {
+                        await Shell.Current.DisplayAlert("No Microphone", "No audio input is available. If you are on the Simulator, ensure the host microphone is selected.", "OK");
+                        return null;
+                    }
+                }
+                catch(Exception iosEx)
+                {
+                     System.Diagnostics.Debug.WriteLine($"iOS Audio Setup Error: {iosEx.Message}");
+                     // Continue, hoping the toolkit handles it, or return if critical
+                }
 #endif
 
                 var recognitionResult = await _speechToText.ListenAsync(
