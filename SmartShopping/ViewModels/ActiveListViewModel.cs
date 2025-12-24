@@ -44,8 +44,21 @@ namespace BrenoMachado.SmartShopping.ViewModels
         public ICommand AddSuggestionCommand { get; }
 
         public ICommand ListenCommand { get; }
+        public ICommand ToggleShoppingModeCommand { get; }
         
         private readonly ISmartService _smartService;
+
+        bool _isShoppingMode;
+        public bool IsShoppingMode
+        {
+            get => _isShoppingMode;
+            set
+            {
+                _isShoppingMode = value;
+                OnPropertyChanged();
+                ToggleScreenState(value);
+            }
+        }
 
         public ActiveListViewModel(IDatabaseService databaseService, IVoiceService voiceService, ISmartService smartService)
         {
@@ -57,6 +70,12 @@ namespace BrenoMachado.SmartShopping.ViewModels
             EditItemCommand = new Command<ShoppingItem>(async (item) => await EditItemAsync(item));
             DeleteItemCommand = new Command<ShoppingItem>(async (item) => await DeleteItemAsync(item));
             AddSuggestionCommand = new Command<string>(async (name) => await AddSuggestionAsync(name));
+            ToggleShoppingModeCommand = new Command(() => IsShoppingMode = !IsShoppingMode);
+        }
+
+        void ToggleScreenState(bool keepOn)
+        {
+            DeviceDisplay.KeepScreenOn = keepOn;
         }
 
         async void LoadListDetailsAsync(string id)

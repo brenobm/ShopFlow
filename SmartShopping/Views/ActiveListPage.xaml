@@ -7,13 +7,24 @@
              Title="{Binding Title}"
              BackgroundColor="#F9FAFB">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="{Binding IsShoppingMode, Converter={StaticResource ShoppingModeTextConverter}}" 
+                     Command="{Binding ToggleShoppingModeCommand}" />
+    </ContentPage.ToolbarItems>
+
     <Grid RowDefinitions="Auto, *">
-        <!-- Suggestions -->
+        <!-- Shopping Mode Status -->
+        <Frame Grid.Row="0" BackgroundColor="#DCFCE7" Padding="10" IsVisible="{Binding IsShoppingMode}" Margin="10,5">
+            <Label Text="🛒 Shopping Mode Active (Screen On)" TextColor="#166534" HorizontalOptions="Center" FontAttributes="Bold"/>
+        </Frame>
+
+        <!-- Suggestions (Hide in Shopping Mode) -->
         <CollectionView Grid.Row="0"
                         ItemsSource="{Binding Suggestions}"
                         HeightRequest="50"
                         Margin="10,5"
-                        SelectionMode="None">
+                        SelectionMode="None"
+                        IsVisible="{Binding IsShoppingMode, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
             </CollectionView.ItemsLayout>
@@ -54,6 +65,11 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <SwipeView>
+                        <SwipeView.Triggers>
+                            <DataTrigger TargetType="SwipeView" Binding="{Binding Source={x:Reference ThisPage}, Path=BindingContext.IsShoppingMode}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </SwipeView.Triggers>
                         <SwipeView.RightItems>
                             <SwipeItems>
                                 <SwipeItem Text="Edit"
