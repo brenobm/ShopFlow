@@ -21,7 +21,7 @@
 		<ApplicationTitle>SmartShopping</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.smartshopping</ApplicationId>
+		<ApplicationId>com.brenomachado.smartshopping</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
