@@ -1,4 +1,4 @@
-namespace BrenoMachado.SmartShopping.Services
+namespace BrenoMachado.ShopFlow.Services
 {
     public interface IVoiceService
     {

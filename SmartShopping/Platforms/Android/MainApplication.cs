@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace SmartShopping;
+namespace BrenoMachado.ShopFlow;
 
 [Application]
 public class MainApplication : MauiApplication

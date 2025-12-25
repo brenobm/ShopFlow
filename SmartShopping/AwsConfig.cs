@@ -1,6 +1,6 @@
 using Amazon;
 
-namespace BrenoMachado.SmartShopping
+namespace BrenoMachado.ShopFlow
 {
     public static class AwsConfig
     {

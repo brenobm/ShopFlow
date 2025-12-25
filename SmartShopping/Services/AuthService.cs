@@ -3,7 +3,7 @@ using Amazon.CognitoIdentityProvider.Model;
 using Amazon.Extensions.CognitoAuthentication;
 using Amazon;
 
-namespace BrenoMachado.SmartShopping.Services
+namespace BrenoMachado.ShopFlow.Services
 {
     public class AuthService : IAuthService
     {

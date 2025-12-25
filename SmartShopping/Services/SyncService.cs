@@ -1,9 +1,9 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
-using BrenoMachado.SmartShopping.Models;
+using BrenoMachado.ShopFlow.Models;
 using System.Diagnostics;
 
-namespace BrenoMachado.SmartShopping.Services
+namespace BrenoMachado.ShopFlow.Services
 {
     public class SyncService : ISyncService
     {

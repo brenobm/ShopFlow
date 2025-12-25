@@ -1,8 +1,8 @@
 using System.Windows.Input;
-using BrenoMachado.SmartShopping.Services;
-using BrenoMachado.SmartShopping.Views;
+using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.Views;
 
-namespace BrenoMachado.SmartShopping.ViewModels
+namespace BrenoMachado.ShopFlow.ViewModels
 {
     public class LoginViewModel : BaseViewModel
     {

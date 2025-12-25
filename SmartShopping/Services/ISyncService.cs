@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
+using BrenoMachado.ShopFlow.Models;
 
-namespace BrenoMachado.SmartShopping.Services
+namespace BrenoMachado.ShopFlow.Services
 {
     public interface ISyncService
     {

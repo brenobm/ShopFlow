@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using BrenoMachado.ShopFlow.Models;
 using System.Threading.Tasks;
 
-namespace BrenoMachado.SmartShopping.Services
+namespace BrenoMachado.ShopFlow.Services
 {
     public interface ISmartService
     {

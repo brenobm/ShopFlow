@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace BrenoMachado.SmartShopping.ViewModels
+namespace BrenoMachado.ShopFlow.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {

@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
-using BrenoMachado.SmartShopping.Services;
-using BrenoMachado.SmartShopping.ViewModels;
-using BrenoMachado.SmartShopping.Views;
+using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.ViewModels;
+using BrenoMachado.ShopFlow.Views;
 
-namespace SmartShopping;
+namespace BrenoMachado.ShopFlow;
 
 public static class MauiProgram
 {

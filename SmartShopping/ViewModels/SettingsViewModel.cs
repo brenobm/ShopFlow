@@ -1,7 +1,7 @@
 using System.Windows.Input;
-using BrenoMachado.SmartShopping.Services;
+using BrenoMachado.ShopFlow.Services;
 
-namespace BrenoMachado.SmartShopping.ViewModels
+namespace BrenoMachado.ShopFlow.ViewModels
 {
     public class SettingsViewModel : BaseViewModel
     {

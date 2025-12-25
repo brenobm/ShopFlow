@@ -1,4 +1,4 @@
-﻿namespace SmartShopping;
+﻿namespace BrenoMachado.ShopFlow;
 
 public partial class MainPage : ContentPage
 {

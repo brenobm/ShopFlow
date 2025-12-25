@@ -1,6 +1,6 @@
-using BrenoMachado.SmartShopping.ViewModels;
+using BrenoMachado.ShopFlow.ViewModels;
 
-namespace BrenoMachado.SmartShopping.Views;
+namespace BrenoMachado.ShopFlow.Views;
 
 public partial class LoginPage : ContentPage
 {

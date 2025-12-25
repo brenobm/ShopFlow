@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using BrenoMachado.SmartShopping.Models;
-using BrenoMachado.SmartShopping.Services;
-using BrenoMachado.SmartShopping.Views;
+using BrenoMachado.ShopFlow.Models;
+using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.Views;
 
-namespace BrenoMachado.SmartShopping.ViewModels
+namespace BrenoMachado.ShopFlow.ViewModels
 {
     [QueryProperty(nameof(ListId), "Id")]
     public class ActiveListViewModel : BaseViewModel

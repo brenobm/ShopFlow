@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace SmartShopping;
+namespace BrenoMachado.ShopFlow;
 
 public class Program
 {

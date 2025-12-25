@@ -1,7 +1,7 @@
 using SQLite;
-using BrenoMachado.SmartShopping.Models;
+using BrenoMachado.ShopFlow.Models;
 
-namespace BrenoMachado.SmartShopping.Services
+namespace BrenoMachado.ShopFlow.Services
 {
     public class DatabaseService : IDatabaseService
     {

@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace SmartShopping;
+namespace BrenoMachado.ShopFlow;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

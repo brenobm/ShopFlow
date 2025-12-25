@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using BrenoMachado.SmartShopping.Services;
+using BrenoMachado.ShopFlow.Services;
 
-namespace SmartShopping;
+namespace BrenoMachado.ShopFlow;
 
 public partial class App : Application
 {

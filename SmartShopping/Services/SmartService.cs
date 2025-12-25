@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using BrenoMachado.ShopFlow.Models;
 using System.Threading.Tasks;
 
-namespace BrenoMachado.SmartShopping.Services
+namespace BrenoMachado.ShopFlow.Services
 {
     public class SmartService : ISmartService
     {

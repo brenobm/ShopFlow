@@ -1,7 +1,7 @@
-﻿using BrenoMachado.SmartShopping.Views;
-using BrenoMachado.SmartShopping.Services;
+﻿using BrenoMachado.ShopFlow.Views;
+using BrenoMachado.ShopFlow.Services;
 
-namespace SmartShopping;
+namespace BrenoMachado.ShopFlow;
 
 public partial class AppShell : Shell
 {

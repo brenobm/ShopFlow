@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Threading;
 using CommunityToolkit.Maui.Media;
 
-namespace BrenoMachado.SmartShopping.Services
+namespace BrenoMachado.ShopFlow.Services
 {
     public class VoiceService : IVoiceService
     {
