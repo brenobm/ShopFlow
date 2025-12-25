@@ -12,7 +12,7 @@ namespace BrenoMachado.ShopFlow.Services
             if (_database is not null)
                 return;
 
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "SmartShopping.db3");
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "ShopFlow.db3");
             _database = new SQLiteAsyncConnection(dbPath);
             
             await _database.CreateTableAsync<User>();

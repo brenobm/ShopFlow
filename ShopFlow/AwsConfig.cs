@@ -10,7 +10,7 @@ namespace BrenoMachado.ShopFlow
         public static readonly RegionEndpoint Region = RegionEndpoint.USEast1;
         
         // DynamoDB Table Names
-        public const string ItemsTableName = "SmartShopping_Items";
-        public const string ListsTableName = "SmartShopping_Lists";
+        public const string ItemsTableName = "ShopFlow_Items";
+        public const string ListsTableName = "ShopFlow_Lists";
     }
 }
