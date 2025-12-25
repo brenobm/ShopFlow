@@ -21,7 +21,7 @@
 		<ApplicationTitle>ShopFlow</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.brenomachado.ShopFlow</ApplicationId>
+		<ApplicationId>com.brenomachado.shopflow</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
