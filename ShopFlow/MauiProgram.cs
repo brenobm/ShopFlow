@@ -10,6 +10,11 @@ public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
 	{
+        // Enable AWS SDK Logging
+        Amazon.AWSConfigs.LoggingConfig.LogTo = Amazon.LoggingOptions.SystemDiagnostics;
+        Amazon.AWSConfigs.LoggingConfig.LogResponses = Amazon.ResponseLoggingOption.Always;
+        Amazon.AWSConfigs.LoggingConfig.LogMetrics = true;
+
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()

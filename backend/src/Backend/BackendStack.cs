@@ -135,7 +135,19 @@ namespace Backend
             {
                 TypeName = "Mutation",
                 FieldName = "createList",
-                RequestMappingTemplate = MappingTemplate.DynamoDbPutItem(PrimaryKey.Partition("id").Auto(), Values.Projecting("name")),
+                RequestMappingTemplate = MappingTemplate.FromString(@"
+                {
+                    ""version"" : ""2017-02-28"",
+                    ""operation"" : ""PutItem"",
+                    ""key"" : {
+                        ""id"" : { ""S"" : ""$util.autoId()"" }
+                    },
+                    ""attributeValues"" : {
+                        ""name"" : { ""S"" : ""${context.arguments.name}"" },
+                        ""createdAt"" : { ""S"" : ""$util.time.nowISO8601()"" },
+                        ""UserId"" : { ""S"" : ""${context.identity.username}"" }
+                    }
+                }"),
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem() 
             });
 

@@ -14,7 +14,13 @@ namespace BrenoMachado.ShopFlow.Services
 
         public AuthService()
         {
-            _providerClient = new AmazonCognitoIdentityProviderClient(new Amazon.Runtime.AnonymousAWSCredentials(), AwsConfig.Region);
+            var config = new AmazonCognitoIdentityProviderConfig
+            {
+                RegionEndpoint = AwsConfig.Region,
+                Timeout = TimeSpan.FromSeconds(10),
+                MaxErrorRetry = 3
+            };
+            _providerClient = new AmazonCognitoIdentityProviderClient(new Amazon.Runtime.AnonymousAWSCredentials(), config);
             _userPool = new CognitoUserPool(AwsConfig.UserPoolId, AwsConfig.UserPoolClientId, _providerClient);
         }
 
