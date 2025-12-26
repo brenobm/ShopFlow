@@ -151,9 +151,75 @@ namespace Backend
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem() 
             });
 
-             // ITEMS Mapping (Simplified: User would query items by ListId usually, but keeping it per schema for now)
-             // Note: Real implementation needs Global Secondary Indexes to query efficiently. 
-             // We'll stick to basic connectivity for now.
+            // ADD ITEM Mapping
+            itemsDS.CreateResolver("AddItemResolver", new ResolverProps
+            {
+                TypeName = "Mutation",
+                FieldName = "addItem",
+                RequestMappingTemplate = MappingTemplate.FromString(@"
+                {
+                    ""version"" : ""2017-02-28"",
+                    ""operation"" : ""PutItem"",
+                    ""key"" : {
+                        ""UserId"" : { ""S"" : ""${context.identity.username}"" },
+                        ""Id"" : { ""S"" : ""$util.autoId()"" }
+                    },
+                    ""attributeValues"" : {
+                        ""ListId"" : { ""S"" : ""${context.arguments.listId}"" },
+                        ""Name"" : { ""S"" : ""${context.arguments.name}"" },
+                        ""Quantity"" : { ""N"" : ""${context.arguments.quantity}"" },
+                        ""Unit"" : { ""S"" : ""${context.arguments.unit}"" },
+                        ""Category"" : { ""S"" : ""${context.arguments.category}"" },
+                        ""IsPurchased"" : { ""BOOL"" : false }
+                    }
+                }"),
+                ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
+            });
+
+            // UPDATE ITEM Mapping
+            // Note: Supports updating isPurchased, name, etc.
+            itemsDS.CreateResolver("UpdateItemResolver", new ResolverProps
+            {
+                TypeName = "Mutation",
+                FieldName = "updateItem",
+                 RequestMappingTemplate = MappingTemplate.FromString(@"
+                {
+                    ""version"" : ""2017-02-28"",
+                    ""operation"" : ""UpdateItem"",
+                    ""key"" : {
+                        ""UserId"" : { ""S"" : ""${context.identity.username}"" },
+                        ""Id"" : { ""S"" : ""${context.arguments.id}"" }
+                    },
+                    ""update"" : {
+                        ""expression"" : ""SET #name = :name, IsPurchased = :isPurchased"",
+                        ""expressionNames"" : {
+                            ""#name"" : ""Name""
+                        },
+                        ""expressionValues"" : {
+                            "":name"" : { ""S"" : ""${context.arguments.name}"" },
+                            "":isPurchased"" : { ""BOOL"" : ${context.arguments.isPurchased} }
+                        }
+                    }
+                }"),
+                ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
+            });
+
+            // DELETE ITEM Mapping
+            itemsDS.CreateResolver("DeleteItemResolver", new ResolverProps
+            {
+                TypeName = "Mutation",
+                FieldName = "deleteItem",
+                RequestMappingTemplate = MappingTemplate.FromString(@"
+                {
+                    ""version"" : ""2017-02-28"",
+                    ""operation"" : ""DeleteItem"",
+                    ""key"" : {
+                        ""UserId"" : { ""S"" : ""${context.identity.username}"" },
+                        ""Id"" : { ""S"" : ""${context.arguments.id}"" }
+                    }
+                }"),
+                ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
+            });
              
             // 7. Lambda (Smart Suggestions)
             var suggestionsLambda = new Function(this, "SmartSuggestionsFunction", new FunctionProps
