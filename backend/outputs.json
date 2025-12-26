@@ -1,0 +1,11 @@
+{
+  "BackendStack": {
+    "UserPoolClientId": "61fcskms6g0o2epem6lrbvge58",
+    "UserPoolId": "us-west-2_mQ39tQDFE",
+    "ItemsTableName": "ShopFlow_Items",
+    "Region": "us-west-2",
+    "IdentityPoolId": "us-west-2:4e930d96-c00e-4d93-aa32-8b0a2f3d76df",
+    "GraphQLEndpoint": "https://msd5yv5s7fdevbcgwt56giiyy4.appsync-api.us-west-2.amazonaws.com/graphql",
+    "ListsTableName": "ShopFlow_Lists"
+  }
+}

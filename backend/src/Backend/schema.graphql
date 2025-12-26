@@ -1,0 +1,47 @@
+
+type ShoppingList {
+  id: ID!
+  name: String!
+  owner: String
+  items: [ShoppingItem]
+  createdAt: String
+  updatedAt: String
+}
+
+type ShoppingItem {
+  id: ID!
+  listId: ID!
+  name: String!
+  quantity: Float
+  unit: String
+  category: String
+  isPurchased: Boolean
+}
+
+type Query {
+  getLists: [ShoppingList]
+  getList(id: ID!): ShoppingList
+}
+
+type Mutation {
+  createList(name: String!): ShoppingList
+  updateList(id: ID!, name: String!): ShoppingList
+  deleteList(id: ID!): ShoppingList
+  
+  addItem(listId: ID!, name: String!, quantity: Float, unit: String, category: String): ShoppingItem
+  updateItem(listId: ID!, id: ID!, name: String, quantity: Float, unit: String, category: String, isPurchased: Boolean): ShoppingItem
+  deleteItem(listId: ID!, id: ID!): ShoppingItem
+}
+
+type Subscription {
+  onUpdateList(id: ID!): ShoppingList
+    @aws_subscribe(mutations: ["updateList"])
+  onUpdateItem(listId: ID!): ShoppingItem
+    @aws_subscribe(mutations: ["addItem", "updateItem", "deleteItem"])
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
