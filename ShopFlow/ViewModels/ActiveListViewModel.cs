@@ -9,7 +9,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
     [QueryProperty(nameof(ListId), "Id")]
     public class ActiveListViewModel : BaseViewModel
     {
-        private readonly IDatabaseService _databaseService;
+        private readonly IGraphQLService _graphQLService;
         
         string _listId;
         public string ListId
@@ -47,7 +47,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand ToggleShoppingModeCommand { get; }
         
         private readonly ISmartService _smartService;
-        private readonly ISyncService _syncService;
+        private readonly IVoiceService _voiceService;
 
         bool _isShoppingMode;
         public bool IsShoppingMode
@@ -61,11 +61,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
         }
 
-        public ActiveListViewModel(IDatabaseService databaseService, IVoiceService voiceService, ISmartService smartService, ISyncService syncService)
+        public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService)
         {
-            _databaseService = databaseService;
+            _graphQLService = graphQLService;
             _smartService = smartService;
-            _syncService = syncService;
+            _voiceService = voiceService;
+            
             ListenCommand = new Command(async () => await ListenAsync(voiceService));
             AddItemCommand = new Command(async () => await AddItemAsync());
             TogglePurchasedCommand = new Command<ShoppingItem>(async (item) => await TogglePurchasedAsync(item));
@@ -84,8 +85,18 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
             try
             {
-                CurrentList = await _databaseService.GetListAsync(id);
-                // LoadItemsAsync(); // Refresh() will be called by OnAppearing
+                // We don't have GetListAsync(id) in Service, but we can assume the ID is valid or fetch lists.
+                // For now, let's just set the ID and fetch items. The Name might be missing until we have GetList(id).
+                // Or we can fetch all lists and find it.
+                // Let's implement GetList(id) or just use what we have.
+                // CurrentList = await _databaseService.GetListAsync(id);
+                // Workaround: Set ID, try to fetch name or just Items.
+                var lists = await _graphQLService.GetListsAsync();
+                CurrentList = lists.FirstOrDefault(l => l.Id == id) ?? new ShoppingList { Id = id, Name = "Shopping List" };
+                
+                // LoadItemsAsync(); // Refresh() will be called by OnAppearing? No, manually call it?
+                // Wait, property setter is void async.
+                await LoadItemsAsync();
             }
             catch (Exception ex)
             {
@@ -102,48 +113,55 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
              if (CurrentList == null) return;
              
-             var items = await _databaseService.GetItemsAsync(CurrentList.Id);
-             Items.Clear();
-             
-             var groups = items.GroupBy(i => i.Category ?? "Uncategorized")
-                               .Select(g => new ShoppingItemGroup(g.Key, g))
-                               .OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999);
-
-             foreach(var group in groups)
+             try 
              {
-                 Items.Add(group);
+                 var items = await _graphQLService.GetItemsAsync(CurrentList.Id);
+                 Items.Clear();
+                 
+                 var groups = items.GroupBy(i => i.Category ?? "Uncategorized")
+                                   .Select(g => new ShoppingItemGroup(g.Key, g))
+                                   .OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999);
+    
+                 foreach(var group in groups)
+                 {
+                     Items.Add(group);
+                 }
+                 await LoadSuggestionsAsync();
+             } 
+             catch(Exception ex)
+             {
+                 System.Diagnostics.Debug.WriteLine($"Error loading items: {ex.Message}");
              }
-             await LoadSuggestionsAsync();
         }
 
         async Task LoadSuggestionsAsync()
         {
-            var suggestions = await _smartService.GetSuggestionsAsync();
-            Suggestions.Clear();
-            var allItems = Items.SelectMany(g => g).ToList();
-            foreach(var s in suggestions)
+            try
             {
-                if(!allItems.Any(i => i.Name.Equals(s, StringComparison.OrdinalIgnoreCase))) // Don't suggest if already in list
+                var suggestions = await _smartService.GetSuggestionsAsync();
+                Suggestions.Clear();
+                var allItems = Items.SelectMany(g => g).ToList();
+                foreach(var s in suggestions)
                 {
-                    Suggestions.Add(s);
+                    if(!allItems.Any(i => i.Name.Equals(s, StringComparison.OrdinalIgnoreCase))) // Don't suggest if already in list
+                    {
+                        Suggestions.Add(s);
+                    }
                 }
-            }
+            } catch(Exception) {}
         }
 
         async Task AddSuggestionAsync(string name)
         {
              if (string.IsNullOrWhiteSpace(name)) return;
 
-             var newItem = new ShoppingItem 
-             { 
-                 Name = name.Trim(),
-                 ListId = CurrentList.Id,
-                 Category = "Smart Suggestion"
-             };
-             
-             await _databaseService.SaveItemAsync(newItem);
-             await _syncService.PushItemAsync(newItem);
-             await LoadItemsAsync(); // Will reload suggestions too
+             try {
+                await _graphQLService.AddItemAsync(CurrentList.Id, name.Trim(), 1, "qty", "Smart Suggestion");
+                await LoadItemsAsync(); 
+             } catch(Exception ex)
+             {
+                  await Application.Current.MainPage.DisplayAlert("Error", $"Failed to add suggestion: {ex.Message}", "OK");
+             }
         }
 
         async Task AddItemAsync()
@@ -154,20 +172,24 @@ namespace BrenoMachado.ShopFlow.ViewModels
         async Task TogglePurchasedAsync(ShoppingItem item)
         {
             if (item == null) return;
+            // Optimistic update
+            bool original = item.IsPurchased;
             item.IsPurchased = !item.IsPurchased;
-            item.PurchasedAt = item.IsPurchased ? DateTime.UtcNow : null;
-            
-            await _databaseService.SaveItemAsync(item);
-            await _syncService.PushItemAsync(item);
-            await LoadItemsAsync(); // Refresh to sort
-            
-            // Voice feedback could go here
+            // item.PurchasedAt = item.IsPurchased ? DateTime.UtcNow : null; // Backend might handle this? Or we pass it? 
+            // UpdateItem mutation handles IsPurchased.
+
+            try {
+                await _graphQLService.UpdateItemAsync(item);
+                // await LoadItemsAsync(); // Optional: Refresh to sort?
+            } catch {
+                item.IsPurchased = original; // Revert on error
+            }
         }
 
         async Task EditItemAsync(ShoppingItem item)
         {
              if (item == null) return;
-             await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?ItemId={item.Id}&ListId={CurrentList.Id}");
+             await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?ItemId={item.Id}&ListId={CurrentList.Id}&Name={Uri.EscapeDataString(item.Name)}&Category={Uri.EscapeDataString(item.Category ?? "")}");
         }
 
         async Task DeleteItemAsync(ShoppingItem item)
@@ -176,9 +198,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
             bool confirm = await Shell.Current.DisplayAlert("Delete", $"Remove {item.Name}?", "Yes", "No");
             if(confirm)
             {
-                await _databaseService.DeleteItemAsync(item);
-                await _syncService.DeleteItemAsync(item.Id);
-                await LoadItemsAsync();
+                try {
+                    await _graphQLService.DeleteItemAsync(item.ListId, item.Id);
+                    await LoadItemsAsync();
+                } catch(Exception ex) {
+                     await Application.Current.MainPage.DisplayAlert("Error", $"Failed to delete: {ex.Message}", "OK");
+                }
             }
         }
         async Task ListenAsync(IVoiceService voiceService)
@@ -188,19 +213,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 var text = await voiceService.ListenAsync();
                 if (!string.IsNullOrWhiteSpace(text))
                 {
-                    // Add item directly
-                     var newItem = new ShoppingItem 
-                     { 
-                         Name = text.Trim(), // Capitalize first letter logic could go here
-                         ListId = CurrentList.Id,
-                         Category = "Voice Added"
-                     };
-                     
-                     await _databaseService.SaveItemAsync(newItem);
-                     await _syncService.PushItemAsync(newItem);
+                     await _graphQLService.AddItemAsync(CurrentList.Id, text.Trim(), 1, "qty", "Voice Added");
                      await LoadItemsAsync();
-                     
-                     // Feedback
                      await Shell.Current.DisplayAlert("Voice Input", $"Added '{text}'", "OK");
                 }
             }

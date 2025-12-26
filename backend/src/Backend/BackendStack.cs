@@ -104,6 +104,32 @@ namespace Backend
                 RequestMappingTemplate = MappingTemplate.DynamoDbScanTable(),
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultList()
             });
+
+            // ITEMS Mapping
+            // getItems(listId: ID!) -> Query where UserId = $ctx.identity.username AND filter ListId = $args.listId
+            itemsDS.CreateResolver("GetItemsResolver", new ResolverProps
+            {
+                TypeName = "Query",
+                FieldName = "getItems",
+                RequestMappingTemplate = MappingTemplate.FromString(@"
+                {
+                    ""version"" : ""2017-02-28"",
+                    ""operation"" : ""Query"",
+                    ""query"" : {
+                        ""expression"" : ""UserId = :userId"",
+                        ""expressionValues"" : {
+                            "":userId"" : { ""S"" : ""${context.identity.username}"" }
+                        }
+                    },
+                    ""filter"" : {
+                        ""expression"" : ""ListId = :listId"",
+                        ""expressionValues"" : {
+                             "":listId"" : { ""S"" : ""${context.arguments.listId}"" }
+                        }
+                    }
+                }"),
+                ResponseMappingTemplate = MappingTemplate.DynamoDbResultList()
+            });
             
             listsDS.CreateResolver("CreateListResolver", new ResolverProps 
             {

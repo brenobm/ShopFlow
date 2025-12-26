@@ -8,7 +8,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 {
     public class DashboardViewModel : BaseViewModel
     {
-        private readonly IDatabaseService _databaseService;
+        private readonly IGraphQLService _graphQLService;
 
         public ObservableCollection<ShoppingList> Lists { get; } = new();
 
@@ -19,10 +19,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand DeleteListCommand { get; }
         public ICommand GoToSettingsCommand { get; }
 
-        public DashboardViewModel(IDatabaseService databaseService)
+        public DashboardViewModel(IGraphQLService graphQLService)
         {
-            Title = "My Lists";
-            _databaseService = databaseService;
+            Title = "My Lists (Cloud)";
+            _graphQLService = graphQLService;
 
             LoadListsCommand = new Command(async () => await LoadListsAsync());
             AddListCommand = new Command(async () => await AddListAsync());
@@ -39,13 +39,17 @@ namespace BrenoMachado.ShopFlow.ViewModels
             try
             {
                 IsBusy = true;
-                var lists = await _databaseService.GetListsAsync();
+                // Fetch from Cloud
+                var lists = await _graphQLService.GetListsAsync();
                 Lists.Clear();
                 foreach (var list in lists)
                 {
-                    // Optionally load item count here if needed, or do it in the query
                     Lists.Add(list);
                 }
+            }
+            catch (Exception ex)
+            {
+                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to load lists: {ex.Message}", "OK");
             }
             finally
             {
@@ -59,9 +63,15 @@ namespace BrenoMachado.ShopFlow.ViewModels
              if (string.IsNullOrWhiteSpace(name))
                  return;
 
-             var newList = new ShoppingList { Name = name.Trim() };
-             await _databaseService.SaveListAsync(newList);
-             await LoadListsAsync();
+             try 
+             {
+                 var newList = await _graphQLService.CreateListAsync(name.Trim());
+                 await LoadListsAsync();
+             }
+             catch (Exception ex)
+             {
+                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to create list: {ex.Message}", "OK");
+             }
         }
 
         async Task EditListAsync(ShoppingList list)
@@ -70,9 +80,15 @@ namespace BrenoMachado.ShopFlow.ViewModels
             string name = await Shell.Current.DisplayPromptAsync("Edit List", "Enter new list name", initialValue: list.Name);
             if (string.IsNullOrWhiteSpace(name) || name == list.Name) return;
 
-            list.Name = name.Trim();
-            await _databaseService.SaveListAsync(list);
-            await LoadListsAsync();
+            try
+            {
+                await _graphQLService.UpdateListAsync(list.Id, name.Trim());
+                await LoadListsAsync();
+            }
+            catch (Exception ex)
+            {
+                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to update list: {ex.Message}", "OK");
+            }
         }
 
         async Task DeleteListAsync(ShoppingList list)
@@ -81,8 +97,15 @@ namespace BrenoMachado.ShopFlow.ViewModels
             bool confirm = await Shell.Current.DisplayAlert("Delete", $"Delete list '{list.Name}'?", "Yes", "No");
             if (confirm)
             {
-                await _databaseService.DeleteListAsync(list);
-                await LoadListsAsync();
+                try
+                {
+                    await _graphQLService.DeleteListAsync(list.Id);
+                    await LoadListsAsync();
+                }
+                catch (Exception ex)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error", $"Failed to delete list: {ex.Message}", "OK");
+                }
             }
         }
 

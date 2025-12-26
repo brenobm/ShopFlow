@@ -30,6 +30,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISmartService, SmartService>();
         builder.Services.AddSingleton<IAuthService, AuthService>();
         builder.Services.AddSingleton<ISyncService, SyncService>();
+        builder.Services.AddSingleton<IGraphQLService, GraphQLService>();
 
         // ViewModels
         builder.Services.AddSingleton<DashboardViewModel>();

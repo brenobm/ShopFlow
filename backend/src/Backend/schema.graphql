@@ -21,6 +21,7 @@ type ShoppingItem {
 type Query {
   getLists: [ShoppingList]
   getList(id: ID!): ShoppingList
+  getItems(listId: ID!): [ShoppingItem]
 }
 
 type Mutation {
