@@ -18,12 +18,5 @@ public partial class AppShell : Shell
 
     }
 
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-        if (!await _authService.IsAuthenticatedAsync())
-        {
-            await Current.GoToAsync($"//Login");
-        }
-    }
+
 }

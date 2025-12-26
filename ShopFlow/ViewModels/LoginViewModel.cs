@@ -57,7 +57,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 if (success)
                 {
                     // Navigate to Main App
-                    await Shell.Current.GoToAsync($"//{nameof(DashboardPage)}");
+                    // Navigate to Main App (Swap MainPage)
+                    Application.Current.MainPage = new AppShell(_authService);
                 }
                 else
                 {
