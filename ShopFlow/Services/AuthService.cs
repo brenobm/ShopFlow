@@ -62,6 +62,7 @@ namespace BrenoMachado.ShopFlow.Services
 
         public async Task<bool> LoginAsync(string username, string password)
         {
+            Console.WriteLine($"[AuthService] LoginAsync called for user: {username}");
             try
             {
                 var user = new CognitoUser(username, AwsConfig.UserPoolClientId, _userPool, _providerClient);
@@ -70,18 +71,24 @@ namespace BrenoMachado.ShopFlow.Services
                     Password = password
                 };
 
-                var authResponse = await user.StartWithSrpAuthAsync(authRequest);
+                Console.WriteLine("[AuthService] Starting SRP Auth...");
+                var authResponse = await user.StartWithSrpAuthAsync(authRequest).ConfigureAwait(false);
+                Console.WriteLine($"[AuthService] SRP Auth response received. Result: {authResponse?.AuthenticationResult != null}");
+
                 if (authResponse.AuthenticationResult != null)
                 {
                     _currentUser = user;
                     // Store the ID token for use in Identity Pool (SyncService)
                     _idToken = authResponse.AuthenticationResult.IdToken;
+                    Console.WriteLine("[AuthService] Login successful.");
                     return true;
                 }
+                Console.WriteLine("[AuthService] Login failed: No AuthenticationResult.");
                 return false;
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[AuthService] Login Error: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Login Error: {ex.Message}");
                 throw;
             }

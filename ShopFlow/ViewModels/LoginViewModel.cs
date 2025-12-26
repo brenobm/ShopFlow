@@ -67,6 +67,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
             if (IsBusy) return;
             IsBusy = true;
+            Console.WriteLine("[LoginViewModel] LoginAsync started.");
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
@@ -77,30 +78,37 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             try
             {
+                Console.WriteLine($"[LoginViewModel] Attempting login for user: {Username}");
                 bool success = await _authService.LoginAsync(Username, Password);
+                Console.WriteLine($"[LoginViewModel] Service returned success: {success}");
+
                 if (success)
                 {
-                    // Navigate to Main App
                     // Navigate to Main App (Swap MainPage)
+                    Console.WriteLine("[LoginViewModel] Swapping MainPage to AppShell.");
                     Application.Current.MainPage = new AppShell(_authService);
                 }
                 else
                 {
+                    Console.WriteLine("[LoginViewModel] Login failed (success=false). Showing alert.");
                     await Application.Current.MainPage.DisplayAlert("Error", "Login failed. Check credentials.", "OK");
                 }
             }
             catch (Amazon.CognitoIdentityProvider.Model.UserNotConfirmedException)
             {
+                Console.WriteLine("[LoginViewModel] UserNotConfirmedException caught.");
                 await Application.Current.MainPage.DisplayAlert("Verify", "Account exists but is not confirmed. Please check your email for the code.", "OK");
                 IsVerification = true;
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[LoginViewModel] Exception caught: {ex.Message}");
                 await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
             }
             finally
             {
                 IsBusy = false;
+                Console.WriteLine("[LoginViewModel] IsBusy set to false.");
             }
         }
 
