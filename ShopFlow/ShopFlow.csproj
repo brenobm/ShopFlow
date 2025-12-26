@@ -94,9 +94,10 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
-	<ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
+	<!-- Removed conflicting ImageAsset that overrides MauiIcon generation -->
+	<!-- <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
 		<ImageAsset Include="Platforms\iOS\Assets.xcassets\**" />
-	</ItemGroup>
+	</ItemGroup> -->
 
 	<ItemGroup>
 		<PackageReference Include="Amazon.Extensions.CognitoAuthentication" Version="3.1.2" />

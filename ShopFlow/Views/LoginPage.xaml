@@ -8,7 +8,7 @@
 
     <StackLayout Padding="30" Spacing="20" VerticalOptions="Center">
         
-        <Image Source="appicon.png" HeightRequest="100" Margin="0,0,0,20"/>
+        <Image Source="logo.png" HeightRequest="100" Margin="0,0,0,20"/>
 
         <Entry Placeholder="Username" Text="{Binding Username}" BackgroundColor="White" IsVisible="{Binding IsVerification, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}"/>
         
