@@ -37,7 +37,7 @@ namespace BrenoMachado.ShopFlow.Services
             }
         }
 
-        }
+
 
         public async Task<bool> ConfirmSignUpAsync(string username, string confirmationCode)
         {

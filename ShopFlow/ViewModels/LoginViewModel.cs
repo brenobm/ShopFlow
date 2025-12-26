@@ -30,8 +30,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 Title = _isSignUp ? "Sign Up" : "Login";
             }
         }
-            }
-        }
+
 
         bool _isVerification;
         public bool IsVerification
@@ -55,7 +54,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             Title = "Login";
             LoginCommand = new Command(async () => await LoginAsync());
             SignUpCommand = new Command(async () => await SignUpAsync());
-            SignUpCommand = new Command(async () => await SignUpAsync());
+
             VerifyCommand = new Command(async () => await VerifyAsync());
             ToggleModeCommand = new Command(() => 
             {
@@ -122,7 +121,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 bool success = await _authService.SignUpAsync(Username, Password, Email);
                 if (success)
                 {
-                    await Application.Current.MainPage.DisplayAlert("Success", "Account created! Please check your email for verification code (not implemented in UI yet) or just Login if confirmed.", "OK");
+
                     await Application.Current.MainPage.DisplayAlert("Success", "Account created! Please check your email for the verification code.", "OK");
                     IsVerification = true; 
                     IsSignUp = false;
