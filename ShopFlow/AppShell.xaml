@@ -7,9 +7,10 @@
     xmlns:views="clr-namespace:BrenoMachado.ShopFlow.Views"
     Title="ShopFlow">
 
-    <ShellItem Route="LoginPage" FlyoutItem.IsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate views:LoginPage}" />
-    </ShellItem>
+    <ShellContent 
+        Route="Login" 
+        ContentTemplate="{DataTemplate views:LoginPage}" 
+        FlyoutItem.IsVisible="False" />
 
     <TabBar Route="Main">
         <ShellContent

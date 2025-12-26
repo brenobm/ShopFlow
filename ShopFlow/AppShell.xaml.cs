@@ -15,7 +15,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(ActiveListPage), typeof(ActiveListPage));
         Routing.RegisterRoute(nameof(ItemDetailPage), typeof(ItemDetailPage));
         Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
-        Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
+
     }
 
     protected override async void OnAppearing()
@@ -23,7 +23,7 @@ public partial class AppShell : Shell
         base.OnAppearing();
         if (!await _authService.IsAuthenticatedAsync())
         {
-            await Current.GoToAsync($"//{nameof(LoginPage)}");
+            await Current.GoToAsync($"//Login");
         }
     }
 }
