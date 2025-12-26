@@ -21,13 +21,21 @@ namespace BrenoMachado.ShopFlow.Services
         {
             if (_dynamoClient != null) return;
             
-            // In a real app, we would use credentials from the logged-in user (Cognito Identity Pool)
-            // Here we use anonymous for demo or assume Config holds keys (which it shouldn't for client app)
-            // For Phase 4, we assume we use the same credentials as Auth or basic setup.
-            // Since we implemented UserPools, we need IdentityPools to get AWS Credentials.
-            // Simplified: We just initialize it. In production, need CognitoAWSCredentials.
+            // Use CognitoAWSCredentials to get temporary AWS credentials for the logged-in user context
+            // Note: This requires the Identity Pool to be configured to accept the specific User Pool as a provider.
+            var credentials = new Amazon.CognitoIdentity.CognitoAWSCredentials(
+                AwsConfig.IdentityPoolId, // Identity Pool ID
+                AwsConfig.Region // Region
+            );
+
+            // Add the User Pool login to the credentials map
+            var idToken = _authService.GetIdToken();
+            if (!string.IsNullOrEmpty(idToken))
+            {
+                credentials.AddLogin($"cognito-idp.{AwsConfig.Region.SystemName}.amazonaws.com/{AwsConfig.UserPoolId}", idToken);
+            }
             
-            _dynamoClient = new AmazonDynamoDBClient(new Amazon.Runtime.AnonymousAWSCredentials(), AwsConfig.Region);
+            _dynamoClient = new AmazonDynamoDBClient(credentials, AwsConfig.Region);
         }
 
         public async Task SyncAsync()

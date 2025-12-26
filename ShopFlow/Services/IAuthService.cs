@@ -7,4 +7,5 @@ public interface IAuthService
     Task SignOutAsync();
     Task<bool> IsAuthenticatedAsync();
     string GetCurrentUserId();
+    string GetIdToken();
 }

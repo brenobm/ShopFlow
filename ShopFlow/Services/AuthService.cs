@@ -10,6 +10,7 @@ namespace BrenoMachado.ShopFlow.Services
         private readonly AmazonCognitoIdentityProviderClient _providerClient;
         private readonly CognitoUserPool _userPool;
         private CognitoUser _currentUser;
+        private string _idToken; // Cache the ID token
 
         public AuthService()
         {
@@ -50,7 +51,8 @@ namespace BrenoMachado.ShopFlow.Services
                 if (authResponse.AuthenticationResult != null)
                 {
                     _currentUser = user;
-                    // TODO: Securely store tokens if needed, but CognitoUser handles session usually
+                    // Store the ID token for use in Identity Pool (SyncService)
+                    _idToken = authResponse.AuthenticationResult.IdToken;
                     return true;
                 }
                 return false;
@@ -85,6 +87,11 @@ namespace BrenoMachado.ShopFlow.Services
         public string GetCurrentUserId()
         {
              return _currentUser?.Username;
+        }
+
+        public string GetIdToken()
+        {
+            return _idToken;
         }
     }
 }
