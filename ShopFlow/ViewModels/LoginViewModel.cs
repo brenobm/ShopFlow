@@ -11,10 +11,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public string Username { get; set; }
         public string Password { get; set; }
         public string Email { get; set; } // For signup
+        public string VerificationCode { get; set; } // For confirmation
 
         public ICommand LoginCommand { get; }
         public ICommand SignUpCommand { get; }
         public ICommand ToggleModeCommand { get; }
+        public ICommand VerifyCommand { get; }
 
         bool _isSignUp;
         public bool IsSignUp
@@ -28,7 +30,24 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 Title = _isSignUp ? "Sign Up" : "Login";
             }
         }
-        public bool IsLogin => !IsSignUp;
+            }
+        }
+
+        bool _isVerification;
+        public bool IsVerification
+        {
+            get => _isVerification;
+            set
+            {
+                _isVerification = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsLogin));
+                OnPropertyChanged(nameof(IsSignUp));
+                if (_isVerification) Title = "Verify Account";
+            }
+        }
+
+        public bool IsLogin => !IsSignUp && !IsVerification;
 
         public LoginViewModel(IAuthService authService)
         {
@@ -36,7 +55,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
             Title = "Login";
             LoginCommand = new Command(async () => await LoginAsync());
             SignUpCommand = new Command(async () => await SignUpAsync());
-            ToggleModeCommand = new Command(() => IsSignUp = !IsSignUp);
+            SignUpCommand = new Command(async () => await SignUpAsync());
+            VerifyCommand = new Command(async () => await VerifyAsync());
+            ToggleModeCommand = new Command(() => 
+            {
+                IsSignUp = !IsSignUp;
+                IsVerification = false; // Reset verification when toggling manual mode
+            });
         }
 
         async Task LoginAsync()
@@ -64,6 +89,11 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 {
                     await Application.Current.MainPage.DisplayAlert("Error", "Login failed. Check credentials.", "OK");
                 }
+            }
+            catch (Amazon.CognitoIdentityProvider.Model.UserNotConfirmedException)
+            {
+                await Application.Current.MainPage.DisplayAlert("Verify", "Account exists but is not confirmed. Please check your email for the code.", "OK");
+                IsVerification = true;
             }
             catch (Exception ex)
             {
@@ -93,7 +123,40 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 if (success)
                 {
                     await Application.Current.MainPage.DisplayAlert("Success", "Account created! Please check your email for verification code (not implemented in UI yet) or just Login if confirmed.", "OK");
-                    IsSignUp = false; // Switch to login
+                    await Application.Current.MainPage.DisplayAlert("Success", "Account created! Please check your email for the verification code.", "OK");
+                    IsVerification = true; 
+                    IsSignUp = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+        async Task VerifyAsync()
+        {
+             if (IsBusy) return;
+            IsBusy = true;
+
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(VerificationCode))
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", "Username and Code are required", "OK");
+                IsBusy = false;
+                return;
+            }
+
+            try
+            {
+                bool success = await _authService.ConfirmSignUpAsync(Username, VerificationCode);
+                if (success)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Success", "Account verified! You can now login.", "OK");
+                    IsVerification = false;
+                    IsSignUp = false; // Go to Login
                 }
             }
             catch (Exception ex)

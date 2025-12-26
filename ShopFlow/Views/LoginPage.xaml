@@ -10,11 +10,14 @@
         
         <Image Source="appicon.svg" HeightRequest="100" Margin="0,0,0,20"/>
 
-        <Entry Placeholder="Username" Text="{Binding Username}" BackgroundColor="White"/>
+        <Entry Placeholder="Username" Text="{Binding Username}" BackgroundColor="White" IsVisible="{Binding IsVerification, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}"/>
         
         <Entry Placeholder="Email" Text="{Binding Email}" IsVisible="{Binding IsSignUp}" BackgroundColor="White" Keyboard="Email"/>
         
-        <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True" BackgroundColor="White"/>
+        <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True" BackgroundColor="White" IsVisible="{Binding IsVerification, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}"/>
+
+        <!-- Verification Code -->
+        <Entry Placeholder="Verification Code" Text="{Binding VerificationCode}" IsVisible="{Binding IsVerification}" BackgroundColor="White" Keyboard="Numeric"/>
 
         <Button Text="Login" 
                 Command="{Binding LoginCommand}" 
@@ -26,6 +29,12 @@
                 Command="{Binding SignUpCommand}" 
                 IsVisible="{Binding IsSignUp}"
                 BackgroundColor="#10B981" 
+                TextColor="White"/>
+
+        <Button Text="Verify" 
+                Command="{Binding VerifyCommand}" 
+                IsVisible="{Binding IsVerification}"
+                BackgroundColor="#F59E0B" 
                 TextColor="White"/>
 
         <Button Text="{Binding IsSignUp, StringFormat='Already have an account? Login'}" 

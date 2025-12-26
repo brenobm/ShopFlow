@@ -37,6 +37,29 @@ namespace BrenoMachado.ShopFlow.Services
             }
         }
 
+        }
+
+        public async Task<bool> ConfirmSignUpAsync(string username, string confirmationCode)
+        {
+            try
+            {
+                var request = new ConfirmSignUpRequest
+                {
+                    ClientId = AwsConfig.UserPoolClientId,
+                    Username = username,
+                    ConfirmationCode = confirmationCode
+                };
+
+                await _providerClient.ConfirmSignUpAsync(request);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Confirmation Error: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<bool> LoginAsync(string username, string password)
         {
             try
