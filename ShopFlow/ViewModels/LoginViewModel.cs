@@ -46,7 +46,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                await Shell.Current.DisplayAlert("Error", "Please enter username and password", "OK");
+                await Application.Current.MainPage.DisplayAlert("Error", "Please enter username and password", "OK");
                 IsBusy = false;
                 return;
             }
@@ -62,12 +62,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 }
                 else
                 {
-                    await Shell.Current.DisplayAlert("Error", "Login failed. Check credentials.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Error", "Login failed. Check credentials.", "OK");
                 }
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+                await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
             }
             finally
             {
@@ -82,7 +82,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(Email))
             {
-                await Shell.Current.DisplayAlert("Error", "All fields are required", "OK");
+                await Application.Current.MainPage.DisplayAlert("Error", "All fields are required", "OK");
                 IsBusy = false;
                 return;
             }
@@ -92,13 +92,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 bool success = await _authService.SignUpAsync(Username, Password, Email);
                 if (success)
                 {
-                    await Shell.Current.DisplayAlert("Success", "Account created! Please check your email for verification code (not implemented in UI yet) or just Login if confirmed.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Success", "Account created! Please check your email for verification code (not implemented in UI yet) or just Login if confirmed.", "OK");
                     IsSignUp = false; // Switch to login
                 }
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+                await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
             }
             finally
             {
