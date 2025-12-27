@@ -10,7 +10,7 @@ public class ShoppingList
     public string Name { get; set; }
     public string OwnerId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public bool IsDefault { get; set; }
+    public bool? IsDefault { get; set; }
     
     [Ignore]
     public List<ShoppingItem> Items { get; set; } = new List<ShoppingItem>();

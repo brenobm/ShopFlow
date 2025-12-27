@@ -46,13 +46,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 // Fetch from Cloud
                 var lists = await _graphQLService.GetListsAsync();
                 Lists.Clear();
-                foreach (var list in lists.OrderByDescending(l => l.IsDefault).ThenBy(l => l.Name))
+                foreach (var list in lists.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name))
                 {
                     Lists.Add(list);
                 }
                 
                 // Consistency Check: Ensure exactly one default exists if lists exist
-                if (Lists.Any() && !Lists.Any(l => l.IsDefault))
+                if (Lists.Any() && !Lists.Any(l => l.IsDefault == true))
                 {
                     await SetDefaultListAsync(Lists.First());
                 }
@@ -93,7 +93,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             try
             {
-                await _graphQLService.UpdateListAsync(list.Id, name.Trim(), list.IsDefault);
+                await _graphQLService.UpdateListAsync(list.Id, name.Trim(), list.IsDefault.GetValueOrDefault());
                 await LoadListsAsync();
             }
             catch (Exception ex)
@@ -113,7 +113,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     await _graphQLService.DeleteListAsync(list.Id);
                     
                     // Logic: If verify default was deleted, promote another
-                    if (list.IsDefault)
+                    if (list.IsDefault == true)
                     {
                         var remaining = Lists.Where(l => l.Id != list.Id).ToList();
                         if (remaining.Any())
@@ -134,12 +134,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
         async Task SetDefaultListAsync(ShoppingList newDefault)
         {
             if (newDefault == null) return;
-            if (newDefault.IsDefault) return; // Already default
+            if (newDefault.IsDefault == true) return; // Already default
 
             try
             {
                 // 1. Unset old default(s)
-                var oldDefaults = Lists.Where(l => l.IsDefault && l.Id != newDefault.Id).ToList();
+                var oldDefaults = Lists.Where(l => l.IsDefault == true && l.Id != newDefault.Id).ToList();
                 foreach (var old in oldDefaults)
                 {
                     old.IsDefault = false;

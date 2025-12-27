@@ -389,7 +389,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
              if (targetList == null)
              {
                  var lists = await _graphQLService.GetListsAsync();
-                 targetList = lists.FirstOrDefault(l => l.IsDefault) ?? lists.FirstOrDefault();
+                 targetList = lists.FirstOrDefault(l => l.IsDefault == true) ?? lists.FirstOrDefault();
                  if(targetList == null) return;
                  CurrentList = targetList; // Set it so the UI loads it
              }
@@ -400,7 +400,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                  // This sounds like a strict rule.
                  // Let's check if we should switch.
                  var lists = await _graphQLService.GetListsAsync();
-                 var defaultList = lists.FirstOrDefault(l => l.IsDefault);
+                 var defaultList = lists.FirstOrDefault(l => l.IsDefault == true);
                  if (defaultList != null && defaultList.Id != CurrentList.Id)
                  {
                      targetList = defaultList;
