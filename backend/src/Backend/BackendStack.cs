@@ -182,7 +182,7 @@ namespace Backend
             {
                 TypeName = "Mutation",
                 FieldName = "updateItem",
-                 RequestMappingTemplate = MappingTemplate.FromString(@"
+                RequestMappingTemplate = MappingTemplate.FromString(@"
                 {
                     ""version"" : ""2017-02-28"",
                     ""operation"" : ""UpdateItem"",
@@ -191,13 +191,14 @@ namespace Backend
                         ""id"" : { ""S"" : ""${context.arguments.id}"" }
                     },
                     ""update"" : {
-                        ""expression"" : ""SET #name = :name, isPurchased = :isPurchased"",
+                        ""expression"" : ""SET #isPurchased = :isPurchased#if($context.arguments.name), #name = :name#end"",
                         ""expressionNames"" : {
-                            ""#name"" : ""name""
+                            ""#isPurchased"" : ""isPurchased""
+                            #if($context.arguments.name),""#name"" : ""name""#end
                         },
                         ""expressionValues"" : {
-                            "":name"" : { ""S"" : ""${context.arguments.name}"" },
                             "":isPurchased"" : { ""BOOL"" : ${context.arguments.isPurchased} }
+                            #if($context.arguments.name),"":name"" : { ""S"" : ""${context.arguments.name}"" }#end
                         }
                     },
                     ""condition"": {

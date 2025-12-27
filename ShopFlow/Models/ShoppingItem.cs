@@ -2,7 +2,7 @@ using SQLite;
 
 namespace BrenoMachado.ShopFlow.Models;
 
-public class ShoppingItem
+public class ShoppingItem : System.ComponentModel.INotifyPropertyChanged
 {
     [PrimaryKey]
     public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -11,7 +11,21 @@ public class ShoppingItem
     public string ListId { get; set; }
     
     public string Name { get; set; }
-    public bool IsPurchased { get; set; }
+    
+    private bool _isPurchased;
+    public bool IsPurchased 
+    { 
+        get => _isPurchased; 
+        set 
+        {
+            if (_isPurchased != value)
+            {
+                _isPurchased = value;
+                OnPropertyChanged(nameof(IsPurchased));
+            }
+        }
+    }
+
     public string Category { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? PurchasedAt { get; set; }
@@ -30,4 +44,8 @@ public class ShoppingItem
         "Personal Care",
         "Other"
     };
+
+    public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+    protected void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 }
