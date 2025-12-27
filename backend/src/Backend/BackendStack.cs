@@ -345,7 +345,8 @@ namespace Backend
                 Timeout = Duration.Seconds(30),
                  Environment = new Dictionary<string, string>
                 {
-                    { "fEMAIL_SOURCE", "breno.machado@example.com" }
+                    { "fEMAIL_SOURCE", "breno.machado@example.com" },
+                    { "PINPOINT_APP_ID", pinpointApp.Ref }
                 }
             });
 
@@ -373,6 +374,19 @@ namespace Backend
             listsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
             globalProductsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
 
+            // 11. Amazon Pinpoint Project
+            var pinpointApp = new Amazon.CDK.AWS.Pinpoint.CfnApp(this, "ShopFlowPinpointApp", new Amazon.CDK.AWS.Pinpoint.CfnAppProps
+            {
+                Name = "ShopFlowPinpointApp"
+            });
+            
+            // Allow Lambda to Use Pinpoint
+            inviteUserLambda.AddToRolePolicy(new Amazon.CDK.AWS.IAM.PolicyStatement(new Amazon.CDK.AWS.IAM.PolicyStatementProps
+            {
+                Actions = new[] { "mobiletargeting:SendMessages", "mobiletargeting:GetEndpoint", "mobiletargeting:UpdateEndpoint" },
+                Resources = new[] { pinpointApp.AttrArn + "/*" }
+            }));
+
             // 10. Outputs
             new CfnOutput(this, "UserPoolId", new CfnOutputProps { Value = userPool.UserPoolId });
             new CfnOutput(this, "UserPoolClientId", new CfnOutputProps { Value = userPoolClient.UserPoolClientId });
@@ -381,6 +395,7 @@ namespace Backend
             new CfnOutput(this, "ItemsTableName", new CfnOutputProps { Value = itemsTable.TableName });
             new CfnOutput(this, "ListsTableName", new CfnOutputProps { Value = listsTable.TableName });
             new CfnOutput(this, "GraphQLEndpoint", new CfnOutputProps { Value = api.GraphqlUrl });
+            new CfnOutput(this, "PinpointAppId", new CfnOutputProps { Value = pinpointApp.Ref });
         }
     }
 }

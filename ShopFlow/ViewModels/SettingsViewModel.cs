@@ -6,16 +6,33 @@ namespace BrenoMachado.ShopFlow.ViewModels
     public class SettingsViewModel : BaseViewModel
     {
         private readonly IDatabaseService _databaseService;
+        private readonly IAppNotificationService _notificationService;
 
         public ICommand ClearDataCommand { get; }
+        public ICommand TestPushCommand { get; }
 
         public string Version => "1.0.0";
 
-        public SettingsViewModel(IDatabaseService databaseService)
+        public SettingsViewModel(IDatabaseService databaseService, IAppNotificationService notificationService)
         {
             _databaseService = databaseService;
+            _notificationService = notificationService;
             Title = "Settings";
             ClearDataCommand = new Command(async () => await ClearDataAsync());
+            TestPushCommand = new Command(async () => await TestPushAsync());
+            
+            // Auto-init on settings open (or app start ideally)
+            _ = _notificationService.InitializeAsync();
+        }
+
+        async Task TestPushAsync()
+        {
+            await _notificationService.ShowLocalNotification("Test Notification", "This is a local alert from ShopFlow!");
+            // Also try to get token
+            try {
+                var token = await _notificationService.GetDeviceTokenAsync();
+                Console.WriteLine($"Token: {token}");
+            } catch {}
         }
 
         async Task ClearDataAsync()

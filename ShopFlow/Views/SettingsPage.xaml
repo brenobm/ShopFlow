@@ -19,6 +19,16 @@
         </Frame>
 
         <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
+            <StackLayout Spacing="10">
+                <Label Text="Notifications" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
+                <Button Text="Test Local Notification" 
+                        Command="{Binding TestPushCommand}"
+                        BackgroundColor="#3B82F6"
+                        TextColor="White"/>
+            </StackLayout>
+        </Frame>
+
+        <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
             <StackLayout Spacing="5">
                  <Label Text="About" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
                  <Label Text="Smart Shopping" FontSize="16" TextColor="#111827"/>

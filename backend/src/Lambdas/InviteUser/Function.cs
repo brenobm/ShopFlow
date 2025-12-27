@@ -110,14 +110,63 @@ public class Function
             }
         };
 
-        try
+            try
         {
             var response = await _sesClient.SendEmailAsync(sendRequest);
             Console.WriteLine($"Email sent to {toEmail}, MessageID: {response.MessageId}");
+            
+            // Attempt Push Notification
+            await SendPushNotification(toEmail, listName);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error sending email to {toEmail}: {ex.Message}");
+            Console.WriteLine($"Error sending email/push to {toEmail}: {ex.Message}");
+        }
+    }
+
+    private async Task SendPushNotification(string userId, string listName)
+    {
+        var appId = Environment.GetEnvironmentVariable("PINPOINT_APP_ID");
+        if(string.IsNullOrEmpty(appId)) return;
+
+        try 
+        {
+            using var pinpoint = new Amazon.Pinpoint.AmazonPinpointClient();
+            var request = new Amazon.Pinpoint.Model.SendMessagesRequest
+            {
+                ApplicationId = appId,
+                MessageRequest = new Amazon.Pinpoint.Model.MessageRequest
+                {
+                    Addresses = new Dictionary<string, Amazon.Pinpoint.Model.AddressConfiguration>
+                    {
+                        { userId, new Amazon.Pinpoint.Model.AddressConfiguration { ChannelType = Amazon.Pinpoint.Model.ChannelType.GCM } } // Simplification: Assuming UserId maps to Endpoint or Address
+                    },
+                    MessageConfiguration = new Amazon.Pinpoint.Model.DirectMessageConfiguration
+                    {
+                        GCMMessage = new Amazon.Pinpoint.Model.GCMMessage
+                        {
+                            Action = Amazon.Pinpoint.Model.Action.OPEN_APP,
+                            Body = $"You have been invited to list '{listName}'",
+                            Title = "New List Invitation"
+                        },
+                        APNSMessage = new Amazon.Pinpoint.Model.APNSMessage
+                        {
+                            Action = Amazon.Pinpoint.Model.Action.OPEN_APP,
+                            Body = $"You have been invited to list '{listName}'",
+                            Title = "New List Invitation"
+                        }
+                    }
+                }
+            };
+            
+            // Note: This relies on the 'userId' being a valid Endpoint ID or Address in Pinpoint.
+            // Since we haven't implemented the registration logic fully, this serves as the backend scaffolding.
+            await pinpoint.SendMessagesAsync(request);
+            Console.WriteLine($"Push sent to {userId}");
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Push failed: {ex.Message}");
         }
     }
 }
