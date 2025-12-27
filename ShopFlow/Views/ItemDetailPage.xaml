@@ -17,7 +17,17 @@
             </VerticalStackLayout>
             
             <VerticalStackLayout Spacing="10">
-                <Label Text="Category" FontAttributes="Bold" TextColor="#374151"/>
+                <Grid ColumnDefinitions="*, Auto">
+                    <Label Text="Category" FontAttributes="Bold" TextColor="#374151" VerticalOptions="Center"/>
+                    <Button Text="+ New" 
+                            Command="{Binding AddCategoryCommand}" 
+                            HeightRequest="30" 
+                            Padding="10,0" 
+                            FontSize="12"
+                            BackgroundColor="#E5E7EB"
+                            TextColor="#374151"
+                            Grid.Column="1"/>
+                </Grid>
                 <CollectionView ItemsSource="{Binding Categories}"
                                 SelectionMode="Single"
                                 SelectedItem="{Binding SelectedCategory}"

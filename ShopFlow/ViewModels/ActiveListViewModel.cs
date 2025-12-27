@@ -11,7 +11,6 @@ namespace BrenoMachado.ShopFlow.ViewModels
     {
         private readonly IGraphQLService _graphQLService;
         
-        string _listId;
         public string ListId
         {
             get => _listId;
@@ -19,6 +18,19 @@ namespace BrenoMachado.ShopFlow.ViewModels
             {
                 _listId = value;
                 LoadListDetailsAsync(value); 
+            }
+        }
+        
+        public enum SortOption { Category, Name, DateAdded, Status }
+        SortOption _currentSort = SortOption.Category;
+        public SortOption CurrentSort
+        {
+            get => _currentSort;
+            set
+            {
+                _currentSort = value;
+                OnPropertyChanged();
+                Task.Run(LoadItemsAsync); // Trigger re-sort
             }
         }
         
@@ -42,6 +54,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand EditItemCommand { get; }
         public ICommand DeleteItemCommand { get; }
         public ICommand AddSuggestionCommand { get; }
+        public ICommand SortCommand { get; }
 
         public ICommand ListenCommand { get; }
         public ICommand ToggleShoppingModeCommand { get; }
@@ -83,6 +96,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             EditItemCommand = new Command<ShoppingItem>(async (item) => await EditItemAsync(item));
             DeleteItemCommand = new Command<ShoppingItem>(async (item) => await DeleteItemAsync(item));
             AddSuggestionCommand = new Command<string>(async (name) => await AddSuggestionAsync(name));
+            SortCommand = new Command(async () => await ShowSortOptionsAsync());
             ToggleShoppingModeCommand = new Command(() => IsShoppingMode = !IsShoppingMode);
             ScanCommand = new Command(async () => await ScanAsync());
             ShareCommand = new Command(async () => await ShareListAsync());
@@ -120,7 +134,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
              
              try 
              {
-                 var items = await _graphQLService.GetItemsAsync(CurrentList.Id);
+                 var items = await _graphQLService.GetItemsAsync(CurrentList.Id); // Returns IEnumerable<ShoppingItem>
                  
                  // Filter out bought items if in Shopping Mode
                  if (IsShoppingMode)
@@ -128,12 +142,42 @@ namespace BrenoMachado.ShopFlow.ViewModels
                      items = items.Where(i => !i.IsPurchased).ToList();
                  }
 
-                 Items.Clear();
+                 // PRE-SORT ITEMS BEFORE GROUPING
+                 IEnumerable<ShoppingItem> sortedItems = items;
+                 switch(CurrentSort)
+                 {
+                    case SortOption.Name: 
+                        sortedItems = items.OrderBy(i => i.Name); 
+                        break;
+                    case SortOption.DateAdded: 
+                        sortedItems = items.OrderByDescending(i => i.CreatedAt); 
+                        break;
+                    case SortOption.Status: 
+                        sortedItems = items.OrderBy(i => i.IsPurchased).ThenBy(i => i.Name); 
+                        break;
+                    default: 
+                        // Default/Category: Sort by Name inside category usually
+                        sortedItems = items.OrderBy(i => i.Name); 
+                        break; 
+                 }
                  
-                 var groups = items.GroupBy(i => i.Category ?? "Uncategorized")
+                 var groups = sortedItems.GroupBy(i => i.Category ?? "Uncategorized")
                                    .Select(g => new ShoppingItemGroup(g.Key, g))
-                                   .OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999);
-    
+                                   .ToList();
+
+                   // Sort Groups based on SortOption
+                 if (CurrentSort == SortOption.Category)
+                 {
+                     groups = groups.OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999).ToList();
+                 }
+                 else
+                 {
+                    // If sorting by Name/Date, we might want to keep Category order OR sort groups alphabetically?
+                    // Let's stick to Category Order for the groups themselves to keep UI structure stable
+                    groups = groups.OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999).ToList();
+                 }
+                 
+                 Items.Clear();
                  foreach(var group in groups)
                  {
                      Items.Add(group);
@@ -144,6 +188,32 @@ namespace BrenoMachado.ShopFlow.ViewModels
              {
                  System.Diagnostics.Debug.WriteLine($"Error loading items: {ex.Message}");
              }
+        }
+
+        List<ShoppingItemGroup> SortGroups(List<ShoppingItemGroup> groups)
+        {
+            // 1. Sort Items WITHIN Groups
+            foreach(var group in groups)
+            {
+                // We need to sort the internal list of the group. 
+                // Since ShoppingItemGroup inherits from ObservableCollection/List, we might need to clear and re-add or sort a copy.
+                // Assuming ShoppingItemGroup is : ObservableCollection<ShoppingItem> or List<ShoppingItem>
+                // Changes here might be tricky if it's ObservableCollection. Ideally we sort 'items' BEFORE grouping.
+            }
+            // Retrying logic: Sort 'items' list BEFORE grouping is cleaner.
+            return groups;
+        }
+
+        async Task ShowSortOptionsAsync()
+        {
+            string action = await Shell.Current.DisplayActionSheet("Sort By", "Cancel", null, "Category (Default)", "Name (A-Z)", "Date Added (Newest)", "Status (Unchecked First)");
+            switch(action)
+            {
+                case "Category (Default)": CurrentSort = SortOption.Category; break;
+                case "Name (A-Z)": CurrentSort = SortOption.Name; break;
+                case "Date Added (Newest)": CurrentSort = SortOption.DateAdded; break;
+                case "Status (Unchecked First)": CurrentSort = SortOption.Status; break;
+            }
         }
 
         async Task LoadSuggestionsAsync()

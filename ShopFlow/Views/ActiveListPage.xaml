@@ -8,6 +8,7 @@
              BackgroundColor="#F9FAFB">
 
     <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Sort" Command="{Binding SortCommand}" Order="Primary" />
         <ToolbarItem Text="{Binding IsShoppingMode, Converter={StaticResource ShoppingModeTextConverter}}" 
                      Command="{Binding ToggleShoppingModeCommand}" />
         <ToolbarItem Text="Share" Command="{Binding ShareCommand}" Order="Secondary" />

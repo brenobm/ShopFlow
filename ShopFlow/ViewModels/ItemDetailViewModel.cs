@@ -19,9 +19,26 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             SaveCommand = new Command(async () => await SaveAsync());
             CancelCommand = new Command(async () => await CancelAsync());
+            AddCategoryCommand = new Command(async () => await AddCategoryAsync());
 
             Categories = new ObservableCollection<string>(ShoppingItem.DefaultCategories);
             SelectedCategory = Categories.FirstOrDefault();
+        }
+
+        public ICommand AddCategoryCommand { get; }
+
+        async Task AddCategoryAsync()
+        {
+            string newCategory = await Shell.Current.DisplayPromptAsync("New Category", "Enter category name:");
+            if (!string.IsNullOrWhiteSpace(newCategory))
+            {
+                newCategory = newCategory.Trim();
+                if (!Categories.Contains(newCategory))
+                {
+                    Categories.Add(newCategory);
+                }
+                SelectedCategory = newCategory;
+            }
         }
 
         public ObservableCollection<string> Categories { get; }
