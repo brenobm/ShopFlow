@@ -46,6 +46,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand ListenCommand { get; }
         public ICommand ToggleShoppingModeCommand { get; }
         public ICommand ScanCommand { get; }
+        public ICommand ShareCommand { get; }
         
         private readonly ISmartService _smartService;
         private readonly IVoiceService _voiceService;
@@ -81,6 +82,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             AddSuggestionCommand = new Command<string>(async (name) => await AddSuggestionAsync(name));
             ToggleShoppingModeCommand = new Command(() => IsShoppingMode = !IsShoppingMode);
             ScanCommand = new Command(async () => await ScanAsync());
+            ShareCommand = new Command(async () => await ShareListAsync());
         }
 
         void ToggleScreenState(bool keepOn)
@@ -339,6 +341,22 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
 
             return false;
+        }
+        async Task ShareListAsync()
+        {
+            if (CurrentList == null) return;
+            string email = await Shell.Current.DisplayPromptAsync("Share List", $"Enter email to share '{CurrentList.Name}' with:");
+            if (string.IsNullOrWhiteSpace(email)) return;
+
+            try
+            {
+                await _graphQLService.ShareListAsync(CurrentList.Id, email.Trim());
+                await Application.Current.MainPage.DisplayAlert("Success", $"Invited {email} to list.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Failed to share list: {ex.Message}", "OK");
+            }
         }
     }
 }

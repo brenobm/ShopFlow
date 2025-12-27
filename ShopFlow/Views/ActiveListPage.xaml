@@ -10,6 +10,7 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="{Binding IsShoppingMode, Converter={StaticResource ShoppingModeTextConverter}}" 
                      Command="{Binding ToggleShoppingModeCommand}" />
+        <ToolbarItem Text="Share" Command="{Binding ShareCommand}" Order="Secondary" />
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto, *">
