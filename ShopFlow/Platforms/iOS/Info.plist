@@ -8,6 +8,10 @@
 	<string>com.brenomachado.shopflow</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
+	<key>XSAppIconAssets</key>
+	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>CFBundleIconName</key>
+	<string>appicon</string>
 	<key>CFBundleName</key>
 	<string>ShopFlow</string>
 	<key>LSRequiresIPhoneOS</key>
