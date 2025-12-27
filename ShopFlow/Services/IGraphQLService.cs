@@ -13,5 +13,7 @@ namespace BrenoMachado.ShopFlow.Services
         Task<ShoppingItem> AddItemAsync(string listId, string name, double quantity, string unit, string category);
         Task<ShoppingItem> UpdateItemAsync(ShoppingItem item);
         Task<ShoppingItem> DeleteItemAsync(string listId, string id);
+        Task<GlobalProduct> GetGlobalProductAsync(string barcode);
+        Task<GlobalProduct> CreateGlobalProductAsync(string barcode, string name, string category);
     }
 }

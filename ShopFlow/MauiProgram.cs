@@ -3,7 +3,8 @@ using Microsoft.Extensions.Logging;
 using BrenoMachado.ShopFlow.Services;
 using BrenoMachado.ShopFlow.ViewModels;
 using BrenoMachado.ShopFlow.Views;
-using ZXing.Net.MAUI.Controls;
+using ZXing.Net.Maui.Controls;
+using ZXing.Net.Maui;
 
 namespace BrenoMachado.ShopFlow;
 

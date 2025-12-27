@@ -235,7 +235,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 string barcode = await ScanPage.ScanAsync(Shell.Current.Navigation);
                 if (string.IsNullOrWhiteSpace(barcode)) return;
 
-                string productName = null;
+                string? productName = null;
                 string category = "Scanned";
 
                 // 2. Lookup OpenFoodFacts

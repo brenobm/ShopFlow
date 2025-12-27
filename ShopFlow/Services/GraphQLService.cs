@@ -243,5 +243,50 @@ namespace BrenoMachado.ShopFlow.Services
             await _client.SendMutationAsync<dynamic>(request);
             return new ShoppingItem { Id = id };
         }
+        public async Task<GlobalProduct> GetGlobalProductAsync(string barcode)
+        {
+             SetAuthorizationHeader();
+             var request = new GraphQLRequest
+            {
+                Query = @"
+                query GetGlobalProduct($barcode: String!) {
+                    getGlobalProduct(barcode: $barcode) {
+                        barcode
+                        name
+                        category
+                    }
+                }",
+                Variables = new { barcode }
+            };
+
+            var response = await _client.SendQueryAsync<dynamic>(request);
+            // Return null if not found or errors (common for lookup)
+            if (response.Errors != null && response.Errors.Any()) return null;
+            if (response.Data.getGlobalProduct == null) return null;
+
+            return response.Data.getGlobalProduct.ToObject<GlobalProduct>();
+        }
+
+        public async Task<GlobalProduct> CreateGlobalProductAsync(string barcode, string name, string category)
+        {
+             SetAuthorizationHeader();
+             var request = new GraphQLRequest
+            {
+                Query = @"
+                mutation CreateGlobalProduct($barcode: String!, $name: String!, $category: String) {
+                    createGlobalProduct(barcode: $barcode, name: $name, category: $category) {
+                        barcode
+                        name
+                        category
+                    }
+                }",
+                Variables = new { barcode, name, category }
+            };
+
+            var response = await _client.SendMutationAsync<dynamic>(request);
+            if (response.Errors != null && response.Errors.Any()) throw new Exception(response.Errors[0].Message);
+            
+            return response.Data.createGlobalProduct.ToObject<GlobalProduct>();
+        }
     }
 }

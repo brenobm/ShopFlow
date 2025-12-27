@@ -1,4 +1,5 @@
-using ZXing.Net.MAUI;
+using ZXing.Net.Maui;
+using ZXing.Net.Maui.Controls; // For BarcodeReaderOptions if needed
 
 namespace BrenoMachado.ShopFlow.Views;
 
