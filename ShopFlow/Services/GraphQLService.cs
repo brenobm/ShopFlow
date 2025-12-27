@@ -44,6 +44,7 @@ namespace BrenoMachado.ShopFlow.Services
                         id
                         name
                         createdAt
+                        isDefault
                     }
                 }"
             };
@@ -59,20 +60,21 @@ namespace BrenoMachado.ShopFlow.Services
             return lists;
         }
 
-        public async Task<ShoppingList> CreateListAsync(string name)
+        public async Task<ShoppingList> CreateListAsync(string name, bool isDefault = false)
         {
             SetAuthorizationHeader();
             var request = new GraphQLRequest
             {
                 Query = @"
-                mutation CreateList($name: String!) {
-                    createList(name: $name) {
+                mutation CreateList($name: String!, $isDefault: Boolean) {
+                    createList(name: $name, isDefault: $isDefault) {
                         id
                         name
                         createdAt
+                        isDefault
                     }
                 }",
-                Variables = new { name }
+                Variables = new { name, isDefault }
             };
 
             var response = await _client.SendMutationAsync<dynamic>(request);
@@ -84,20 +86,21 @@ namespace BrenoMachado.ShopFlow.Services
             return response.Data.createList.ToObject<ShoppingList>();
         }
 
-        public async Task<ShoppingList> UpdateListAsync(string id, string name)
+        public async Task<ShoppingList> UpdateListAsync(string id, string name, bool isDefault)
         {
              SetAuthorizationHeader();
              var request = new GraphQLRequest
             {
                 Query = @"
-                mutation UpdateList($id: ID!, $name: String!) {
-                    updateList(id: $id, name: $name) {
+                mutation UpdateList($id: ID!, $name: String, $isDefault: Boolean) {
+                    updateList(id: $id, name: $name, isDefault: $isDefault) {
                         id
                         name
                         createdAt
+                        isDefault
                     }
                 }",
-                Variables = new { id, name }
+                Variables = new { id, name, isDefault }
             };
 
             var response = await _client.SendMutationAsync<dynamic>(request);

@@ -9,7 +9,7 @@ public class AppDelegate : MauiUIApplicationDelegate
 {
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
-        /*
+
         // Request Siri Authorization
         Intents.INPreferences.RequestSiriAuthorization((status) =>
         {
@@ -29,17 +29,36 @@ public class AppDelegate : MauiUIApplicationDelegate
                     break;
             }
         });
-        */
 
         return base.FinishedLaunching(application, launchOptions);
     }
 
     public override bool ContinueUserActivity(UIApplication application, NSUserActivity userActivity, UIApplicationRestorationHandler completionHandler)
     {
+        // Handle INAddTasksIntent (Siri "Add [milk]")
+        if (userActivity.Interaction?.Intent is INAddTasksIntent addIntent)
+        {
+             var items = addIntent.TaskTitles;
+             if (items != null)
+             {
+                 foreach (var item in items)
+                 {
+                     var itemName = item.SpokenPhrase;
+                     Console.WriteLine($"Siri Request to Add: {itemName}");
+                     
+                     // Dispatch to main thread to navigate/add
+                     MainThread.BeginInvokeOnMainThread(async () => 
+                     {
+                         // Navigate to ActiveList and Add Item
+                         await Shell.Current.GoToAsync($"//ActiveListPage?action=add&item={itemName}");
+                     });
+                 }
+             }
+             return true;
+        }
+
         if (userActivity.ActivityType == "com.brenomachado.shopflow.additem")
         {
-            // Handle the shortcut/intent here
-            // For now, we just log it. In a real scenario, we'd navigate to the page.
             Console.WriteLine("Opened via Siri Shortcut");
             return true;
         }

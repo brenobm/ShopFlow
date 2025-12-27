@@ -39,7 +39,12 @@
 	<string>This app uses Bluetooth to detect nearby beacons or devices for shopping assistance.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to your camera to scan barcodes.</string>
-
+	<key>NSSiriUsageDescription</key>
+	<string>ShopFlow uses Siri to let you add items to your shopping list with your voice.</string>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>INAddTasksIntent</string>
+	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

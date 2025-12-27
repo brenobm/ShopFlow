@@ -5,8 +5,8 @@ namespace BrenoMachado.ShopFlow.Services
     public interface IGraphQLService
     {
         Task<List<ShoppingList>> GetListsAsync();
-        Task<ShoppingList> CreateListAsync(string name);
-        Task<ShoppingList> UpdateListAsync(string id, string name);
+        Task<ShoppingList> CreateListAsync(string name, bool isDefault = false);
+        Task<ShoppingList> UpdateListAsync(string id, string name, bool isDefault);
         Task<ShoppingList> DeleteListAsync(string id);
         Task<ShoppingList> ShareListAsync(string id, string email);
         Task<List<ShoppingItem>> GetItemsAsync(string listId); // Though typically fetched via List

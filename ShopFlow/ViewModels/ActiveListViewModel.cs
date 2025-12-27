@@ -369,5 +369,48 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to share list: {ex.Message}", "OK");
             }
         }
+
+        public async Task AddItemFromSiriAsync(string itemName)
+        {
+             if (string.IsNullOrWhiteSpace(itemName)) return;
+             
+             // If CurrentList matches the "Default", great. But if we are just launching, we need to find the default.
+             // If CurrentList is set (we were already open), usage depends on requirement. 
+             // "when doing command voice, it will add to the default list." -> Implies ALWAYS default list?
+             // Or if I'm inside "Project B" list, should "Siri add milk" add to Project B or Default?
+             // Usually Siri "Add to ShopFlow" implies default unless specified.
+             // But if the app is foregrounded in a specific list, it might be ambiguous.
+             // Let's assume: If app is NOT in a list context (launched fresh), use Default.
+             // If app IS in a list context, probably stick to it? 
+             // The user said: "Siri, add milk... add to the default list."
+             
+             ShoppingList targetList = CurrentList;
+             
+             if (targetList == null)
+             {
+                 var lists = await _graphQLService.GetListsAsync();
+                 targetList = lists.FirstOrDefault(l => l.IsDefault) ?? lists.FirstOrDefault();
+                 if(targetList == null) return;
+                 CurrentList = targetList; // Set it so the UI loads it
+             }
+             else 
+             {
+                 // Optional: Explicitly switch to default list?
+                 // "when doing command voice, it will add to the default list."
+                 // This sounds like a strict rule.
+                 // Let's check if we should switch.
+                 var lists = await _graphQLService.GetListsAsync();
+                 var defaultList = lists.FirstOrDefault(l => l.IsDefault);
+                 if (defaultList != null && defaultList.Id != CurrentList.Id)
+                 {
+                     targetList = defaultList;
+                     CurrentList = targetList; // Switch UI to Default List
+                 }
+             }
+
+             await _graphQLService.AddItemAsync(targetList.Id, itemName, 1, "qty", "Siri");
+             await LoadItemsAsync();
+             // Maybe show a toast
+        }
     }
 }

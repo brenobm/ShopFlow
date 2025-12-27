@@ -43,12 +43,30 @@
                                 <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.OpenListCommand}"
                                                       CommandParameter="{Binding .}" />
                             </Frame.GestureRecognizers>
-                            <Grid Padding="15" BackgroundColor="White">
-                                <Label Text="{Binding Name}" 
+                            <Grid Padding="15" BackgroundColor="White" ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" 
+                                       Text="{Binding Name}" 
                                        FontSize="18" 
                                        TextColor="#1F2937" 
                                        FontAttributes="Bold"
                                        VerticalOptions="Center"/>
+                                
+                                <Button Grid.Column="1"
+                                        Text="★"
+                                        TextColor="#9CA3AF"
+                                        BackgroundColor="Transparent"
+                                        FontSize="24"
+                                        Padding="0"
+                                        HeightRequest="40"
+                                        WidthRequest="40"
+                                        Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.SetDefaultListCommand}"
+                                        CommandParameter="{Binding .}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding IsDefault}" Value="True">
+                                            <Setter Property="TextColor" Value="#F59E0B" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
                             </Grid>
                         </Frame>
                     </SwipeView>

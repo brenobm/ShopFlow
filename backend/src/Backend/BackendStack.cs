@@ -208,10 +208,44 @@ namespace Backend
                         ""name"" : { ""S"" : ""${context.arguments.name}"" },
                         ""createdAt"" : { ""S"" : ""$util.time.nowISO8601()"" },
                         ""UserId"" : { ""S"" : ""${context.identity.username}"" },
-                        ""members"" : { ""L"" : [] }
+                        ""members"" : { ""L"" : [] },
+                        ""isDefault"" : { ""BOOL"" : ${context.arguments.isDefault} }
                     }
                 }"),
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem() 
+            });
+
+             // UPDATE LIST Mapping
+            listsDS.CreateResolver("UpdateListResolver", new ResolverProps
+            {
+                TypeName = "Mutation",
+                FieldName = "updateList",
+                RequestMappingTemplate = MappingTemplate.FromString(@"
+                {
+                    ""version"" : ""2017-02-28"",
+                    ""operation"" : ""UpdateItem"",
+                    ""key"" : {
+                        ""id"" : { ""S"" : ""${context.arguments.id}"" }
+                    },
+                    ""update"" : {
+                        ""expression"" : ""SET #name = :name, #isDefault = :isDefault"",
+                         ""expressionNames"" : {
+                            ""#name"" : ""name"",
+                            ""#isDefault"" : ""isDefault""
+                        },
+                        ""expressionValues"" : {
+                            "":name"" : { ""S"" : ""${context.arguments.name}"" },
+                            "":isDefault"" : { ""BOOL"" : ${context.arguments.isDefault} }
+                        }
+                    },
+                     ""condition"": {
+                        ""expression"": ""UserId = :currentUser"",
+                        ""expressionValues"": {
+                            "":currentUser"": { ""S"" : ""${context.identity.username}"" }
+                        }
+                    }
+                }"),
+                ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
             });
 
             // SHARE LIST Mapping

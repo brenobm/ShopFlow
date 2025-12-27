@@ -1,11 +1,11 @@
-
 type ShoppingList {
   id: ID!
   name: String!
   owner: String
   members: [String]
+  isDefault: Boolean
   items: [ShoppingItem]
-  createdAt: String
+  createdAt: AWSDateTime!
   updatedAt: String
 }
 
@@ -27,8 +27,8 @@ type Query {
 }
 
 type Mutation {
-  createList(name: String!): ShoppingList
-  updateList(id: ID!, name: String!): ShoppingList
+  createList(name: String!, isDefault: Boolean): ShoppingList
+  updateList(id: ID!, name: String, isDefault: Boolean): ShoppingList
   deleteList(id: ID!): ShoppingList
   shareList(id: ID!, email: String!): ShoppingList
   
