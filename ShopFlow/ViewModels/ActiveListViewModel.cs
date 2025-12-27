@@ -58,6 +58,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 _isShoppingMode = value;
                 OnPropertyChanged();
                 ToggleScreenState(value);
+                _ = LoadItemsAsync(); // Refresh list to apply filter
             }
         }
 
@@ -116,6 +117,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
              try 
              {
                  var items = await _graphQLService.GetItemsAsync(CurrentList.Id);
+                 
+                 // Filter out bought items if in Shopping Mode
+                 if (IsShoppingMode)
+                 {
+                     items = items.Where(i => !i.IsPurchased).ToList();
+                 }
+
                  Items.Clear();
                  
                  var groups = items.GroupBy(i => i.Category ?? "Uncategorized")
