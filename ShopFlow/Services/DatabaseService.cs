@@ -18,6 +18,7 @@ namespace BrenoMachado.ShopFlow.Services
             await _database.CreateTableAsync<User>();
             await _database.CreateTableAsync<ShoppingList>();
             await _database.CreateTableAsync<ShoppingItem>();
+            await _database.CreateTableAsync<PurchaseHistory>();
         }
 
         public async Task<List<ShoppingList>> GetListsAsync()
@@ -105,6 +106,32 @@ namespace BrenoMachado.ShopFlow.Services
         {
             await Init();
             return await _database.Table<ShoppingItem>().Where(i => i.IsPurchased).ToListAsync();
+        }
+
+        // Purchase History Methods
+        public async Task LogPurchaseAsync(string itemName)
+        {
+            await Init();
+            // Simple debounce: Don't log if purchased today already
+            var today = DateTime.Today;
+            var existing = await _database.Table<PurchaseHistory>()
+                            .Where(x => x.ItemName == itemName && x.DatePurchased >= today)
+                            .FirstOrDefaultAsync();
+            
+            if (existing == null)
+            {
+                await _database.InsertAsync(new PurchaseHistory 
+                { 
+                    ItemName = itemName, 
+                    DatePurchased = DateTime.Now 
+                });
+            }
+        }
+
+        public async Task<List<PurchaseHistory>> GetPurchaseHistoryAsync()
+        {
+            await Init();
+            return await _database.Table<PurchaseHistory>().ToListAsync();
         }
     }
 }

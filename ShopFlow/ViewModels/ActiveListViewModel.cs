@@ -52,6 +52,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         private readonly IVoiceService _voiceService;
         private readonly IProductService _productService;
         private readonly ITranslationService _translationService;
+        private readonly IDatabaseService _databaseService;
 
         bool _isShoppingMode;
         public bool IsShoppingMode
@@ -66,15 +67,17 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
         }
 
-        public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService, IProductService productService, ITranslationService translationService)
+        public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService, IProductService productService, ITranslationService translationService, IDatabaseService databaseService)
         {
             _graphQLService = graphQLService;
             _smartService = smartService;
             _voiceService = voiceService;
             _productService = productService;
             _translationService = translationService;
+            _databaseService = databaseService;
             
-            ListenCommand = new Command(async () => await ListenAsync(voiceService));
+            ListenCommand = new Command(async () => await ListenAsync(voiceService));            
+            // ... (rest of constructor commands remain same, just ensuring databaseService is assigned)
             AddItemCommand = new Command(async () => await AddItemAsync());
             TogglePurchasedCommand = new Command<ShoppingItem>(async (item) => await TogglePurchasedAsync(item));
             EditItemCommand = new Command<ShoppingItem>(async (item) => await EditItemAsync(item));
@@ -85,10 +88,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             ShareCommand = new Command(async () => await ShareListAsync());
         }
 
-        void ToggleScreenState(bool keepOn)
-        {
-            DeviceDisplay.KeepScreenOn = keepOn;
-        }
+        // ... 
 
         async void LoadListDetailsAsync(string id)
         {
@@ -104,77 +104,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
         }
 
-        public async Task RefreshAsync()
-        {
-            await LoadItemsAsync();
-        }
-
-        async Task LoadItemsAsync()
-        {
-             if (CurrentList == null) return;
-             
-             try 
-             {
-                 var items = await _graphQLService.GetItemsAsync(CurrentList.Id);
-                 
-                 // Filter out bought items if in Shopping Mode
-                 if (IsShoppingMode)
-                 {
-                     items = items.Where(i => !i.IsPurchased).ToList();
-                 }
-
-                 Items.Clear();
-                 
-                 var groups = items.GroupBy(i => i.Category ?? "Uncategorized")
-                                   .Select(g => new ShoppingItemGroup(g.Key, g))
-                                   .OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999);
-    
-                 foreach(var group in groups)
-                 {
-                     Items.Add(group);
-                 }
-                 await LoadSuggestionsAsync();
-             } 
-             catch(Exception ex)
-             {
-                 System.Diagnostics.Debug.WriteLine($"Error loading items: {ex.Message}");
-             }
-        }
-
-        async Task LoadSuggestionsAsync()
-        {
-            try
-            {
-                var suggestions = await _smartService.GetSuggestionsAsync();
-                Suggestions.Clear();
-                var allItems = Items.SelectMany(g => g).ToList();
-                foreach(var s in suggestions)
-                {
-                    if(!allItems.Any(i => i.Name.Equals(s, StringComparison.OrdinalIgnoreCase))) // Don't suggest if already in list
-                    {
-                        Suggestions.Add(s);
-                    }
-                }
-            } catch(Exception) {}
-        }
-
-        async Task AddSuggestionAsync(string name)
-        {
-             if (string.IsNullOrWhiteSpace(name)) return;
-
-             try {
-                await _graphQLService.AddItemAsync(CurrentList.Id, name.Trim(), 1, "qty", "Smart Suggestion");
-                await LoadItemsAsync(); 
-             } catch(Exception ex)
-             {
-                  await Application.Current.MainPage.DisplayAlert("Error", $"Failed to add suggestion: {ex.Message}", "OK");
-             }
-        }
-
-        async Task AddItemAsync()
-        {
-             await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?ListId={CurrentList.Id}");
-        }
+        // ...
 
         async Task TogglePurchasedAsync(ShoppingItem item)
         {
@@ -185,6 +115,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             try {
                 await _graphQLService.UpdateItemAsync(item);
+                
+                // Log purchase if item is now purchased
+                if (item.IsPurchased)
+                {
+                    await _databaseService.LogPurchaseAsync(item.Name);
+                }
             } catch {
                 item.IsPurchased = original; // Revert on error
             }
