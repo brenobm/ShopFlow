@@ -370,7 +370,15 @@ namespace Backend
                 Identity = Identity.Email("breno.machado@example.com") // TODO: Replace with user email or ask input
             });
 
-            // 9. Invite User Lambda (DynamoDB Stream)
+            /* TEMPORARILY DISABLED PINPOINT TO FIX DEPLOYMENT
+            // 9. Amazon Pinpoint Project
+            var pinpointApp = new Amazon.CDK.AWS.Pinpoint.CfnApp(this, "ShopFlowPinpointApp", new Amazon.CDK.AWS.Pinpoint.CfnAppProps
+            {
+                Name = "ShopFlowPinpointApp"
+            });
+            */
+
+            // 10. Invite User Lambda (DynamoDB Stream)
             var inviteUserLambda = new Function(this, "InviteUserFunction", new FunctionProps
             {
                 Runtime = Runtime.DOTNET_8,
@@ -380,7 +388,7 @@ namespace Backend
                  Environment = new Dictionary<string, string>
                 {
                     { "fEMAIL_SOURCE", "breno.machado@example.com" },
-                    { "PINPOINT_APP_ID", pinpointApp.Ref }
+                    // { "PINPOINT_APP_ID", pinpointApp.Ref } // Disabled
                 }
             });
 
@@ -391,35 +399,27 @@ namespace Backend
             }));
             
             // Permissions
-            // Allow Lambda to read from Stream (handled by AddEventSource usually, but explicit read is good)
             listsTable.GrantStreamRead(inviteUserLambda);
             
-            // Allow Lambda to Send Email
-            // emailIdentity.GrantSendEmail(inviteUserLambda); // L2 method might not exist in all versions or is strictly identity policy
-            // Using generic IAM for simplicity/compatibility
             inviteUserLambda.AddToRolePolicy(new Amazon.CDK.AWS.IAM.PolicyStatement(new Amazon.CDK.AWS.IAM.PolicyStatementProps
             {
                 Actions = new[] { "ses:SendEmail", "ses:SendRawEmail" },
-                Resources = new[] { "*" } // In prod, restrict to specific identity ARN
+                Resources = new[] { "*" } 
             }));
 
             // 10. Grant Access to Identity Pool
             itemsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
             listsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
             globalProductsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
-
-            // 11. Amazon Pinpoint Project
-            var pinpointApp = new Amazon.CDK.AWS.Pinpoint.CfnApp(this, "ShopFlowPinpointApp", new Amazon.CDK.AWS.Pinpoint.CfnAppProps
-            {
-                Name = "ShopFlowPinpointApp"
-            });
-            
+           
+            /*
             // Allow Lambda to Use Pinpoint
             inviteUserLambda.AddToRolePolicy(new Amazon.CDK.AWS.IAM.PolicyStatement(new Amazon.CDK.AWS.IAM.PolicyStatementProps
             {
                 Actions = new[] { "mobiletargeting:SendMessages", "mobiletargeting:GetEndpoint", "mobiletargeting:UpdateEndpoint" },
                 Resources = new[] { pinpointApp.AttrArn + "/*" }
             }));
+            */
 
             // 10. Outputs
             new CfnOutput(this, "UserPoolId", new CfnOutputProps { Value = userPool.UserPoolId });
@@ -429,7 +429,7 @@ namespace Backend
             new CfnOutput(this, "ItemsTableName", new CfnOutputProps { Value = itemsTable.TableName });
             new CfnOutput(this, "ListsTableName", new CfnOutputProps { Value = listsTable.TableName });
             new CfnOutput(this, "GraphQLEndpoint", new CfnOutputProps { Value = api.GraphqlUrl });
-            new CfnOutput(this, "PinpointAppId", new CfnOutputProps { Value = pinpointApp.Ref });
+            // new CfnOutput(this, "PinpointAppId", new CfnOutputProps { Value = pinpointApp.Ref }); // Disabled
         }
     }
 }
