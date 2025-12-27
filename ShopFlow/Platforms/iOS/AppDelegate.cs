@@ -36,7 +36,10 @@ public class AppDelegate : MauiUIApplicationDelegate
     public override bool ContinueUserActivity(UIApplication application, NSUserActivity userActivity, UIApplicationRestorationHandler completionHandler)
     {
         // Handle INAddTasksIntent (Siri "Add [milk]")
-        if (userActivity.Interaction?.Intent is INAddTasksIntent addIntent)
+        // Note: Direct access to .Interaction might fail in some .NET iOS bindings, using KVC as workaround
+        var interaction = userActivity.ValueForKey(new NSString("interaction")) as INInteraction;
+        
+        if (interaction?.Intent is INAddTasksIntent addIntent)
         {
              var items = addIntent.TaskTitles;
              if (items != null)
