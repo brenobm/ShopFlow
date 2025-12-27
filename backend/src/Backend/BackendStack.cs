@@ -54,9 +54,9 @@ namespace Backend
             // 4. DynamoDB Table (Items)
             var itemsTable = new Table(this, "ShopFlowItems", new TableProps
             {
-                TableName = "ShopFlow_Items",
-                PartitionKey = new Attribute { Name = "UserId", Type = AttributeType.STRING },
-                SortKey = new Attribute { Name = "Id", Type = AttributeType.STRING },
+                TableName = "ShopFlow_Items_v2",
+                PartitionKey = new Attribute { Name = "userId", Type = AttributeType.STRING },
+                SortKey = new Attribute { Name = "id", Type = AttributeType.STRING },
                 BillingMode = BillingMode.PAY_PER_REQUEST,
                 RemovalPolicy = RemovalPolicy.DESTROY
             });
@@ -106,7 +106,7 @@ namespace Backend
             });
 
             // ITEMS Mapping
-            // getItems(listId: ID!) -> Query where UserId = $ctx.identity.username AND filter ListId = $args.listId
+            // getItems(listId: ID!) -> Query where userId = $ctx.identity.username AND filter listId = $args.listId
             itemsDS.CreateResolver("GetItemsResolver", new ResolverProps
             {
                 TypeName = "Query",
@@ -116,13 +116,13 @@ namespace Backend
                     ""version"" : ""2017-02-28"",
                     ""operation"" : ""Query"",
                     ""query"" : {
-                        ""expression"" : ""UserId = :userId"",
+                        ""expression"" : ""userId = :userId"",
                         ""expressionValues"" : {
                             "":userId"" : { ""S"" : ""${context.identity.username}"" }
                         }
                     },
                     ""filter"" : {
-                        ""expression"" : ""ListId = :listId"",
+                        ""expression"" : ""listId = :listId"",
                         ""expressionValues"" : {
                              "":listId"" : { ""S"" : ""${context.arguments.listId}"" }
                         }
@@ -161,16 +161,16 @@ namespace Backend
                     ""version"" : ""2017-02-28"",
                     ""operation"" : ""PutItem"",
                     ""key"" : {
-                        ""UserId"" : { ""S"" : ""${context.identity.username}"" },
-                        ""Id"" : { ""S"" : ""$util.autoId()"" }
+                        ""userId"" : { ""S"" : ""${context.identity.username}"" },
+                        ""id"" : { ""S"" : ""$util.autoId()"" }
                     },
                     ""attributeValues"" : {
-                        ""ListId"" : { ""S"" : ""${context.arguments.listId}"" },
-                        ""Name"" : { ""S"" : ""${context.arguments.name}"" },
-                        ""Quantity"" : { ""N"" : ""${context.arguments.quantity}"" },
-                        ""Unit"" : { ""S"" : ""${context.arguments.unit}"" },
-                        ""Category"" : { ""S"" : ""${context.arguments.category}"" },
-                        ""IsPurchased"" : { ""BOOL"" : false }
+                        ""listId"" : { ""S"" : ""${context.arguments.listId}"" },
+                        ""name"" : { ""S"" : ""${context.arguments.name}"" },
+                        ""quantity"" : { ""N"" : ""${context.arguments.quantity}"" },
+                        ""unit"" : { ""S"" : ""${context.arguments.unit}"" },
+                        ""category"" : { ""S"" : ""${context.arguments.category}"" },
+                        ""isPurchased"" : { ""BOOL"" : false }
                     }
                 }"),
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
@@ -187,18 +187,21 @@ namespace Backend
                     ""version"" : ""2017-02-28"",
                     ""operation"" : ""UpdateItem"",
                     ""key"" : {
-                        ""UserId"" : { ""S"" : ""${context.identity.username}"" },
-                        ""Id"" : { ""S"" : ""${context.arguments.id}"" }
+                        ""userId"" : { ""S"" : ""${context.identity.username}"" },
+                        ""id"" : { ""S"" : ""${context.arguments.id}"" }
                     },
                     ""update"" : {
-                        ""expression"" : ""SET #name = :name, IsPurchased = :isPurchased"",
+                        ""expression"" : ""SET #name = :name, isPurchased = :isPurchased"",
                         ""expressionNames"" : {
-                            ""#name"" : ""Name""
+                            ""#name"" : ""name""
                         },
                         ""expressionValues"" : {
                             "":name"" : { ""S"" : ""${context.arguments.name}"" },
                             "":isPurchased"" : { ""BOOL"" : ${context.arguments.isPurchased} }
                         }
+                    },
+                    ""condition"": {
+                        ""expression"": ""attribute_exists(id)""
                     }
                 }"),
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
@@ -214,8 +217,8 @@ namespace Backend
                     ""version"" : ""2017-02-28"",
                     ""operation"" : ""DeleteItem"",
                     ""key"" : {
-                        ""UserId"" : { ""S"" : ""${context.identity.username}"" },
-                        ""Id"" : { ""S"" : ""${context.arguments.id}"" }
+                        ""userId"" : { ""S"" : ""${context.identity.username}"" },
+                        ""id"" : { ""S"" : ""${context.arguments.id}"" }
                     }
                 }"),
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
