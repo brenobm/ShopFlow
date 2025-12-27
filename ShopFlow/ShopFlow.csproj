@@ -113,7 +113,6 @@
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />
 		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
 		<PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
-		<PackageReference Include="OpenFoodFacts.DotNet.Wrapper" Version="1.0.4" />
 		<PackageReference Include="ZXing.Net.MAUI.Controls" Version="4.3.0" />
 		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
 		<PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />

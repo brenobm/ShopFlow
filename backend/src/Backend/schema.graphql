@@ -23,6 +23,7 @@ type Query {
   getLists: [ShoppingList]
   getList(id: ID!): ShoppingList
   getItems(listId: ID!): [ShoppingItem]
+  getGlobalProduct(barcode: String!): GlobalProduct
 }
 
 type Mutation {
@@ -34,6 +35,14 @@ type Mutation {
   addItem(listId: ID!, name: String!, quantity: Float, unit: String, category: String): ShoppingItem
   updateItem(listId: ID!, id: ID!, name: String, quantity: Float, unit: String, category: String, isPurchased: Boolean): ShoppingItem
   deleteItem(listId: ID!, id: ID!): ShoppingItem
+  
+  createGlobalProduct(barcode: String!, name: String!, category: String): GlobalProduct
+}
+
+type GlobalProduct {
+  barcode: String!
+  name: String!
+  category: String
 }
 
 type Subscription {

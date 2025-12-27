@@ -235,17 +235,49 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 string barcode = await ScanPage.ScanAsync(Shell.Current.Navigation);
                 if (string.IsNullOrWhiteSpace(barcode)) return;
 
-                // 2. Lookup Product
-                var product = await _productService.LookupProductAsync(barcode);
-                if (product == null || string.IsNullOrWhiteSpace(product.Name))
+                string productName = null;
+                string category = "Scanned";
+
+                // 2. Lookup OpenFoodFacts
+                var offProduct = await _productService.LookupProductAsync(barcode);
+                if (offProduct != null && !string.IsNullOrWhiteSpace(offProduct.Name))
                 {
-                    await Shell.Current.DisplayAlert("Scan", "Product not found.", "OK");
-                    return;
+                    productName = offProduct.Name;
+                    category = offProduct.Category ?? category;
+                }
+                else
+                {
+                    // 3. Fallback: Lookup Global Product Table
+                    var globalProduct = await _graphQLService.GetGlobalProductAsync(barcode);
+                    if (globalProduct != null)
+                    {
+                        productName = globalProduct.Name;
+                        category = globalProduct.Category ?? category;
+                    }
+                }
+
+                // 4. Not Found anywhere? -> Register
+                if (string.IsNullOrWhiteSpace(productName))
+                {
+                    bool register = await Shell.Current.DisplayAlert("Not Found", "Product not found. Do you want to register it?", "Yes", "No");
+                    if (!register) return;
+
+                    productName = await Shell.Current.DisplayPromptAsync("Register Product", "Enter product name:");
+                    if (string.IsNullOrWhiteSpace(productName)) return;
+
+                    // Save to Global Table for future (Fire and Forget or Await?)
+                    // Await to ensure it works
+                    try 
+                    {
+                        await _graphQLService.CreateGlobalProductAsync(barcode, productName, category);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to save global product: {ex.Message}");
+                    }
                 }
                 
-                string productName = product.Name;
-                
-                // 3. Smart Matching
+                // 5. Smart Matching (Common Flow)
                 bool matchFound = await SmartMatchAndMarkAsync(productName);
 
                 if (matchFound)
@@ -254,11 +286,11 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 }
                 else
                 {
-                    // 4. Add if new
+                    // 6. Add if new
                     bool add = await Shell.Current.DisplayAlert("New Item", $"Add '{productName}' to list?", "Yes", "No");
                     if (add)
                     {
-                        await _graphQLService.AddItemAsync(CurrentList.Id, productName, 1, "qty", "Scanned");
+                        await _graphQLService.AddItemAsync(CurrentList.Id, productName, 1, "qty", category);
                         await LoadItemsAsync();
                     }
                 }

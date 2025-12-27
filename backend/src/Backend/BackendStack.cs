@@ -72,6 +72,15 @@ namespace Backend
                 RemovalPolicy = RemovalPolicy.DESTROY
             });
 
+            // 5.1. DynamoDB Table (Global Products)
+            var globalProductsTable = new Table(this, "ShopFlowGlobalProducts", new TableProps
+            {
+                TableName = "ShopFlow_GlobalProducts",
+                PartitionKey = new Attribute { Name = "barcode", Type = AttributeType.STRING },
+                BillingMode = BillingMode.PAY_PER_REQUEST,
+                RemovalPolicy = RemovalPolicy.DESTROY
+            });
+
 
             // 6. AppSync API
             var api = new GraphqlApi(this, "ShopFlowApi", new GraphqlApiProps
@@ -94,6 +103,44 @@ namespace Backend
             // Data Sources
             var itemsDS = api.AddDynamoDbDataSource("ItemsDataSource", itemsTable);
             var listsDS = api.AddDynamoDbDataSource("ListsDataSource", listsTable);
+            var globalProductsDS = api.AddDynamoDbDataSource("GlobalProductsDataSource", globalProductsTable);
+
+            // GLOBAL PRODUCTS Mappping
+            // getGlobalProduct
+            globalProductsDS.CreateResolver("GetGlobalProductResolver", new ResolverProps
+            {
+                 TypeName = "Query",
+                 FieldName = "getGlobalProduct",
+                 RequestMappingTemplate = MappingTemplate.FromString(@"
+                 {
+                    ""version"": ""2017-02-28"",
+                    ""operation"": ""GetItem"",
+                    ""key"": {
+                        ""barcode"": { ""S"": ""${context.arguments.barcode}"" }
+                    }
+                 }"),
+                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
+            });
+
+            // createGlobalProduct
+            globalProductsDS.CreateResolver("CreateGlobalProductResolver", new ResolverProps
+            {
+                 TypeName = "Mutation",
+                 FieldName = "createGlobalProduct",
+                 RequestMappingTemplate = MappingTemplate.FromString(@"
+                 {
+                    ""version"": ""2017-02-28"",
+                    ""operation"": ""PutItem"",
+                    ""key"": {
+                        ""barcode"": { ""S"": ""${context.arguments.barcode}"" }
+                    },
+                    ""attributeValues"": {
+                        ""name"": { ""S"": ""${context.arguments.name}"" },
+                        ""category"": { ""S"": ""${context.arguments.category}"" }
+                    }
+                 }"),
+                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
+            });
 
             // Resolvers (Basic Mapping)
             // Function to create standard request/response templates would be cleaner, but inlining for simplicity
@@ -324,6 +371,7 @@ namespace Backend
             // 10. Grant Access to Identity Pool
             itemsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
             listsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
+            globalProductsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
 
             // 10. Outputs
             new CfnOutput(this, "UserPoolId", new CfnOutputProps { Value = userPool.UserPoolId });
