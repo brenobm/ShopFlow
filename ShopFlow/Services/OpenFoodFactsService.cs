@@ -1,4 +1,4 @@
-using System.Net.Http.Json;
+using Newtonsoft.Json;
 using BrenoMachado.ShopFlow.Models;
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +21,9 @@ namespace BrenoMachado.ShopFlow.Services
             try
             {
                 var url = $"https://world.openfoodfacts.org/api/v0/product/{barcode}.json";
-                var response = await _httpClient.GetFromJsonAsync<OpenFoodFactsResponse>(url);
+                // Use GetStringAsync and Newtonsoft.Json to avoid System.Net.Http.Json missing reference issues
+                var json = await _httpClient.GetStringAsync(url);
+                var response = JsonConvert.DeserializeObject<OpenFoodFactsResponse>(json);
 
                 if (response != null && response.Status == 1 && response.Product != null)
                 {
