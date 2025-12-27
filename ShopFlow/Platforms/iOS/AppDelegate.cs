@@ -9,6 +9,7 @@ public class AppDelegate : MauiUIApplicationDelegate
 {
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
+        /*
         // Request Siri Authorization
         Intents.INPreferences.RequestSiriAuthorization((status) =>
         {
@@ -28,6 +29,7 @@ public class AppDelegate : MauiUIApplicationDelegate
                     break;
             }
         });
+        */
 
         return base.FinishedLaunching(application, launchOptions);
     }
