@@ -1,7 +1,7 @@
 using Plugin.LocalNotification;
-#if ANDROID
-using Plugin.Firebase.CloudMessaging;
-#endif
+// #if ANDROID
+// using Plugin.Firebase.CloudMessaging;
+// #endif
 
 namespace BrenoMachado.ShopFlow.Services
 {
