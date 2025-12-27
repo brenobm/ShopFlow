@@ -104,7 +104,82 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
         }
 
-        // ...
+        void ToggleScreenState(bool keepOn)
+        {
+            DeviceDisplay.KeepScreenOn = keepOn;
+        }
+
+        public async Task RefreshAsync()
+        {
+            await LoadItemsAsync();
+        }
+
+        async Task LoadItemsAsync()
+        {
+             if (CurrentList == null) return;
+             
+             try 
+             {
+                 var items = await _graphQLService.GetItemsAsync(CurrentList.Id);
+                 
+                 // Filter out bought items if in Shopping Mode
+                 if (IsShoppingMode)
+                 {
+                     items = items.Where(i => !i.IsPurchased).ToList();
+                 }
+
+                 Items.Clear();
+                 
+                 var groups = items.GroupBy(i => i.Category ?? "Uncategorized")
+                                   .Select(g => new ShoppingItemGroup(g.Key, g))
+                                   .OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999);
+    
+                 foreach(var group in groups)
+                 {
+                     Items.Add(group);
+                 }
+                 await LoadSuggestionsAsync();
+             } 
+             catch(Exception ex)
+             {
+                 System.Diagnostics.Debug.WriteLine($"Error loading items: {ex.Message}");
+             }
+        }
+
+        async Task LoadSuggestionsAsync()
+        {
+            try
+            {
+                var suggestions = await _smartService.GetSuggestionsAsync();
+                Suggestions.Clear();
+                var allItems = Items.SelectMany(g => g).ToList();
+                foreach(var s in suggestions)
+                {
+                    if(!allItems.Any(i => i.Name.Equals(s, StringComparison.OrdinalIgnoreCase))) // Don't suggest if already in list
+                    {
+                        Suggestions.Add(s);
+                    }
+                }
+            } catch(Exception) {}
+        }
+
+        async Task AddSuggestionAsync(string name)
+        {
+             if (string.IsNullOrWhiteSpace(name)) return;
+
+             try {
+                await _graphQLService.AddItemAsync(CurrentList.Id, name.Trim(), 1, "qty", "Smart Suggestion");
+                await LoadItemsAsync(); 
+             } catch(Exception ex)
+             {
+                  await Application.Current.MainPage.DisplayAlert("Error", $"Failed to add suggestion: {ex.Message}", "OK");
+             }
+        }
+
+        async Task AddItemAsync()
+        {
+             await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?ListId={CurrentList.Id}");
+        }
 
         async Task TogglePurchasedAsync(ShoppingItem item)
         {
@@ -119,7 +194,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 // Log purchase if item is now purchased
                 if (item.IsPurchased)
                 {
-                    await _databaseService.LogPurchaseAsync(item.Name);
+                    await _databaseService.LogPurchaseAsync(item);
                 }
             } catch {
                 item.IsPurchased = original; // Revert on error

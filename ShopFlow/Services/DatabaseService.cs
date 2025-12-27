@@ -109,20 +109,21 @@ namespace BrenoMachado.ShopFlow.Services
         }
 
         // Purchase History Methods
-        public async Task LogPurchaseAsync(string itemName)
+        public async Task LogPurchaseAsync(ShoppingItem item)
         {
             await Init();
             // Simple debounce: Don't log if purchased today already
             var today = DateTime.Today;
             var existing = await _database.Table<PurchaseHistory>()
-                            .Where(x => x.ItemName == itemName && x.DatePurchased >= today)
+                            .Where(x => x.ItemName == item.Name && x.DatePurchased >= today)
                             .FirstOrDefaultAsync();
             
             if (existing == null)
             {
                 await _database.InsertAsync(new PurchaseHistory 
                 { 
-                    ItemName = itemName, 
+                    ItemName = item.Name, 
+                    Category = item.Category ?? "Uncategorized",
                     DatePurchased = DateTime.Now 
                 });
             }

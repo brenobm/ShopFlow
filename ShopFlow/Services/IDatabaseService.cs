@@ -16,7 +16,7 @@ namespace BrenoMachado.ShopFlow.Services
         
         Task<List<ShoppingItem>> GetPurchasedItemsAsync();
 
-        Task LogPurchaseAsync(string itemName);
+        Task LogPurchaseAsync(ShoppingItem item);
         Task<List<PurchaseHistory>> GetPurchaseHistoryAsync();
     }
 }

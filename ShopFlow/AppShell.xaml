@@ -10,10 +10,12 @@
 
 
     <TabBar Route="Main">
-        <ShellContent
-            Title="My Lists"
-            ContentTemplate="{DataTemplate views:DashboardPage}"
-            Route="DashboardPage" />
+        <Tab Title="Lists" Icon="icon_dashboard.png">
+            <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" Route="DashboardPage" />
+        </Tab>
+        <Tab Title="Reports" Icon="icon_dashboard.png">
+            <ShellContent ContentTemplate="{DataTemplate views:ReportsPage}" Route="ReportsPage" />
+        </Tab>
     </TabBar>
 
 </Shell>
