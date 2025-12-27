@@ -12,52 +12,37 @@ namespace BrenoMachado.ShopFlow.Services
         {
             try
             {
-                var isGranted = await _speechToText.RequestPermissions(CancellationToken.None);
-                if (!isGranted)
+                if (!await _speechToText.RequestPermissions(CancellationToken.None))
                 {
-                    await Shell.Current.DisplayAlert("Permission Denied", "Microphone permission is required for voice control. Please check your system settings.", "OK");
+                    await Shell.Current.DisplayAlert("Permission Denied", "Microphone permission is required.", "OK");
                     return null;
                 }
 
-#if IOS
-                try
+                var progress = new Progress<string>(partialText => 
                 {
-                    var audioSession = AVFoundation.AVAudioSession.SharedInstance();
-                    audioSession.SetCategory(AVFoundation.AVAudioSessionCategory.PlayAndRecord, AVFoundation.AVAudioSessionCategoryOptions.DefaultToSpeaker);
-                    audioSession.SetActive(true);
-                    
-                    if (!audioSession.InputAvailable)
-                    {
-                        await Shell.Current.DisplayAlert("No Microphone", "No audio input is available. If you are on the Simulator, ensure the host microphone is selected.", "OK");
-                        return null;
-                    }
-                }
-                catch(Exception iosEx)
-                {
-                     System.Diagnostics.Debug.WriteLine($"iOS Audio Setup Error: {iosEx.Message}");
-                     // Continue, hoping the toolkit handles it, or return if critical
-                }
-#endif
+                     // Optional: Could expose an event to update UI with partial text
+                });
 
                 var recognitionResult = await _speechToText.ListenAsync(
                     CultureInfo.CurrentCulture,
-                    new Progress<string>(partialText => 
-                    {
-                        // Optional: handle partial results
-                    }), 
+                    progress,
                     CancellationToken.None);
 
                 if (recognitionResult.IsSuccessful)
                 {
                     return recognitionResult.Text;
                 }
-                else
+                
+                // Specific handling for common errors
+                if (recognitionResult.Exception is TaskCanceledException)
                 {
-                    if (recognitionResult.Exception != null)
-                    {
-                         await Shell.Current.DisplayAlert("Recognition Error", $"Error: {recognitionResult.Exception.Message}", "OK");
-                    }
+                    // Often happens on iOS if speech service is busy or user cancels
+                    return null; 
                 }
+
+                await Shell.Current.DisplayAlert("Recognition Error", 
+                    $"Error: {recognitionResult.Exception?.Message ?? "Unknown Error"}", "OK");
+                return null;
 
                 return null;
             }
