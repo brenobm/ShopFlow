@@ -84,8 +84,15 @@ namespace BrenoMachado.ShopFlow.Services
                 if (authResponse.AuthenticationResult != null)
                 {
                     _currentUser = user;
-                    // Store the ID token for use in Identity Pool (SyncService)
                     _idToken = authResponse.AuthenticationResult.IdToken;
+                    
+                    // Identify if RefreshToken is consistent (it might be null on subsequent auths if not requested, but usually returns on SRP)
+                    if (!string.IsNullOrEmpty(authResponse.AuthenticationResult.RefreshToken))
+                    {
+                        await SecureStorage.SetAsync("auth_refresh_token", authResponse.AuthenticationResult.RefreshToken);
+                    }
+                    await SecureStorage.SetAsync("auth_username", username);
+
                     Console.WriteLine("[AuthService] Login successful.");
                     return true;
                 }
@@ -107,17 +114,54 @@ namespace BrenoMachado.ShopFlow.Services
                 _currentUser.SignOut();
                 _currentUser = null;
             }
+            SecureStorage.Remove("auth_refresh_token");
+            SecureStorage.Remove("auth_username");
             await Task.CompletedTask;
         }
 
         public async Task<bool> IsAuthenticatedAsync()
         {
-            // Simple check: do we have a cached session or current user?
-            // For a robust implementation, we'd check SecureStorage for a refresh token and try to refresh.
-            // For this phase, we assume session is volatile or managed by CognitoUser memory for simplicity,
-            // but normally we check if _currentUser.SessionTokensIsValid()
-            
-            return _currentUser != null; // Simplification
+            if (_currentUser != null) return true;
+
+            try 
+            {
+                var refreshToken = await SecureStorage.GetAsync("auth_refresh_token");
+                var username = await SecureStorage.GetAsync("auth_username");
+
+                if (!string.IsNullOrEmpty(refreshToken) && !string.IsNullOrEmpty(username))
+                {
+                     var user = new CognitoUser(username, AwsConfig.UserPoolClientId, _userPool, _providerClient);
+                     
+                     // Manually set the session tokens with the refresh token
+                     user.SessionTokens = new CognitoUserSession(null, null, refreshToken, DateTime.Now, DateTime.Now.AddHours(1));
+
+                     // Attempt to refresh
+                     var authRequest = new InitiateRefreshTokenAuthRequest { AuthFlowType = AuthFlowType.REFRESH_TOKEN_AUTH };
+                     var authResponse = await user.StartWithRefreshTokenAuthAsync(authRequest);
+                     
+                     if (authResponse.AuthenticationResult != null)
+                     {
+                         _currentUser = user;
+                         _idToken = authResponse.AuthenticationResult.IdToken;
+                         
+                         // Update Refresh Token if a new one is returned (Refresh Token Rotation)
+                         if (!string.IsNullOrEmpty(authResponse.AuthenticationResult.RefreshToken))
+                         {
+                             await SecureStorage.SetAsync("auth_refresh_token", authResponse.AuthenticationResult.RefreshToken);
+                         }
+                         
+                         return true;
+                     }
+                }
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AuthService] Auto-login failed: {ex.Message}");
+                // Clean up invalid state
+                SecureStorage.Remove("auth_refresh_token");
+            }
+
+            return false; 
         }
 
         public string GetCurrentUserId()
