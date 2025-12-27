@@ -17,6 +17,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand OpenListCommand { get; }
         public ICommand EditListCommand { get; }
         public ICommand DeleteListCommand { get; }
+        public ICommand ShareListCommand { get; }
         public ICommand GoToSettingsCommand { get; }
 
         public DashboardViewModel(IGraphQLService graphQLService)
@@ -27,8 +28,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
             LoadListsCommand = new Command(async () => await LoadListsAsync());
             AddListCommand = new Command(async () => await AddListAsync());
             OpenListCommand = new Command<ShoppingList>(async (list) => await OpenListAsync(list));
+             OpenListCommand = new Command<ShoppingList>(async (list) => await OpenListAsync(list));
             EditListCommand = new Command<ShoppingList>(async (list) => await EditListAsync(list));
             DeleteListCommand = new Command<ShoppingList>(async (list) => await DeleteListAsync(list));
+            ShareListCommand = new Command<ShoppingList>(async (list) => await ShareListAsync(list));
             GoToSettingsCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(Views.SettingsPage)));
         }
 
@@ -115,6 +118,23 @@ namespace BrenoMachado.ShopFlow.ViewModels
             
             // Navigate to ActiveListPage passing the list ID
             await Shell.Current.GoToAsync($"{nameof(ActiveListPage)}?Id={list.Id}");
+        }
+        
+        async Task ShareListAsync(ShoppingList list)
+        {
+            if (list == null) return;
+            string email = await Shell.Current.DisplayPromptAsync("Share List", $"Enter email to share '{list.Name}' with:");
+            if (string.IsNullOrWhiteSpace(email)) return;
+
+            try
+            {
+                await _graphQLService.ShareListAsync(list.Id, email.Trim());
+                await Application.Current.MainPage.DisplayAlert("Success", $"Invited {email} to list.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Failed to share list: {ex.Message}", "OK");
+            }
         }
         
         public void OnAppearing()

@@ -7,6 +7,7 @@ using Amazon.CDK.AWS.Cognito.IdentityPool.Alpha;
 using System.Collections.Generic;
 using Amazon.CDK.AWS.AppSync;
 using Amazon.CDK.AWS.Lambda;
+using Amazon.CDK.AWS.Lambda.EventSources;
 using Amazon.CDK.AWS.SES;
 using System.IO;
 
@@ -67,6 +68,7 @@ namespace Backend
                 TableName = "ShopFlow_Lists",
                 PartitionKey = new Attribute { Name = "id", Type = AttributeType.STRING },
                 BillingMode = BillingMode.PAY_PER_REQUEST,
+                Stream = StreamViewType.NEW_AND_OLD_IMAGES,
                 RemovalPolicy = RemovalPolicy.DESTROY
             });
 
@@ -97,16 +99,29 @@ namespace Backend
             // Function to create standard request/response templates would be cleaner, but inlining for simplicity
             
             // LISTS Mapping
+            // getLists -> Scan with Filter (Security Fix)
             listsDS.CreateResolver("GetListsResolver", new ResolverProps 
             {
                 TypeName = "Query",
                 FieldName = "getLists",
-                RequestMappingTemplate = MappingTemplate.DynamoDbScanTable(),
+                RequestMappingTemplate = MappingTemplate.FromString(@"
+                {
+                    ""version"" : ""2017-02-28"",
+                    ""operation"" : ""Scan"",
+                    ""filter"" : {
+                        ""expression"" : ""UserId = :userId OR contains(members, :email)"",
+                        ""expressionValues"" : {
+                            "":userId"" : { ""S"" : ""${context.identity.username}"" },
+                            "":email"" : { ""S"" : ""${context.identity.claims.email}"" }
+                        }
+                    }
+                }"),
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultList()
             });
 
             // ITEMS Mapping
             // getItems(listId: ID!) -> Query where userId = $ctx.identity.username AND filter listId = $args.listId
+            // Note: Ideally we should allow members to get items too, but for now we trust they have the ListId from getLists
             itemsDS.CreateResolver("GetItemsResolver", new ResolverProps
             {
                 TypeName = "Query",
@@ -145,10 +160,40 @@ namespace Backend
                     ""attributeValues"" : {
                         ""name"" : { ""S"" : ""${context.arguments.name}"" },
                         ""createdAt"" : { ""S"" : ""$util.time.nowISO8601()"" },
-                        ""UserId"" : { ""S"" : ""${context.identity.username}"" }
+                        ""UserId"" : { ""S"" : ""${context.identity.username}"" },
+                        ""members"" : { ""L"" : [] }
                     }
                 }"),
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem() 
+            });
+
+            // SHARE LIST Mapping
+            listsDS.CreateResolver("ShareListResolver", new ResolverProps
+            {
+                TypeName = "Mutation",
+                FieldName = "shareList",
+                RequestMappingTemplate = MappingTemplate.FromString(@"
+                {
+                    ""version"" : ""2017-02-28"",
+                    ""operation"" : ""UpdateItem"",
+                    ""key"" : {
+                        ""id"" : { ""S"" : ""${context.arguments.id}"" }
+                    },
+                    ""update"" : {
+                        ""expression"" : ""SET members = list_append(if_not_exists(members, :empty_list), :new_member)"",
+                        ""expressionValues"" : {
+                            "":new_member"" : { ""L"" : [ { ""S"" : ""${context.arguments.email}"" } ] },
+                            "":empty_list"" : { ""L"" : [] }
+                        }
+                    },
+                    ""condition"": {
+                        ""expression"": ""UserId = :currentUser"",
+                        ""expressionValues"": {
+                            "":currentUser"": { ""S"" : ""${context.identity.username}"" }
+                        }
+                    }
+                }"),
+                ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
             });
 
             // ADD ITEM Mapping
@@ -244,7 +289,39 @@ namespace Backend
                 Identity = Identity.Email("breno.machado@example.com") // TODO: Replace with user email or ask input
             });
 
-            // 9. Grant Access to Identity Pool
+            // 9. Invite User Lambda (DynamoDB Stream)
+            var inviteUserLambda = new Function(this, "InviteUserFunction", new FunctionProps
+            {
+                Runtime = Runtime.DOTNET_8,
+                Code = Amazon.CDK.AWS.Lambda.Code.FromAsset("src/Lambdas/InviteUser/publish"),
+                Handler = "InviteUser::InviteUser.Function::FunctionHandler",
+                Timeout = Duration.Seconds(30),
+                 Environment = new Dictionary<string, string>
+                {
+                    { "fEMAIL_SOURCE", "breno.machado@example.com" }
+                }
+            });
+
+            inviteUserLambda.AddEventSource(new DynamoEventSource(listsTable, new DynamoEventSourceProps
+            {
+                StartingPosition = StartingPosition.LATEST,
+                BatchSize = 1,
+            }));
+            
+            // Permissions
+            // Allow Lambda to read from Stream (handled by AddEventSource usually, but explicit read is good)
+            listsTable.GrantStreamRead(inviteUserLambda);
+            
+            // Allow Lambda to Send Email
+            // emailIdentity.GrantSendEmail(inviteUserLambda); // L2 method might not exist in all versions or is strictly identity policy
+            // Using generic IAM for simplicity/compatibility
+            inviteUserLambda.AddToRolePolicy(new Amazon.CDK.AWS.IAM.PolicyStatement(new Amazon.CDK.AWS.IAM.PolicyStatementProps
+            {
+                Actions = new[] { "ses:SendEmail", "ses:SendRawEmail" },
+                Resources = new[] { "*" } // In prod, restrict to specific identity ARN
+            }));
+
+            // 10. Grant Access to Identity Pool
             itemsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
             listsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
 

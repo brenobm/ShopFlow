@@ -129,6 +129,30 @@ namespace BrenoMachado.ShopFlow.Services
             return new ShoppingList { Id = id };
         }
 
+        public async Task<ShoppingList> ShareListAsync(string id, string email)
+        {
+             SetAuthorizationHeader();
+             var request = new GraphQLRequest
+             {
+                 Query = @"
+                 mutation ShareList($id: ID!, $email: String!) {
+                     shareList(id: $id, email: $email) {
+                         id
+                         name
+                         owner
+                         members
+                     }
+                 }",
+                 Variables = new { id, email }
+             };
+
+             var response = await _client.SendMutationAsync<dynamic>(request);
+             if (response.Errors != null && response.Errors.Any())
+                throw new Exception(response.Errors[0].Message);
+             
+             return response.Data.shareList.ToObject<ShoppingList>();
+        }
+
         public async Task<List<ShoppingItem>> GetItemsAsync(string listId)
         {
              SetAuthorizationHeader();

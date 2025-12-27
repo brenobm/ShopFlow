@@ -3,6 +3,7 @@ type ShoppingList {
   id: ID!
   name: String!
   owner: String
+  members: [String]
   items: [ShoppingItem]
   createdAt: String
   updatedAt: String
@@ -28,6 +29,7 @@ type Mutation {
   createList(name: String!): ShoppingList
   updateList(id: ID!, name: String!): ShoppingList
   deleteList(id: ID!): ShoppingList
+  shareList(id: ID!, email: String!): ShoppingList
   
   addItem(listId: ID!, name: String!, quantity: Float, unit: String, category: String): ShoppingItem
   updateItem(listId: ID!, id: ID!, name: String, quantity: Float, unit: String, category: String, isPurchased: Boolean): ShoppingItem
