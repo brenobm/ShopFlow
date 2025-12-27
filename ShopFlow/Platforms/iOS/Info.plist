@@ -37,6 +37,8 @@
 	<string>This app uses speech recognition to convert your voice commands into text.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>This app uses Bluetooth to detect nearby beacons or devices for shopping assistance.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to your camera to scan barcodes.</string>
 	<key>NSSiriUsageDescription</key>
 	<string>This app uses Siri to let you add items to your shopping list with your voice.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>

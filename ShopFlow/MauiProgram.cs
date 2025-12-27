@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using BrenoMachado.ShopFlow.Services;
 using BrenoMachado.ShopFlow.ViewModels;
 using BrenoMachado.ShopFlow.Views;
+using ZXing.Net.MAUI.Controls;
 
 namespace BrenoMachado.ShopFlow;
 
@@ -36,6 +37,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<IAuthService, AuthService>();
         builder.Services.AddSingleton<ISyncService, SyncService>();
         builder.Services.AddSingleton<IGraphQLService, GraphQLService>();
+        builder.Services.AddSingleton<IProductService, OpenFoodFactsService>();
+        builder.Services.AddSingleton<ITranslationService, AwsTranslateService>();
+
+        builder.UseBarcodeReader(); // Initialize ZXing
 
         // ViewModels
         builder.Services.AddSingleton<DashboardViewModel>();

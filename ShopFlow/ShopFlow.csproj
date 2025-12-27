@@ -44,38 +44,39 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
-	  <ApplicationVersion>32</ApplicationVersion>
+	  <ApplicationVersion>33</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-ios|AnyCPU'">
-	  <ApplicationVersion>32</ApplicationVersion>
+	  <ApplicationVersion>33</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-maccatalyst|AnyCPU'">
-	  <ApplicationVersion>32</ApplicationVersion>
+	  <ApplicationVersion>33</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|AnyCPU'">
-	  <ApplicationVersion>32</ApplicationVersion>
+	  <ApplicationVersion>33</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android|AnyCPU'">
-	  <ApplicationVersion>32</ApplicationVersion>
+	  <ApplicationVersion>33</ApplicationVersion>
 	  <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-ios|AnyCPU'">
-	  <ApplicationVersion>32</ApplicationVersion>
+	  <ApplicationVersion>33</ApplicationVersion>
 	  <MtouchLink>None</MtouchLink>
 	  <UseInterpreter>true</UseInterpreter>
+	  <CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-maccatalyst|AnyCPU'">
-	  <ApplicationVersion>32</ApplicationVersion>
+	  <ApplicationVersion>33</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows10.0.19041.0|AnyCPU'">
-	  <ApplicationVersion>32</ApplicationVersion>
+	  <ApplicationVersion>33</ApplicationVersion>
 	</PropertyGroup>
 
 
@@ -108,13 +109,19 @@
 		<PackageReference Include="AWSSDK.Core" Version="4.0.3.6" />
 		<PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.10.4" />
 		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.17" />
+		<PackageReference Include="AWSSDK.Translate" Version="4.0.1.9" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />
+		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
+		<PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
+		<PackageReference Include="OpenFoodFacts.DotNet.Wrapper" Version="1.0.4" />
+		<PackageReference Include="ZXing.Net.MAUI.Controls" Version="4.3.0" />
 		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
 		<PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.11" />
+		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.7.2" />
 	</ItemGroup>
 
 </Project>

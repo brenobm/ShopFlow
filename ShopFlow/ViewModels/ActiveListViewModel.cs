@@ -45,9 +45,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         public ICommand ListenCommand { get; }
         public ICommand ToggleShoppingModeCommand { get; }
+        public ICommand ScanCommand { get; }
         
         private readonly ISmartService _smartService;
         private readonly IVoiceService _voiceService;
+        private readonly IProductService _productService;
+        private readonly ITranslationService _translationService;
 
         bool _isShoppingMode;
         public bool IsShoppingMode
@@ -62,11 +65,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
         }
 
-        public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService)
+        public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService, IProductService productService, ITranslationService translationService)
         {
             _graphQLService = graphQLService;
             _smartService = smartService;
             _voiceService = voiceService;
+            _productService = productService;
+            _translationService = translationService;
             
             ListenCommand = new Command(async () => await ListenAsync(voiceService));
             AddItemCommand = new Command(async () => await AddItemAsync());
@@ -75,6 +80,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             DeleteItemCommand = new Command<ShoppingItem>(async (item) => await DeleteItemAsync(item));
             AddSuggestionCommand = new Command<string>(async (name) => await AddSuggestionAsync(name));
             ToggleShoppingModeCommand = new Command(() => IsShoppingMode = !IsShoppingMode);
+            ScanCommand = new Command(async () => await ScanAsync());
         }
 
         void ToggleScreenState(bool keepOn)
@@ -86,17 +92,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
             try
             {
-                // We don't have GetListAsync(id) in Service, but we can assume the ID is valid or fetch lists.
-                // For now, let's just set the ID and fetch items. The Name might be missing until we have GetList(id).
-                // Or we can fetch all lists and find it.
-                // Let's implement GetList(id) or just use what we have.
-                // CurrentList = await _databaseService.GetListAsync(id);
-                // Workaround: Set ID, try to fetch name or just Items.
                 var lists = await _graphQLService.GetListsAsync();
                 CurrentList = lists.FirstOrDefault(l => l.Id == id) ?? new ShoppingList { Id = id, Name = "Shopping List" };
-                
-                // LoadItemsAsync(); // Refresh() will be called by OnAppearing? No, manually call it?
-                // Wait, property setter is void async.
                 await LoadItemsAsync();
             }
             catch (Exception ex)
@@ -183,12 +180,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
             // Optimistic update
             bool original = item.IsPurchased;
             item.IsPurchased = !item.IsPurchased;
-            // item.PurchasedAt = item.IsPurchased ? DateTime.UtcNow : null; // Backend might handle this? Or we pass it? 
-            // UpdateItem mutation handles IsPurchased.
 
             try {
                 await _graphQLService.UpdateItemAsync(item);
-                // await LoadItemsAsync(); // Optional: Refresh to sort?
             } catch {
                 item.IsPurchased = original; // Revert on error
             }
@@ -214,6 +208,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 }
             }
         }
+        
         async Task ListenAsync(IVoiceService voiceService)
         {
             try 
@@ -230,6 +225,88 @@ namespace BrenoMachado.ShopFlow.ViewModels
             {
                  await Shell.Current.DisplayAlert("Error", $"Voice error: {ex.Message}", "OK");
             }
+        }
+
+        async Task ScanAsync()
+        {
+            try
+            {
+                // 1. Scan Barcode
+                string barcode = await ScanPage.ScanAsync(Shell.Current.Navigation);
+                if (string.IsNullOrWhiteSpace(barcode)) return;
+
+                // 2. Lookup Product
+                var product = await _productService.LookupProductAsync(barcode);
+                if (product == null || string.IsNullOrWhiteSpace(product.Name))
+                {
+                    await Shell.Current.DisplayAlert("Scan", "Product not found.", "OK");
+                    return;
+                }
+                
+                string productName = product.Name;
+                
+                // 3. Smart Matching
+                bool matchFound = await SmartMatchAndMarkAsync(productName);
+
+                if (matchFound)
+                {
+                     await Shell.Current.DisplayAlert("Match!", $"Marked '{productName}' as bought.", "OK");
+                }
+                else
+                {
+                    // 4. Add if new
+                    bool add = await Shell.Current.DisplayAlert("New Item", $"Add '{productName}' to list?", "Yes", "No");
+                    if (add)
+                    {
+                        await _graphQLService.AddItemAsync(CurrentList.Id, productName, 1, "qty", "Scanned");
+                        await LoadItemsAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error", $"Scan error: {ex.Message}", "OK");
+            }
+        }
+
+        async Task<bool> SmartMatchAndMarkAsync(string scannedName)
+        {
+            // Prepare Candidates: [Original, PT, EN]
+            var candidates = new List<string> { scannedName };
+            
+            // Translate to PT-BR
+            var pt = await _translationService.TranslateTextAsync(scannedName, "auto", "pt");
+            if (!string.IsNullOrWhiteSpace(pt) && !candidates.Contains(pt)) candidates.Add(pt);
+            
+            // Translate to EN
+            var en = await _translationService.TranslateTextAsync(scannedName, "auto", "en");
+            if (!string.IsNullOrWhiteSpace(en) && !candidates.Contains(en)) candidates.Add(en);
+
+            // Fetch latest items (just to be sure)
+             var items = await _graphQLService.GetItemsAsync(CurrentList.Id);
+             var unboughtItems = items.Where(i => !i.IsPurchased).ToList();
+
+            foreach (var candidate in candidates)
+            {
+                 // Logic: Does the Candidate (e.g. "Neilson Milk") contain the List Item (e.g. "Milk")?
+                 var match = unboughtItems.FirstOrDefault(i => candidate.Contains(i.Name, StringComparison.OrdinalIgnoreCase));
+                 
+                 if (match != null)
+                 {
+                     await TogglePurchasedAsync(match);
+                     return true;
+                 }
+                 
+                 // Reverse Logic: Does List Item (e.g. "Leite Integral") contain Candidate (e.g. "Leite")?
+                 var matchReverse = unboughtItems.FirstOrDefault(i => i.Name.Contains(candidate, StringComparison.OrdinalIgnoreCase));
+                  if (matchReverse != null)
+                 {
+                     await TogglePurchasedAsync(matchReverse);
+                     return true;
+                 }
+            }
+
+            return false;
         }
     }
 }
