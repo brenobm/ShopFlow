@@ -11,6 +11,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
     {
         private readonly IGraphQLService _graphQLService;
         
+        string _listId;
         public string ListId
         {
             get => _listId;
