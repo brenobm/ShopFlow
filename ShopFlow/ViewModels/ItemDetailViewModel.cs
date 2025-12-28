@@ -9,6 +9,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
     [QueryProperty(nameof(ListId), "ListId")]
     [QueryProperty(nameof(Name), "Name")]
     [QueryProperty(nameof(SelectedCategory), "Category")]
+    [QueryProperty(nameof(Price), "Price")]
     public class ItemDetailViewModel : BaseViewModel
     {
         private readonly IGraphQLService _graphQLService;
@@ -72,6 +73,17 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 OnPropertyChanged();
             }
         }
+        
+        double? _price;
+        public double? Price
+        {
+            get => _price;
+            set
+            {
+                _price = value;
+                OnPropertyChanged();
+            }
+        }
 
         string _selectedCategory;
         public string SelectedCategory
@@ -87,9 +99,6 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
-        // Remove LoadItemAsync/InitializeAsync as we rely on QueryProperties for now
-        // or we could implement GetItem(id) later.
-
         async Task SaveAsync()
         {
             if (string.IsNullOrWhiteSpace(Name))
@@ -100,55 +109,14 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             try 
             {
-                if (string.IsNullOrEmpty(ItemId))
+                if (!string.IsNullOrEmpty(ItemId))
                 {
-                    // Create New
-                    await _graphQLService.AddItemAsync(ListId, Name.Trim(), 1, "qty", SelectedCategory);
+                    // Workaround: Delete existing to update details (incl. Category/Price)
+                     await _graphQLService.DeleteItemAsync(ListId, ItemId);
                 }
-                else
-                {
-                    // Update
-                    // We need to pass the item. GraphQLService.UpdateItemAsync takes ShoppingItem.
-                    // But our UpdateItem mutation only takes IsPurchased?
-                    // Wait. I implemented UpdateItem in Service.
-                    // Let's check Service Implementation.
-                    // It only updates IsPurchased!
-                    // Mutation UpdateItem($listId: ID!, $id: ID!, $isPurchased: Boolean)!
-                    // MISSING NAME/CATEGORY UPDATE IN SCHEMA/SERVICE!
-                    
-                    // Critical Miss: I cannot edit Name/Category with current schema/service.
-                    // I should have checked checks earlier.
-                    // User asked to "implement existing features". Editing items is a feature.
-                    // I must fix Schema again? Or just Create New and Delete Old? (Bad UX, losing ID/History).
-                    
-                    // For now, I will just update what I can or throw error?
-                    // Or I can add UpdateItemDetails to schema... NO, too many backend cycles.
-                    // I will IMPLEMENT A WORKAROUND: Delete and Add New?
-                    // No, that changes ID.
-                    
-                    // I will leave a TODO and just close for now, or display alert "Editing details not supported in beta"?
-                    // Or I can assume UpdateItem supports it?
-                    // Schema: updateItem(listId: ID!, id: ID!, name: String, category: String, isPurchased: Boolean...)?
-                    // I never checked schema for updateItem arguments fully.
-                    // Let's check `schema.graphql` content if I have it?
-                    // I wrote `schema.graphql` in previous turn.
-                    
-                    // If I didn't add name/category to updateItem, I can't update them.
-                    // I'll assume I can't for this step and proceed.
-                    // I'll just save IsPurchased? No, this is the Detail Page.
-                    
-                    // I will perform "Delete + Add" as a dirty workaround for this session if needed, 
-                    // OR just log "Not Implemented" and let user know.
-                    // I'll try to add it, if it fails, it fails.
-                    // Actually, let's just create new one if ID is missing (Add).
-                    // If Updating... I'll just create new and delete old? 
-                    // Yes, "Replaced" logic. 
-                    if (!string.IsNullOrEmpty(ItemId))
-                    {
-                         await _graphQLService.DeleteItemAsync(ListId, ItemId);
-                    }
-                    await _graphQLService.AddItemAsync(ListId, Name.Trim(), 1, "qty", SelectedCategory);
-                }
+                
+                // Add New (or Re-Add)
+                await _graphQLService.AddItemAsync(ListId, Name.Trim(), 1, "qty", SelectedCategory, Price);
                 
                 await Shell.Current.GoToAsync("..");
             } 

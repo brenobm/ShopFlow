@@ -16,6 +16,15 @@
                        HeightRequest="50"/>
             </VerticalStackLayout>
             
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Price" FontAttributes="Bold" TextColor="#374151"/>
+                <Entry Text="{Binding Price}" 
+                       Placeholder="0.00"
+                       Keyboard="Numeric"
+                       BackgroundColor="White"
+                       HeightRequest="50"/>
+            </VerticalStackLayout>
+            
             <VerticalStackLayout Spacing="10">
                 <Grid ColumnDefinitions="*, Auto">
                     <Label Text="Category" FontAttributes="Bold" TextColor="#374151" VerticalOptions="Center"/>

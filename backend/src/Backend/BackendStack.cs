@@ -295,7 +295,8 @@ namespace Backend
                         ""name"" : { ""S"" : ""${context.arguments.name}"" },
                         ""quantity"" : { ""N"" : ""${context.arguments.quantity}"" },
                         ""unit"" : { ""S"" : ""${context.arguments.unit}"" },
-                        ""category"" : { ""S"" : ""${context.arguments.category}"" },
+                        ""category"" : { ""S"" : ""${context.arguments.category}"" }#if($context.arguments.price),
+                        ""price"" : { ""N"" : ""${context.arguments.price}"" }#end,
                         ""isPurchased"" : { ""BOOL"" : false }
                     }
                 }"),
@@ -317,14 +318,16 @@ namespace Backend
                         ""id"" : { ""S"" : ""${context.arguments.id}"" }
                     },
                     ""update"" : {
-                        ""expression"" : ""SET #isPurchased = :isPurchased#if($context.arguments.name), #name = :name#end"",
+                        ""expression"" : ""SET #isPurchased = :isPurchased#if($context.arguments.name), #name = :name#end#if($context.arguments.price), #price = :price#end"",
                         ""expressionNames"" : {
                             ""#isPurchased"" : ""isPurchased""
                             #if($context.arguments.name),""#name"" : ""name""#end
+                            #if($context.arguments.price),""#price"" : ""price""#end
                         },
                         ""expressionValues"" : {
                             "":isPurchased"" : { ""BOOL"" : ${context.arguments.isPurchased} }
                             #if($context.arguments.name),"":name"" : { ""S"" : ""${context.arguments.name}"" }#end
+                            #if($context.arguments.price),"":price"" : { ""N"" : ""${context.arguments.price}"" }#end
                         }
                     },
                     ""condition"": {

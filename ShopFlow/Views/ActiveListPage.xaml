@@ -100,19 +100,22 @@
                                       IsEnabled="False" 
                                       Color="#2563EB"/>
                                       
-                            <Label Grid.Column="1" 
-                                   Text="{Binding Name}" 
-                                   FontSize="16"
-                                   VerticalOptions="Center"
-                                   TextColor="#1F2937"
-                                   Margin="10,0,0,0">
-                                <Label.Triggers>
-                                    <DataTrigger TargetType="Label" Binding="{Binding IsPurchased}" Value="True">
-                                        <Setter Property="TextDecorations" Value="Strikethrough"/>
-                                        <Setter Property="TextColor" Value="#9CA3AF"/>
-                                    </DataTrigger>
-                                </Label.Triggers>
-                            </Label>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="10,0,0,0">
+                                <Label Text="{Binding Name}" 
+                                       FontSize="16"
+                                       TextColor="#1F2937">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsPurchased}" Value="True">
+                                            <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                            <Setter Property="TextColor" Value="#9CA3AF"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Text="{Binding Price, StringFormat='${0:F2}'}" 
+                                       FontSize="12" 
+                                       TextColor="#059669"
+                                       IsVisible="{Binding Price, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
                         </Grid>
                     </SwipeView>
                 </DataTemplate>

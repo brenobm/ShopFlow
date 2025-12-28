@@ -1,4 +1,5 @@
 using SQLite;
+using Newtonsoft.Json;
 
 namespace BrenoMachado.ShopFlow.Models;
 
@@ -6,6 +7,15 @@ public class ShoppingItem : System.ComponentModel.INotifyPropertyChanged
 {
     [PrimaryKey]
     public string Id { get; set; } = Guid.NewGuid().ToString();
+    
+    [JsonProperty("quantity")]
+    public double Quantity { get; set; }
+
+    [JsonProperty("price")]
+    public double? Price { get; set; }
+
+    [JsonProperty("unit")]
+    public string Unit { get; set; }
     
     [Indexed]
     public string ListId { get; set; }

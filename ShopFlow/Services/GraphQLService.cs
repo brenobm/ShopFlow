@@ -170,6 +170,7 @@ namespace BrenoMachado.ShopFlow.Services
                         quantity
                         unit
                         category
+                        price
                         isPurchased
                     }
                 }",
@@ -186,24 +187,25 @@ namespace BrenoMachado.ShopFlow.Services
             return items ?? new List<ShoppingItem>();
         }
 
-        public async Task<ShoppingItem> AddItemAsync(string listId, string name, double quantity, string unit, string category)
+        public async Task<ShoppingItem> AddItemAsync(string listId, string name, double quantity, string unit, string category, double? price = null)
         {
              SetAuthorizationHeader();
              var request = new GraphQLRequest
             {
                 Query = @"
-                mutation AddItem($listId: ID!, $name: String!, $quantity: Float, $unit: String, $category: String) {
-                    addItem(listId: $listId, name: $name, quantity: $quantity, unit: $unit, category: $category) {
+                mutation AddItem($listId: ID!, $name: String!, $quantity: Float, $unit: String, $category: String, $price: Float) {
+                    addItem(listId: $listId, name: $name, quantity: $quantity, unit: $unit, category: $category, price: $price) {
                         id
                         listId
                         name
                         quantity
                         unit
                         category
+                        price
                         isPurchased
                     }
                 }",
-                Variables = new { listId, name, quantity, unit, category }
+                Variables = new { listId, name, quantity, unit, category, price }
             };
 
             var response = await _client.SendMutationAsync<dynamic>(request);
@@ -217,13 +219,16 @@ namespace BrenoMachado.ShopFlow.Services
              var request = new GraphQLRequest
             {
                 Query = @"
-                mutation UpdateItem($listId: ID!, $id: ID!, $isPurchased: Boolean) {
-                    updateItem(listId: $listId, id: $id, isPurchased: $isPurchased) {
+                mutation UpdateItem($listId: ID!, $id: ID!, $name: String, $quantity: Float, $unit: String, $category: String, $price: Float, $isPurchased: Boolean) {
+                    updateItem(listId: $listId, id: $id, name: $name, quantity: $quantity, unit: $unit, category: $category, price: $price, isPurchased: $isPurchased) {
                         id
                         isPurchased
+                        price
+                        name
+                        category
                     }
                 }",
-                Variables = new { listId = item.ListId, id = item.Id, isPurchased = item.IsPurchased }
+                Variables = new { listId = item.ListId, id = item.Id, name = item.Name, quantity = item.Quantity, unit = item.Unit, category = item.Category, price = item.Price, isPurchased = item.IsPurchased }
             };
              var response = await _client.SendMutationAsync<dynamic>(request);
              if (response.Errors != null && response.Errors.Any()) throw new Exception(response.Errors[0].Message);

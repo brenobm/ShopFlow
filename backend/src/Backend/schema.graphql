@@ -14,6 +14,7 @@ type ShoppingItem {
   listId: ID!
   name: String!
   quantity: Float
+  price: Float
   unit: String
   category: String
   isPurchased: Boolean
@@ -32,8 +33,8 @@ type Mutation {
   deleteList(id: ID!): ShoppingList
   shareList(id: ID!, email: String!): ShoppingList
   
-  addItem(listId: ID!, name: String!, quantity: Float, unit: String, category: String): ShoppingItem
-  updateItem(listId: ID!, id: ID!, name: String, quantity: Float, unit: String, category: String, isPurchased: Boolean): ShoppingItem
+  addItem(listId: ID!, name: String!, quantity: Float, price: Float, unit: String, category: String): ShoppingItem
+  updateItem(listId: ID!, id: ID!, name: String, quantity: Float, price: Float, unit: String, category: String, isPurchased: Boolean): ShoppingItem
   deleteItem(listId: ID!, id: ID!): ShoppingItem
   
   createGlobalProduct(barcode: String!, name: String!, category: String): GlobalProduct

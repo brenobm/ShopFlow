@@ -11,6 +11,7 @@
             </ResourceDictionary.MergedDictionaries>
             
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <toolkit:IsNotNullConverter x:Key="IsNotNullConverter" />
             <toolkit:BoolToObjectConverter x:Key="ShoppingModeTextConverter" TrueObject="Stop Shop" FalseObject="Start Shop" />
         </ResourceDictionary>
     </Application.Resources>
