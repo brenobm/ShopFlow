@@ -65,7 +65,7 @@ public static class MauiProgram
             events.AddiOS(ios => ios.FinishedLaunching((app, launchOptions) => {
                 try
                 {
-                    Plugin.Firebase.Shared.CrossFirebase.Initialize(app, launchOptions);
+                    // Plugin.Firebase.CrossFirebase.Initialize(app, launchOptions);
                 }
                 catch (Exception ex)
                 {
