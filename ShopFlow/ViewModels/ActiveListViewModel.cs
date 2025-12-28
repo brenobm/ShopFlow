@@ -306,6 +306,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 {
                      await _graphQLService.AddItemAsync(CurrentList.Id, text.Trim(), 1, "qty", "Voice Added");
                      await LoadItemsAsync();
+                     
+                     // FR-2.5: Voice Confirm
+                     await Microsoft.Maui.Media.TextToSpeech.SpeakAsync($"Added {text}");
+                     
                      await Shell.Current.DisplayAlert("Voice Input", $"Added '{text}'", "OK");
                 }
             }
