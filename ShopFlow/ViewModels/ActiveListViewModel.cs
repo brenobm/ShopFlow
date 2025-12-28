@@ -61,6 +61,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand ToggleShoppingModeCommand { get; }
         public ICommand ScanCommand { get; }
         public ICommand ShareCommand { get; }
+        public ICommand ReadListCommand { get; }
         
         private readonly ISmartService _smartService;
         private readonly IVoiceService _voiceService;
@@ -80,6 +81,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 _ = LoadItemsAsync(); // Refresh list to apply filter
             }
         }
+        
+        // ... (constructor)
 
         public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService, IProductService productService, ITranslationService translationService, IDatabaseService databaseService)
         {
@@ -91,7 +94,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             _databaseService = databaseService;
             
             ListenCommand = new Command(async () => await ListenAsync(voiceService));            
-            // ... (rest of constructor commands remain same, just ensuring databaseService is assigned)
+            // ... (rest of constructor commands)
             AddItemCommand = new Command(async () => await AddItemAsync());
             TogglePurchasedCommand = new Command<ShoppingItem>(async (item) => await TogglePurchasedAsync(item));
             EditItemCommand = new Command<ShoppingItem>(async (item) => await EditItemAsync(item));
@@ -101,6 +104,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             ToggleShoppingModeCommand = new Command(() => IsShoppingMode = !IsShoppingMode);
             ScanCommand = new Command(async () => await ScanAsync());
             ShareCommand = new Command(async () => await ShareListAsync());
+            ReadListCommand = new Command(async () => await ReadListAsync());
         }
 
         // ... 
@@ -482,6 +486,39 @@ namespace BrenoMachado.ShopFlow.ViewModels
              await _graphQLService.AddItemAsync(targetList.Id, itemName, 1, "qty", "Siri");
              await LoadItemsAsync();
              // Maybe show a toast
+        }
+
+        async Task ReadListAsync()
+        {
+             // Flat list of unpurchased items
+             var itemsToRead = Items.SelectMany(g => g).Where(i => !i.IsPurchased).ToList();
+             
+             if (!itemsToRead.Any())
+             {
+                 await Microsoft.Maui.Media.TextToSpeech.SpeakAsync("Your list is empty.");
+                 return;
+             }
+             
+             var textBuilder = new System.Text.StringBuilder();
+             textBuilder.AppendLine($"You have {itemsToRead.Count} items on your list.");
+             
+             foreach(var item in itemsToRead)
+             {
+                 // E.g. "Milk." or "2 Milk."
+                 if (item.Quantity > 1) 
+                     textBuilder.AppendLine($"{item.Quantity} {item.Name} .");
+                 else
+                     textBuilder.AppendLine($"{item.Name} .");
+             }
+             
+             try 
+             {
+                await Microsoft.Maui.Media.TextToSpeech.SpeakAsync(textBuilder.ToString());
+             }
+             catch(Exception ex)
+             {
+                await Shell.Current.DisplayAlert("Read Error", ex.Message, "OK");
+             }
         }
     }
 }

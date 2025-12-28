@@ -9,6 +9,7 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Sort" Command="{Binding SortCommand}" Order="Primary" />
+        <ToolbarItem Text="Read List" Command="{Binding ReadListCommand}" Order="Secondary" />
         <ToolbarItem Text="{Binding IsShoppingMode, Converter={StaticResource ShoppingModeTextConverter}}" 
                      Command="{Binding ToggleShoppingModeCommand}" />
         <ToolbarItem Text="Share" Command="{Binding ShareCommand}" Order="Secondary" />
