@@ -1,4 +1,6 @@
-using System;
+#if ANDROID || IOS
+using Plugin.Firebase.CloudMessaging;
+#endif
 using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel;
 
@@ -19,16 +21,21 @@ namespace BrenoMachado.ShopFlow.Services
             {
                 // Basic cross-platform check (Plugin.Firebase handles checking availability internally mostly)
 #if ANDROID || IOS
-                // TODO: Uncomment when Firebase works
-                // await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
-                // var token = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
-                string token = "dummy-token-" + Guid.NewGuid().ToString(); // Mock
-
-                if (!string.IsNullOrEmpty(token))
+                try
                 {
-                    string platform = DeviceInfo.Platform.ToString();
-                    await _graphQLService.RegisterDeviceAsync(token, platform);
-                    Console.WriteLine($"[PushService] Registered device token: {token}");
+                    await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
+                    var token = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
+                    
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        string platform = DeviceInfo.Platform.ToString();
+                        await _graphQLService.RegisterDeviceAsync(token, platform);
+                        Console.WriteLine($"[PushService] Registered device token: {token}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                     Console.WriteLine($"[PushService] Firebase Token Error: {ex.Message}");
                 }
 #endif
             }

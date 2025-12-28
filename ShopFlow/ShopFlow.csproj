@@ -98,10 +98,13 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
-	<!-- Removed conflicting ImageAsset that overrides MauiIcon generation -->
-	<!-- <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
-		<ImageAsset Include="Platforms\iOS\Assets.xcassets\**" />
-	</ItemGroup> -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
+		<BundleResource Include="Platforms\iOS\GoogleService-Info.plist" Condition="Exists('Platforms\iOS\GoogleService-Info.plist')" />
+	</ItemGroup>
+
+	<ItemGroup Condition="$(TargetFramework.Contains('-android'))">
+		<GoogleServicesJson Include="Platforms\Android\google-services.json" Condition="Exists('Platforms\Android\google-services.json')" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Amazon.Extensions.CognitoAuthentication" Version="3.1.2" />
@@ -113,14 +116,19 @@
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />
 		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
 		<PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
-		<PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
+
 		<PackageReference Include="Plugin.LocalNotification" Version="13.0.0" />
+		<PackageReference Include="Xamarin.Build.Download" Version="0.12.2" />
 
 		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.7.2" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.11" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Plugin.Firebase" Version="3.1.4" />
 	</ItemGroup>
 
 </Project>

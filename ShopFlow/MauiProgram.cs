@@ -50,15 +50,27 @@ public static class MauiProgram
 #if ANDROID
         builder.ConfigureLifecycleEvents(events => {
             events.AddAndroid(android => android.OnCreate((activity, state) => {
-                // TODO: Initialize Firebase once package namespace is verified
-                // Plugin.Firebase.Shared.CrossFirebase.Initialize(activity);
+                try
+                {
+                    Plugin.Firebase.Shared.CrossFirebase.Initialize(activity);
+                }
+                catch (Exception ex)
+                {
+                     Console.WriteLine($"[MauiProgram] Firebase Init Failed: {ex.Message}");
+                }
             }));
         });
 #elif IOS
         builder.ConfigureLifecycleEvents(events => {
             events.AddiOS(ios => ios.FinishedLaunching((app, launchOptions) => {
-                // TODO: Initialize Firebase
-                // Plugin.Firebase.Shared.CrossFirebase.Initialize(app, launchOptions);
+                try
+                {
+                    Plugin.Firebase.Shared.CrossFirebase.Initialize(app, launchOptions);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[MauiProgram] Firebase Init Failed: {ex.Message}");
+                }
                 return false;
             }));
         });
