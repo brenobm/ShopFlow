@@ -7,6 +7,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
     public class LoginViewModel : BaseViewModel
     {
         private readonly IAuthService _authService;
+        private readonly IPushService _pushService;
 
         public string Username { get; set; }
         public string Password { get; set; }
@@ -48,9 +49,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         public bool IsLogin => !IsSignUp && !IsVerification;
 
-        public LoginViewModel(IAuthService authService)
+        public LoginViewModel(IAuthService authService, IPushService pushService)
         {
             _authService = authService;
+            _pushService = pushService;
             Title = "Login";
             LoginCommand = new Command(async () => await LoginAsync());
             SignUpCommand = new Command(async () => await SignUpAsync());
@@ -86,7 +88,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 {
                     // Navigate to Main App (Swap MainPage)
                     Console.WriteLine("[LoginViewModel] Swapping MainPage to AppShell.");
-                    Application.Current.MainPage = new AppShell(_authService);
+                    Application.Current.MainPage = new AppShell(_authService, _pushService);
                 }
                 else
                 {

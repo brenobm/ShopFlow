@@ -38,6 +38,15 @@ type Mutation {
   deleteItem(listId: ID!, id: ID!): ShoppingItem
   
   createGlobalProduct(barcode: String!, name: String!, category: String): GlobalProduct
+  
+  registerDevice(token: String!, platform: String): DeviceToken
+}
+
+type DeviceToken {
+  userId: ID!
+  token: String!
+  platform: String
+  updatedAt: String
 }
 
 type GlobalProduct {

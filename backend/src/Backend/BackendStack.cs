@@ -81,6 +81,21 @@ namespace Backend
                 RemovalPolicy = RemovalPolicy.DESTROY
             });
 
+            // 5.2. DynamoDB Table (Device Tokens - New for Notifications)
+            var deviceTokensTable = new Table(this, "ShopFlowDeviceTokens", new TableProps
+            {
+                TableName = "ShopFlow_DeviceTokens",
+                PartitionKey = new Attribute { Name = "userId", Type = AttributeType.STRING },
+                BillingMode = BillingMode.PAY_PER_REQUEST,
+                RemovalPolicy = RemovalPolicy.DESTROY
+            });
+
+            deviceTokensTable.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps
+            {
+                IndexName = "EmailIndex",
+                PartitionKey = new Attribute { Name = "email", Type = AttributeType.STRING },
+                ProjectionType = ProjectionType.ALL
+            });
 
             // 6. AppSync API
             var api = new GraphqlApi(this, "ShopFlowApi", new GraphqlApiProps
@@ -104,6 +119,7 @@ namespace Backend
             var itemsDS = api.AddDynamoDbDataSource("ItemsDataSource", itemsTable);
             var listsDS = api.AddDynamoDbDataSource("ListsDataSource", listsTable);
             var globalProductsDS = api.AddDynamoDbDataSource("GlobalProductsDataSource", globalProductsTable);
+            var deviceTokensDS = api.AddDynamoDbDataSource("DeviceTokensDataSource", deviceTokensTable);
 
             // GLOBAL PRODUCTS Mappping
             // getGlobalProduct
@@ -137,6 +153,28 @@ namespace Backend
                     ""attributeValues"": {
                         ""name"": { ""S"": ""${context.arguments.name}"" },
                         ""category"": { ""S"": ""${context.arguments.category}"" }
+                    }
+                 }"),
+                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
+            });
+
+            // registerDevice
+            deviceTokensDS.CreateResolver("RegisterDeviceResolver", new ResolverProps
+            {
+                 TypeName = "Mutation",
+                 FieldName = "registerDevice",
+                 RequestMappingTemplate = MappingTemplate.FromString(@"
+                 {
+                    ""version"": ""2017-02-28"",
+                    ""operation"": ""PutItem"",
+                    ""key"": {
+                        ""userId"": { ""S"": ""${context.identity.username}"" }
+                    },
+                    ""attributeValues"": {
+                        ""token"": { ""S"": ""${context.arguments.token}"" },
+                        ""platform"": { ""S"": ""${context.arguments.platform}"" },
+                        ""email"": { ""S"": ""${context.identity.claims.email}"" },
+                        ""updatedAt"": { ""S"": ""$util.time.nowISO8601()"" }
                     }
                  }"),
                  ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
@@ -391,6 +429,7 @@ namespace Backend
                  Environment = new Dictionary<string, string>
                 {
                     { "fEMAIL_SOURCE", "breno.machado@example.com" },
+                    { "fDEVICE_TOKENS_TABLE_NAME", deviceTokensTable.TableName }
                     // { "PINPOINT_APP_ID", pinpointApp.Ref } // Disabled
                 }
             });
@@ -409,11 +448,16 @@ namespace Backend
                 Actions = new[] { "ses:SendEmail", "ses:SendRawEmail" },
                 Resources = new[] { "*" } 
             }));
+            
+            // Allow Lambda to read Device Tokens
+            deviceTokensTable.GrantReadData(inviteUserLambda);
 
             // 10. Grant Access to Identity Pool
             itemsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
             listsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
             globalProductsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
+            deviceTokensTable.GrantWriteData(identityPool.AuthenticatedRole); // AppSync writes via Resolver, but Role needs access potentially if configured in AppSync UserPoolConfig default
+
            
             /*
             // Allow Lambda to Use Pinpoint

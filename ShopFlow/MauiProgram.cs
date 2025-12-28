@@ -5,9 +5,8 @@ using BrenoMachado.ShopFlow.ViewModels;
 using BrenoMachado.ShopFlow.Views;
 using ZXing.Net.Maui.Controls;
 using ZXing.Net.Maui.Controls;
-using ZXing.Net.Maui;
 using Plugin.LocalNotification;
-
+using Microsoft.Maui.LifecycleEvents;
 namespace BrenoMachado.ShopFlow;
 
 public static class MauiProgram
@@ -43,9 +42,27 @@ public static class MauiProgram
         builder.Services.AddSingleton<IProductService, OpenFoodFactsService>();
         builder.Services.AddSingleton<ITranslationService, AwsTranslateService>();
         builder.Services.AddSingleton<IAppNotificationService, NotificationService>();
+        builder.Services.AddSingleton<IPushService, PushService>();
         
         // Plugin.LocalNotification
         builder.UseLocalNotification();
+
+#if ANDROID
+        builder.ConfigureLifecycleEvents(events => {
+            events.AddAndroid(android => android.OnCreate((activity, state) => {
+                // TODO: Initialize Firebase once package namespace is verified
+                // Plugin.Firebase.Shared.CrossFirebase.Initialize(activity);
+            }));
+        });
+#elif IOS
+        builder.ConfigureLifecycleEvents(events => {
+            events.AddiOS(ios => ios.FinishedLaunching((app, launchOptions) => {
+                // TODO: Initialize Firebase
+                // Plugin.Firebase.Shared.CrossFirebase.Initialize(app, launchOptions);
+                return false;
+            }));
+        });
+#endif
 
         builder.UseBarcodeReader(); // Initialize ZXing
 

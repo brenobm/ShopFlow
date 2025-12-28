@@ -296,5 +296,24 @@ namespace BrenoMachado.ShopFlow.Services
             
             return response.Data.createGlobalProduct.ToObject<GlobalProduct>();
         }
+
+        public async Task RegisterDeviceAsync(string token, string platform)
+        {
+             SetAuthorizationHeader();
+             var request = new GraphQLRequest
+            {
+                Query = @"
+                mutation RegisterDevice($token: String!, $platform: String) {
+                    registerDevice(token: $token, platform: $platform) {
+                        userId
+                        token
+                    }
+                }",
+                Variables = new { token, platform }
+            };
+
+            var response = await _client.SendMutationAsync<dynamic>(request);
+            if (response.Errors != null && response.Errors.Any()) throw new Exception(response.Errors[0].Message);
+        }
     }
 }

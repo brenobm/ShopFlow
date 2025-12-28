@@ -29,7 +29,8 @@ public partial class LoadingPage : ContentPage
 
         if (isAuthenticated)
         {
-            Application.Current.MainPage = new AppShell(_authService);
+            var pushService = _serviceProvider.GetService<IPushService>();
+            Application.Current.MainPage = new AppShell(_authService, pushService);
         }
         else
         {

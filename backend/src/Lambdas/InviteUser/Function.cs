@@ -2,11 +2,15 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
+using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using System.Text.Json;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FirebaseAdmin;
+using FirebaseAdmin.Messaging;
+using Google.Apis.Auth.OAuth2;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -16,10 +20,53 @@ namespace InviteUser;
 public class Function
 {
     private readonly IAmazonSimpleEmailService _sesClient;
+    private readonly IAmazonDynamoDB _dynamoDbClient;
+    private readonly string _deviceTokensTableName;
 
     public Function()
     {
         _sesClient = new AmazonSimpleEmailServiceClient();
+        _dynamoDbClient = new AmazonDynamoDBClient();
+        _deviceTokensTableName = Environment.GetEnvironmentVariable("fDEVICE_TOKENS_TABLE_NAME") ?? "ShopFlow_DeviceTokens";
+        
+        InitializeFirebase();
+    }
+
+    private void InitializeFirebase()
+    {
+        if (FirebaseApp.DefaultInstance == null)
+        {
+            try
+            {
+                // Try to get credentials from Env Var (JSON content) or File
+                var serviceAccountJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON");
+                GoogleCredential credential;
+
+                if (!string.IsNullOrEmpty(serviceAccountJson))
+                {
+                     credential = GoogleCredential.FromJson(serviceAccountJson);
+                }
+                else if (System.IO.File.Exists("firebase-service-account.json"))
+                {
+                    credential = GoogleCredential.FromFile("firebase-service-account.json");
+                }
+                else
+                {
+                     // Fallback to default (useful if deployed with GOOGLE_APPLICATION_CREDENTIALS)
+                     credential = GoogleCredential.GetApplicationDefault();
+                }
+
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = credential
+                });
+                Console.WriteLine("Firebase App Initialized.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing Firebase: {ex.Message}");
+            }
+        }
     }
 
     public async Task FunctionHandler(DynamoDBEvent dynamoEvent, ILambdaContext context)
@@ -28,56 +75,43 @@ public class Function
 
         foreach (var record in dynamoEvent.Records)
         {
-            context.Logger.LogLine($"Event ID: {record.EventID}");
-            context.Logger.LogLine($"Event Name: {record.EventName}");
-
-            if (record.EventName == "MODIFY")
+            if (record.EventName == "MODIFY" || record.EventName == "INSERT")
             {
                 var newImage = record.Dynamodb.NewImage;
                 var oldImage = record.Dynamodb.OldImage;
 
-                // Check if 'members' attribute exists and has changed
-                if (newImage.ContainsKey("members") && oldImage.ContainsKey("members"))
+                List<string> newMembers = new List<string>();
+                if (newImage != null && newImage.ContainsKey("members"))
                 {
-                    var newMembers = newImage["members"].L.Select(x => x.S).ToList();
-                    var oldMembers = oldImage["members"].L.Select(x => x.S).ToList();
-
-                    // Find added members
-                    var addedMembers = newMembers.Except(oldMembers).ToList();
-
-                    foreach (var email in addedMembers)
-                    {
-                        context.Logger.LogLine($"Sending invite to: {email}");
-                        await SendInviteEmail(email, newImage.ContainsKey("name") ? newImage["name"].S : "a list");
-                    }
+                     newMembers = newImage["members"].L.Select(x => x.S).ToList();
                 }
-                // Handle case where members list was initialized (from empty to having members) vs Create (INSERT)
-                // Note: logic above handles updates. INSERT usually doesn't have oldImage or members is empty.
-            }
-            else if (record.EventName == "INSERT")
-            {
-                 // Usually createList doesn't add members, but if it did:
-                 var newImage = record.Dynamodb.NewImage;
-                 if (newImage.ContainsKey("members"))
-                 {
-                     var newMembers = newImage["members"].L.Select(x => x.S).ToList();
-                     foreach(var email in newMembers)
-                     {
-                          context.Logger.LogLine($"Sending invite to: {email}");
-                          await SendInviteEmail(email, newImage.ContainsKey("name") ? newImage["name"].S : "a list");
-                     }
-                 }
+
+                List<string> oldMembers = new List<string>();
+                if (oldImage != null && oldImage.ContainsKey("members"))
+                {
+                     oldMembers = oldImage["members"].L.Select(x => x.S).ToList();
+                }
+
+                // Find added members
+                var addedMembers = newMembers.Except(oldMembers).ToList();
+
+                foreach (var email in addedMembers)
+                {
+                    context.Logger.LogLine($"Processing invite for: {email}");
+                    string listName = newImage != null && newImage.ContainsKey("name") ? newImage["name"].S : "a list";
+                    
+                    await SendInviteEmail(email, listName);
+                    await SendPushNotification(email, listName);
+                }
             }
         }
-
-        context.Logger.LogLine("Stream processing complete.");
     }
 
     private async Task SendInviteEmail(string toEmail, string listName)
     {
         var sendRequest = new SendEmailRequest
         {
-            Source = "breno.machado@example.com", // verified identity
+            Source = Environment.GetEnvironmentVariable("fEMAIL_SOURCE") ?? "breno.machado@example.com",
             Destination = new Destination
             {
                 ToAddresses = new List<string> { toEmail }
@@ -89,8 +123,8 @@ public class Function
                 {
                     Html = new Content
                     {
-                       Charset = "UTF-8",
-                       Data = $@"
+                        Charset = "UTF-8",
+                        Data = $@"
                         <html>
                         <body>
                             <h1>Join the shopping list!</h1>
@@ -110,63 +144,80 @@ public class Function
             }
         };
 
-            try
+        try
         {
-            var response = await _sesClient.SendEmailAsync(sendRequest);
-            Console.WriteLine($"Email sent to {toEmail}, MessageID: {response.MessageId}");
-            
-            // Attempt Push Notification
-            await SendPushNotification(toEmail, listName);
+            await _sesClient.SendEmailAsync(sendRequest);
+            Console.WriteLine($"Email sent to {toEmail}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error sending email/push to {toEmail}: {ex.Message}");
+            Console.WriteLine($"Error sending email to {toEmail}: {ex.Message}");
         }
     }
 
-    private async Task SendPushNotification(string userId, string listName)
+    private async Task SendPushNotification(string email, string listName)
     {
-        var appId = Environment.GetEnvironmentVariable("PINPOINT_APP_ID");
-        if(string.IsNullOrEmpty(appId)) return;
-
-        try 
+        try
         {
-            using var pinpoint = new Amazon.Pinpoint.AmazonPinpointClient();
-            var request = new Amazon.Pinpoint.Model.SendMessagesRequest
+            // Query DeviceTokens table by Email
+            var request = new QueryRequest
             {
-                ApplicationId = appId,
-                MessageRequest = new Amazon.Pinpoint.Model.MessageRequest
-                {
-                    Addresses = new Dictionary<string, Amazon.Pinpoint.Model.AddressConfiguration>
-                    {
-                        { userId, new Amazon.Pinpoint.Model.AddressConfiguration { ChannelType = Amazon.Pinpoint.Model.ChannelType.GCM } } // Simplification: Assuming UserId maps to Endpoint or Address
-                    },
-                    MessageConfiguration = new Amazon.Pinpoint.Model.DirectMessageConfiguration
-                    {
-                        GCMMessage = new Amazon.Pinpoint.Model.GCMMessage
-                        {
-                            Action = Amazon.Pinpoint.Model.Action.OPEN_APP,
-                            Body = $"You have been invited to list '{listName}'",
-                            Title = "New List Invitation"
-                        },
-                        APNSMessage = new Amazon.Pinpoint.Model.APNSMessage
-                        {
-                            Action = Amazon.Pinpoint.Model.Action.OPEN_APP,
-                            Body = $"You have been invited to list '{listName}'",
-                            Title = "New List Invitation"
-                        }
-                    }
+                TableName = _deviceTokensTableName,
+                IndexName = "EmailIndex",
+                KeyConditionExpression = "email = :v_email",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
+                    {":v_email", new AttributeValue { S = email }}
                 }
             };
-            
-            // Note: This relies on the 'userId' being a valid Endpoint ID or Address in Pinpoint.
-            // Since we haven't implemented the registration logic fully, this serves as the backend scaffolding.
-            await pinpoint.SendMessagesAsync(request);
-            Console.WriteLine($"Push sent to {userId}");
+
+            var response = await _dynamoDbClient.QueryAsync(request);
+
+            if (response.Items.Count == 0)
+            {
+                Console.WriteLine($"No device tokens found for email: {email}");
+                return;
+            }
+
+            foreach (var item in response.Items)
+            {
+                if (item.ContainsKey("token"))
+                {
+                    var token = item["token"].S;
+                    await SendFCMToDevice(token, listName);
+                }
+            }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Push failed: {ex.Message}");
+            Console.WriteLine($"Error in SendPushNotification for {email}: {ex.Message}");
+        }
+    }
+
+    private async Task SendFCMToDevice(string token, string listName)
+    {
+        var message = new FirebaseAdmin.Messaging.Message()
+        {
+            Token = token,
+            Notification = new Notification()
+            {
+                Title = "New List Invitation",
+                Body = $"You have been invited to list '{listName}'"
+            },
+            Data = new Dictionary<string, string>()
+            {
+                { "type", "invite" },
+                { "listName", listName }
+            }
+        };
+
+        try
+        {
+            string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            Console.WriteLine($"Successfully sent message: {response}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending FCM message: {ex.Message}");
         }
     }
 }

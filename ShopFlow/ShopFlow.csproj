@@ -44,39 +44,39 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
-	  <ApplicationVersion>38</ApplicationVersion>
+	  <ApplicationVersion>39</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-ios|AnyCPU'">
-	  <ApplicationVersion>38</ApplicationVersion>
+	  <ApplicationVersion>39</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-maccatalyst|AnyCPU'">
-	  <ApplicationVersion>38</ApplicationVersion>
+	  <ApplicationVersion>39</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|AnyCPU'">
-	  <ApplicationVersion>38</ApplicationVersion>
+	  <ApplicationVersion>39</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android|AnyCPU'">
-	  <ApplicationVersion>38</ApplicationVersion>
+	  <ApplicationVersion>39</ApplicationVersion>
 	  <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-ios|AnyCPU'">
-	  <ApplicationVersion>38</ApplicationVersion>
+	  <ApplicationVersion>39</ApplicationVersion>
 	  <MtouchLink>None</MtouchLink>
 	  <UseInterpreter>true</UseInterpreter>
 	  <CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-maccatalyst|AnyCPU'">
-	  <ApplicationVersion>38</ApplicationVersion>
+	  <ApplicationVersion>39</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows10.0.19041.0|AnyCPU'">
-	  <ApplicationVersion>38</ApplicationVersion>
+	  <ApplicationVersion>39</ApplicationVersion>
 	</PropertyGroup>
 
 
@@ -112,6 +112,7 @@
 		<PackageReference Include="AWSSDK.Translate" Version="4.0.1.9" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />
 		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
+		<PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
 		<PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
 		<PackageReference Include="Plugin.LocalNotification" Version="13.0.0" />
 
