@@ -7,8 +7,20 @@ using BrenoMachado.ShopFlow.Views;
 namespace BrenoMachado.ShopFlow.ViewModels
 {
     [QueryProperty(nameof(ListId), "Id")]
-    public class ActiveListViewModel : BaseViewModel
+    public class ActiveListViewModel : BaseViewModel, IQueryAttributable
     {
+        public void ApplyQueryAttributes(IDictionary<string, object> query)
+        {
+            if (query.ContainsKey("action") && query["action"].ToString() == "add")
+            {
+                 if (query.ContainsKey("item"))
+                 {
+                     string itemToAdd = query["item"].ToString();
+                     // Use fire-and-forget safely on main thread
+                     MainThread.BeginInvokeOnMainThread(async () => await AddItemFromSiriAsync(itemToAdd));
+                 }
+            }
+        }
         private readonly IGraphQLService _graphQLService;
         
         string _listId;
