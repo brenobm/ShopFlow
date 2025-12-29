@@ -4,20 +4,20 @@
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
              x:Class="BrenoMachado.ShopFlow.Views.LoginPage"
              Title="{Binding Title}"
-             BackgroundColor="#F3F4F6">
+             Title="{Binding Title}">
 
     <StackLayout Padding="30" Spacing="20" VerticalOptions="Center">
         
         <Image Source="dotnet_bot.png" HeightRequest="100" Margin="0,0,0,20"/>
-
-        <Entry Placeholder="Username" Text="{Binding Username}" BackgroundColor="White" IsVisible="{Binding IsVerification, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}"/>
         
-        <Entry Placeholder="Email" Text="{Binding Email}" IsVisible="{Binding IsSignUp}" BackgroundColor="White" Keyboard="Email"/>
+        <Entry Placeholder="Username" Text="{Binding Username}" IsVisible="{Binding IsVerification, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}"/>
         
-        <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True" BackgroundColor="White" IsVisible="{Binding IsVerification, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}"/>
+        <Entry Placeholder="Email" Text="{Binding Email}" IsVisible="{Binding IsSignUp}" Keyboard="Email"/>
+        
+        <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True" IsVisible="{Binding IsVerification, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}"/>
 
         <!-- Verification Code -->
-        <Entry Placeholder="Verification Code" Text="{Binding VerificationCode}" IsVisible="{Binding IsVerification}" BackgroundColor="White" Keyboard="Numeric"/>
+        <Entry Placeholder="Verification Code" Text="{Binding VerificationCode}" IsVisible="{Binding IsVerification}" Keyboard="Numeric"/>
 
         <Button Text="Login" 
                 Command="{Binding LoginCommand}" 

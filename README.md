@@ -9,6 +9,12 @@ ShopFlow is a smart shopping assistant built with .NET MAUI (iOS/Android) and AW
 *   **.NET 8.0 SDK** (or compatible MAUI version)
 *   **7-Zip** (Required for Windows build environment to extract iOS SDKs)
     *   Install to default location: `C:\Program Files\7-Zip\7z.exe`
+    **Building for App Store:**
+Due to Windows path length limits with Firebase packages, **Visual Studio UI** may fail to publish.
+Use the command line:
+```powershell
+dotnet publish -f net10.0-ios -c Release -p:ArchiveOnBuild=true
+```
 
 ### 🔑 Configuration (Important)
 For security reasons, private configuration files are **excluded from source control**. You must obtain these manually to run the app.

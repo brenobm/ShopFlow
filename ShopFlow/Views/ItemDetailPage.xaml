@@ -3,38 +3,35 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
              x:Class="BrenoMachado.ShopFlow.Views.ItemDetailPage"
-             Title="{Binding Title}"
-             BackgroundColor="#F9FAFB">
+             Title="{Binding Title}">
 
     <Grid RowDefinitions="*, Auto" Padding="20">
         <VerticalStackLayout Spacing="20">
             <VerticalStackLayout Spacing="5">
-                <Label Text="Item Name" FontAttributes="Bold" TextColor="#374151"/>
+                <Label Text="Item Name" FontAttributes="Bold"/>
                 <Entry Text="{Binding Name}" 
                        Placeholder="e.g., Bananas"
-                       BackgroundColor="White"
                        HeightRequest="50"/>
             </VerticalStackLayout>
             
             <VerticalStackLayout Spacing="5">
-                <Label Text="Price" FontAttributes="Bold" TextColor="#374151"/>
+                <Label Text="Price" FontAttributes="Bold"/>
                 <Entry Text="{Binding Price}" 
                        Placeholder="0.00"
                        Keyboard="Numeric"
-                       BackgroundColor="White"
                        HeightRequest="50"/>
             </VerticalStackLayout>
             
             <VerticalStackLayout Spacing="10">
                 <Grid ColumnDefinitions="*, Auto">
-                    <Label Text="Category" FontAttributes="Bold" TextColor="#374151" VerticalOptions="Center"/>
+                    <Label Text="Category" FontAttributes="Bold" VerticalOptions="Center"/>
                     <Button Text="+ New" 
                             Command="{Binding AddCategoryCommand}" 
                             HeightRequest="30" 
                             Padding="10,0" 
                             FontSize="12"
-                            BackgroundColor="#E5E7EB"
-                            TextColor="#374151"
+                            BackgroundColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                            TextColor="{AppThemeBinding Light=#374151, Dark=White}"
                             Grid.Column="1"/>
                 </Grid>
                 <CollectionView ItemsSource="{Binding Categories}"
