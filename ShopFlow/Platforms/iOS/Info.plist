@@ -62,5 +62,7 @@
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>GADIsAdManagerApp</key>
+	<true/>
 </dict>
 </plist>
