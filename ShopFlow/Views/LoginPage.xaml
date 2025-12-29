@@ -4,7 +4,7 @@
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
              x:Class="BrenoMachado.ShopFlow.Views.LoginPage"
              Title="{Binding Title}"
-             Title="{Binding Title}">
+
 
     <StackLayout Padding="30" Spacing="20" VerticalOptions="Center">
         
