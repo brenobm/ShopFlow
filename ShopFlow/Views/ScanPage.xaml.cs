@@ -52,4 +52,21 @@ public partial class ScanPage : ContentPage
             }
         }
     }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        cameraView.IsDetecting = true;
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        cameraView.IsDetecting = false;
+    }
+
+    private void CloseButton_Clicked(object sender, EventArgs e)
+    {
+        _tcs.TrySetResult(null); // Return null to indicate cancellation
+    }
 }
