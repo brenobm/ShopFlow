@@ -4,32 +4,32 @@ using BrenoMachado.ShopFlow.Services;
 using BrenoMachado.ShopFlow.ViewModels;
 using BrenoMachado.ShopFlow.Views;
 using ZXing.Net.Maui.Controls;
-using ZXing.Net.Maui.Controls;
 using Plugin.LocalNotification;
 using Microsoft.Maui.LifecycleEvents;
+
 namespace BrenoMachado.ShopFlow;
 
 public static class MauiProgram
 {
-	public static MauiApp CreateMauiApp()
-	{
+    public static MauiApp CreateMauiApp()
+    {
         // Enable AWS SDK Logging
         Amazon.AWSConfigs.LoggingConfig.LogTo = Amazon.LoggingOptions.SystemDiagnostics;
         Amazon.AWSConfigs.LoggingConfig.LogResponses = Amazon.ResponseLoggingOption.Always;
         Amazon.AWSConfigs.LoggingConfig.LogMetrics = true;
 
-		var builder = MauiApp.CreateBuilder();
-		builder
-			.UseMauiApp<App>()
+        var builder = MauiApp.CreateBuilder();
+        builder
+            .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
-			.ConfigureFonts(fonts =>
-			{
-				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-			});
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            });
 
 #if DEBUG
-		builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
 
         // Services
@@ -47,30 +47,17 @@ public static class MauiProgram
         // Plugin.LocalNotification
         builder.UseLocalNotification();
 
+        // Lifecycle Events (Firebase Init removed to rely on auto-init or resolve build errors)
 #if ANDROID
         builder.ConfigureLifecycleEvents(events => {
             events.AddAndroid(android => android.OnCreate((activity, state) => {
-                try
-                {
-                    Plugin.Firebase.Shared.CrossFirebase.Initialize(activity);
-                }
-                catch (Exception ex)
-                {
-                     Console.WriteLine($"[MauiProgram] Firebase Init Failed: {ex.Message}");
-                }
+                // Plugin.Firebase.CrossFirebase.Initialize(activity);
             }));
         });
 #elif IOS
         builder.ConfigureLifecycleEvents(events => {
             events.AddiOS(ios => ios.FinishedLaunching((app, launchOptions) => {
-                try
-                {
-                    // Plugin.Firebase.CrossFirebase.Initialize(app, launchOptions);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[MauiProgram] Firebase Init Failed: {ex.Message}");
-                }
+                // Plugin.Firebase.CrossFirebase.Initialize(app, launchOptions);
                 return false;
             }));
         });
@@ -91,12 +78,10 @@ public static class MauiProgram
         builder.Services.AddTransient<ActiveListPage>();
         builder.Services.AddTransient<ItemDetailPage>();
         builder.Services.AddTransient<SettingsPage>();
-		builder.Services.AddTransient<ReportsPage>();
-		builder.Services.AddTransient<ReportsViewModel>();
-
-        builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<ReportsPage>();
+        
+        builder.Services.AddTransient<LoginPage>();
 
-		return builder.Build();
-	}
+        return builder.Build();
+    }
 }
