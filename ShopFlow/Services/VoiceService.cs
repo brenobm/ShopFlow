@@ -12,39 +12,29 @@ namespace BrenoMachado.ShopFlow.Services
         {
             try
             {
-                if (!await _speechToText.RequestPermissions(CancellationToken.None))
+                // Ensure we are on the Main Thread for iOS Speech Recognition
+                return await MainThread.InvokeOnMainThreadAsync(async () => 
                 {
-                    await Shell.Current.DisplayAlert("Permission Denied", "Microphone permission is required.", "OK");
-                    return null;
-                }
+                    if (!await _speechToText.RequestPermissions(CancellationToken.None))
+                    {
+                        await Shell.Current.DisplayAlert("Permission Denied", "Microphone permission is required.", "OK");
+                        return null;
+                    }
 
-                var progress = new Progress<string>(partialText => 
-                {
-                     // Optional: Could expose an event to update UI with partial text
+                    var progress = new Progress<string>(partialText => 
+                    {
+                         // Optional: UI updates
+                    });
+
+                    var recognitionResult = await _speechToText.ListenAsync(
+                        CultureInfo.CurrentCulture,
+                        progress,
+                        CancellationToken.None);
+                    
+                    return recognitionResult.IsSuccessful ? recognitionResult.Text : null;
                 });
 
-                var recognitionResult = await _speechToText.ListenAsync(
-                    CultureInfo.CurrentCulture,
-                    progress,
-                    CancellationToken.None);
-
-                if (recognitionResult.IsSuccessful)
-                {
-                    return recognitionResult.Text;
-                }
-                
-                // Specific handling for common errors
-                if (recognitionResult.Exception is TaskCanceledException)
-                {
-                    // Often happens on iOS if speech service is busy or user cancels
-                    return null; 
-                }
-
-                await Shell.Current.DisplayAlert("Recognition Error", 
-                    $"Error: {recognitionResult.Exception?.Message ?? "Unknown Error"}", "OK");
-                return null;
-
-                return null;
+                 /* Logic moved inside MainThread block */
             }
             catch (Exception ex)
             {
