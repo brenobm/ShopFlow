@@ -79,6 +79,12 @@ thumbs.db
 ehthumbs.db
 desktop.ini
 
+
 # Temporary Error Logs
 build_error_*.txt
 error_*.txt
+
+# Secrets
+*.p8
+google-services.json
+GoogleService-Info.plist

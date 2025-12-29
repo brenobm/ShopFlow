@@ -5,5 +5,7 @@
 
 	<key>com.apple.developer.siri</key>
 	<true/>
+	<key>aps-environment</key>
+	<string>production</string>
 </dict>
 </plist>
