@@ -126,8 +126,7 @@ namespace BrenoMachado.ShopFlow.Services
             var response = await _client.SendMutationAsync<dynamic>(request);
              if (response.Errors != null && response.Errors.Any())
             {
-                // throw new Exception($"GraphQL Error: {response.Errors[0].Message}");
-                // Ignore delete errors for now if item missing
+                throw new Exception($"GraphQL Error: {response.Errors[0].Message}");
             }
             return new ShoppingList { Id = id };
         }

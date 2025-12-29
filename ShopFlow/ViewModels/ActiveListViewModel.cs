@@ -31,7 +31,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             {
                 _currentSort = value;
                 OnPropertyChanged();
-                Task.Run(LoadItemsAsync); // Trigger re-sort
+                _ = LoadItemsAsync(); // Trigger re-sort
             }
         }
         
@@ -182,12 +182,14 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     groups = groups.OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999).ToList();
                  }
                  
-                 Items.Clear();
-                 foreach(var group in groups)
-                 {
-                     Items.Add(group);
-                 }
-                 await LoadSuggestionsAsync();
+                 MainThread.BeginInvokeOnMainThread(async () => {
+                     Items.Clear();
+                     foreach(var group in groups)
+                     {
+                         Items.Add(group);
+                     }
+                     await LoadSuggestionsAsync();
+                 });
              } 
              catch(Exception ex)
              {

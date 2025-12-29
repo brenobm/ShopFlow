@@ -286,6 +286,28 @@ namespace Backend
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
             });
 
+            // DELETE LIST Mapping
+            listsDS.CreateResolver("DeleteListResolver", new ResolverProps
+            {
+                TypeName = "Mutation",
+                FieldName = "deleteList",
+                RequestMappingTemplate = MappingTemplate.FromString(@"
+                {
+                    ""version"" : ""2017-02-28"",
+                    ""operation"" : ""DeleteItem"",
+                    ""key"" : {
+                        ""id"" : { ""S"" : ""${context.arguments.id}"" }
+                    },
+                    ""condition"": {
+                        ""expression"": ""UserId = :currentUser"",
+                        ""expressionValues"": {
+                            "":currentUser"": { ""S"" : ""${context.identity.username}"" }
+                        }
+                    }
+                }"),
+                ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem()
+            });
+
             // SHARE LIST Mapping
             listsDS.CreateResolver("ShareListResolver", new ResolverProps
             {
