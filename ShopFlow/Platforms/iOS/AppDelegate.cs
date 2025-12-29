@@ -9,6 +9,17 @@ public class AppDelegate : MauiUIApplicationDelegate
 {
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
+        // Enable Audio Playback even in Silent Mode
+        try
+        {
+            var session = AVFoundation.AVAudioSession.SharedInstance();
+            session.SetCategory(AVFoundation.AVAudioSessionCategory.Playback);
+            session.SetActive(true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Audio Session Error: {ex.Message}");
+        }
 
         // Request Siri Authorization
         Intents.INPreferences.RequestSiriAuthorization((status) =>
