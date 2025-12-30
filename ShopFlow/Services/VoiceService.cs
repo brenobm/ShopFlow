@@ -20,27 +20,45 @@ namespace BrenoMachado.ShopFlow.Services
         
         public async Task<string> ListenAsync()
         {
+            System.Diagnostics.Debug.WriteLine("VoiceService.ListenAsync Called");
             try
             {
                 // Ensure we are on the Main Thread for iOS Speech Recognition
                 return await MainThread.InvokeOnMainThreadAsync(async () => 
                 {
-                    if (!await _speechToText.RequestPermissions(CancellationToken.None))
+                    System.Diagnostics.Debug.WriteLine("Requesting Permissions...");
+                    
+                    var micStatus = await Permissions.RequestAsync<Permissions.Microphone>();
+                    if (micStatus != PermissionStatus.Granted)
                     {
-                        await Shell.Current.DisplayAlert("Permission Denied", "Microphone permission is required.", "OK");
-                        return null;
+                         await Shell.Current.DisplayAlert("Permission Denied", "Microphone permission is required.", "OK");
+                         return null;
+                    }
+
+                    // Explicitly request Speech permission on iOS
+                    if (DeviceInfo.Platform == DevicePlatform.iOS)
+                    {
+                        var speechStatus = await Permissions.RequestAsync<Permissions.Speech>();
+                        if (speechStatus != PermissionStatus.Granted)
+                        {
+                            await Shell.Current.DisplayAlert("Permission Denied", "Speech Recognition permission is required.", "OK");
+                            return null;
+                        }
                     }
 
                     var progress = new Progress<string>(partialText => 
                     {
-                         // Optional: UI updates
+                         System.Diagnostics.Debug.WriteLine($"Partial: {partialText}");
                     });
 
+                    System.Diagnostics.Debug.WriteLine($"Starting ListenAsync with culture: {_localizationService.GetCurrentCulture().Name}");
+                    
                     var recognitionResult = await _speechToText.ListenAsync(
                         _localizationService.GetCurrentCulture(),
                         progress,
                         CancellationToken.None);
                     
+                    System.Diagnostics.Debug.WriteLine($"Recognition Result: {recognitionResult.IsSuccessful} - {recognitionResult.Text}");
                     return recognitionResult.IsSuccessful ? recognitionResult.Text : null;
                 });
 
