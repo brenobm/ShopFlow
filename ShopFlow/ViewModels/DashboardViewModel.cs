@@ -9,6 +9,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
     public class DashboardViewModel : BaseViewModel
     {
         private readonly IGraphQLService _graphQLService;
+        private readonly IDatabaseService _databaseService;
 
         public ObservableCollection<ShoppingList> Lists { get; } = new();
 
@@ -21,10 +22,11 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand GoToSettingsCommand { get; }
         public ICommand SetDefaultListCommand { get; }
 
-        public DashboardViewModel(IGraphQLService graphQLService)
+        public DashboardViewModel(IGraphQLService graphQLService, IDatabaseService databaseService)
         {
-            Title = "My Lists (Cloud)";
+            Title = "My Lists";
             _graphQLService = graphQLService;
+            _databaseService = databaseService;
 
             LoadListsCommand = new Command(async () => await LoadListsAsync());
             AddListCommand = new Command(async () => await AddListAsync());
@@ -43,18 +45,39 @@ namespace BrenoMachado.ShopFlow.ViewModels
             try
             {
                 IsBusy = true;
-                // Fetch from Cloud
-                var lists = await _graphQLService.GetListsAsync();
-                Lists.Clear();
-                foreach (var list in lists.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name))
-                {
-                    Lists.Add(list);
-                }
                 
-                // Consistency Check: Ensure exactly one default exists if lists exist
-                if (Lists.Any() && !Lists.Any(l => l.IsDefault == true))
+                // 1. Load Local First (Always works offline)
+                var localLists = await _databaseService.GetListsAsync();
+                UpdateListsCollection(localLists);
+
+                // 2. If Online, Sync with Cloud
+                if (Connectivity.NetworkAccess == NetworkAccess.Internet)
                 {
-                    await SetDefaultListAsync(Lists.First());
+                    try 
+                    {
+                        var cloudLists = await _graphQLService.GetListsAsync();
+                        
+                        // Save Cloud Lists to Local DB (Simple overwrite/merge for now)
+                        foreach (var list in cloudLists)
+                        {
+                            await _databaseService.SaveListAsync(list);
+                        }
+                        
+                        // Reload from Local to reflect updates
+                        localLists = await _databaseService.GetListsAsync();
+                        UpdateListsCollection(localLists);
+                        
+                        // Consistency Check
+                        if (Lists.Any() && !Lists.Any(l => l.IsDefault == true))
+                        {
+                            await SetDefaultListAsync(Lists.First());
+                        }
+                    }
+                    catch (Exception syncEx)
+                    {
+                        Console.WriteLine($"Cloud Sync Failed: {syncEx.Message}");
+                        // Suppress error so user still sees local data
+                    }
                 }
             }
             catch (Exception ex)
@@ -64,6 +87,15 @@ namespace BrenoMachado.ShopFlow.ViewModels
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        private void UpdateListsCollection(List<ShoppingList> source)
+        {
+            Lists.Clear();
+            foreach (var list in source.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name))
+            {
+                Lists.Add(list);
             }
         }
         
@@ -76,7 +108,38 @@ namespace BrenoMachado.ShopFlow.ViewModels
              try 
              {
                  bool isFirst = !Lists.Any();
-                 var newList = await _graphQLService.CreateListAsync(name.Trim(), isFirst);
+                 var newList = new ShoppingList 
+                 { 
+                     Name = name.Trim(), 
+                     IsDefault = isFirst,
+                     // If offline, mark dirty (though we don't have full sync yet, this marks intent)
+                     IsDirty = Connectivity.NetworkAccess != NetworkAccess.Internet 
+                 };
+
+                 if (Connectivity.NetworkAccess == NetworkAccess.Internet)
+                 {
+                     try 
+                     {
+                         // Create Cloud
+                         var cloudList = await _graphQLService.CreateListAsync(name.Trim(), isFirst);
+                         // Use Cloud properties (ID, dates)
+                         newList.Id = cloudList.Id;
+                         newList.CreatedAt = cloudList.CreatedAt;
+                     }
+                     catch (Exception cloudEx)
+                     {
+                         Console.WriteLine($"Cloud Create Failed: {cloudEx.Message}");
+                         // Fallback to offline creation if cloud fails
+                         newList.IsDirty = true;
+                     }
+                 }
+                 else
+                 {
+                      newList.IsDirty = true;
+                 }
+
+                 // Save Local (Critical for Offline)
+                 await _databaseService.SaveListAsync(newList);
                  await LoadListsAsync();
              }
              catch (Exception ex)
@@ -93,7 +156,23 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             try
             {
-                await _graphQLService.UpdateListAsync(list.Id, name.Trim(), list.IsDefault.GetValueOrDefault());
+                list.Name = name.Trim();
+                list.IsDirty = true;
+
+                if (Connectivity.NetworkAccess == NetworkAccess.Internet)
+                {
+                    try
+                    {
+                        await _graphQLService.UpdateListAsync(list.Id, list.Name, list.IsDefault.GetValueOrDefault());
+                        list.IsDirty = false;
+                    }
+                    catch
+                    {
+                        // Keep dirty if cloud fails
+                    }
+                }
+
+                await _databaseService.SaveListAsync(list);
                 await LoadListsAsync();
             }
             catch (Exception ex)
@@ -110,7 +189,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
             {
                 try
                 {
-                    await _graphQLService.DeleteListAsync(list.Id);
+                    if (Connectivity.NetworkAccess == NetworkAccess.Internet)
+                    {
+                         try { await _graphQLService.DeleteListAsync(list.Id); } catch {}
+                    }
                     
                     // Logic: If verify default was deleted, promote another
                     if (list.IsDefault == true)
@@ -122,6 +204,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
                         }
                     }
                     
+                    // Delete Local
+                    await _databaseService.DeleteListAsync(list);
                     await LoadListsAsync();
                 }
                 catch (Exception ex)
@@ -138,19 +222,30 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             try
             {
-                // 1. Unset old default(s)
+                // 1. Unset old default(s) in Local
                 var oldDefaults = Lists.Where(l => l.IsDefault == true && l.Id != newDefault.Id).ToList();
                 foreach (var old in oldDefaults)
                 {
                     old.IsDefault = false;
-                    // Fire and forget update to avoid blocking UI too much, or await?
-                    // Better await to ensure consistency
-                    await _graphQLService.UpdateListAsync(old.Id, old.Name, false);
+                    old.IsDirty = true;
+                    // Attempt Cloud Update (Best Effort)
+                    if (Connectivity.NetworkAccess == NetworkAccess.Internet)
+                    {
+                        try { await _graphQLService.UpdateListAsync(old.Id, old.Name, false); old.IsDirty = false; } catch {}
+                    }
+                    await _databaseService.SaveListAsync(old);
                 }
 
-                // 2. Set new default
+                // 2. Set new default in Local
                 newDefault.IsDefault = true;
-                await _graphQLService.UpdateListAsync(newDefault.Id, newDefault.Name, true);
+                newDefault.IsDirty = true;
+                
+                if (Connectivity.NetworkAccess == NetworkAccess.Internet)
+                {
+                     try { await _graphQLService.UpdateListAsync(newDefault.Id, newDefault.Name, true); newDefault.IsDirty = false; } catch {}
+                }
+                
+                await _databaseService.SaveListAsync(newDefault);
 
                 await LoadListsAsync();
             }
