@@ -497,7 +497,26 @@ namespace Backend
             new CfnOutput(this, "Region", new CfnOutputProps { Value = this.Region });
             new CfnOutput(this, "ItemsTableName", new CfnOutputProps { Value = itemsTable.TableName });
             new CfnOutput(this, "ListsTableName", new CfnOutputProps { Value = listsTable.TableName });
-            new CfnOutput(this, "GraphQLEndpoint", new CfnOutputProps { Value = api.GraphqlUrl });
+        // Product Search Lambda
+        var productSearchLambda = new Function(this, "ProductSearchHandler", new FunctionProps
+        {
+            Runtime = Runtime.DOTNET_8,
+            Code = Code.FromAsset("src/Lambdas/ProductSearch"),
+            Handler = "ProductSearch::ProductSearch.Function::FunctionHandler",
+            MemorySize = 256,
+            Timeout = Duration.Seconds(10),
+            LogRetention = RetentionDays.ONE_WEEK
+        });
+
+        var productSearchDs = api.AddLambdaDataSource("ProductSearchDS", productSearchLambda);
+        productSearchDs.CreateResolver("ProductSearchResolver", new ResolverProps
+        {
+            TypeName = "Query",
+            FieldName = "productSearch"
+        });
+        
+        // Output endpoint
+        new CfnOutput(this, "GraphQlUrl", new CfnOutputProps { Value = api.GraphqlUrl });
             // new CfnOutput(this, "PinpointAppId", new CfnOutputProps { Value = pinpointApp.Ref }); // Disabled
         }
     }

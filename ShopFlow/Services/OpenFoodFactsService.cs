@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using BrenoMachado.ShopFlow.Models;
 using Microsoft.Extensions.Logging;
 
@@ -6,13 +5,12 @@ namespace BrenoMachado.ShopFlow.Services
 {
     public class OpenFoodFactsService : IProductService
     {
-        private readonly HttpClient _httpClient;
+        private readonly IGraphQLService _graphQLService;
         private readonly ILogger<OpenFoodFactsService> _logger;
 
-        public OpenFoodFactsService(ILogger<OpenFoodFactsService> logger)
+        public OpenFoodFactsService(IGraphQLService graphQLService, ILogger<OpenFoodFactsService> logger)
         {
-            _httpClient = new HttpClient();
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ShopFlow - Android - Version 1.0");
+            _graphQLService = graphQLService;
             _logger = logger;
         }
 
@@ -20,41 +18,25 @@ namespace BrenoMachado.ShopFlow.Services
         {
             try
             {
-                var url = $"https://world.openfoodfacts.org/api/v0/product/{barcode}.json";
-                // Use GetStringAsync and Newtonsoft.Json to avoid System.Net.Http.Json missing reference issues
-                var json = await _httpClient.GetStringAsync(url);
-                var response = JsonConvert.DeserializeObject<OpenFoodFactsResponse>(json);
+                // Delegate to Backend for CloudWatch Logging
+                var result = await _graphQLService.ProductSearchAsync(barcode);
 
-                if (response != null && response.Status == 1 && response.Product != null)
+                if (result != null)
                 {
                     return new ShoppingItem
                     {
-                        Name = response.Product.ProductName,
-                        // Could add image URL or brand if strictly needed, but ShoppingItem is simple for now
-                        Category = "Groceries" // Default
+                        Name = result.Name,
+                        Category = result.Category ?? "Groceries",
+                        // ImageUrl could be added to ShoppingItem model if needed in future
                     };
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error looking up product");
+                _logger.LogError(ex, "Error looking up product via Backend");
             }
 
             return null;
-        }
-
-        // Internal classes for JSON Deserialization
-        private class OpenFoodFactsResponse
-        {
-            public int Status { get; set; }
-            public ProductData Product { get; set; }
-        }
-
-        private class ProductData
-        {
-            public string ProductName { get; set; }
-            public string Brands { get; set; }
-            public string ImageUrl { get; set; }
         }
     }
 }

@@ -25,6 +25,14 @@ type Query {
   getList(id: ID!): ShoppingList
   getItems(listId: ID!): [ShoppingItem]
   getGlobalProduct(barcode: String!): GlobalProduct
+  getSuggestions: [String]
+  productSearch(barcode: String!): Product
+}
+
+type Product {
+    name: String
+    category: String
+    imageUrl: String
 }
 
 type Mutation {

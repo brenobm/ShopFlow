@@ -314,5 +314,28 @@ namespace BrenoMachado.ShopFlow.Services
             var response = await _client.SendMutationAsync<dynamic>(request);
             if (response.Errors != null && response.Errors.Any()) throw new Exception(response.Errors[0].Message);
         }
+
+        public async Task<ProductSearchDto> ProductSearchAsync(string barcode)
+        {
+             SetAuthorizationHeader();
+             var request = new GraphQLRequest
+            {
+                Query = @"
+                query ProductSearch($barcode: String!) {
+                    productSearch(barcode: $barcode) {
+                        name
+                        category
+                        imageUrl
+                    }
+                }",
+                Variables = new { barcode }
+            };
+
+            var response = await _client.SendQueryAsync<dynamic>(request);
+            if (response.Errors != null && response.Errors.Any()) return null; // Log?
+            if (response.Data.productSearch == null) return null;
+
+            return response.Data.productSearch.ToObject<ProductSearchDto>();
+        }
     }
 }
