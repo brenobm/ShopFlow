@@ -419,5 +419,277 @@ namespace BrenoMachado.ShopFlow.Resources.Strings {
                 return ResourceManager.GetString("WeeklySummary", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to Permission Denied.
+        /// </summary>
+        public static string Msg_PermissionDenied {
+            get {
+                return ResourceManager.GetString("Msg_PermissionDenied", resourceCulture);
+            }
+        }
+        
+        public static string Msg_MicRequired {
+            get {
+                return ResourceManager.GetString("Msg_MicRequired", resourceCulture);
+            }
+        }
+        
+        public static string Msg_SpeechRequired {
+            get {
+                return ResourceManager.GetString("Msg_SpeechRequired", resourceCulture);
+            }
+        }
+        
+        public static string Msg_VoiceError {
+            get {
+                return ResourceManager.GetString("Msg_VoiceError", resourceCulture);
+            }
+        }
+        
+        public static string Msg_RemoveItemConfirmation {
+            get {
+                return ResourceManager.GetString("Msg_RemoveItemConfirmation", resourceCulture);
+            }
+        }
+        
+        public static string Msg_ProductNotFoundRegister {
+            get {
+                return ResourceManager.GetString("Msg_ProductNotFoundRegister", resourceCulture);
+            }
+        }
+        
+        public static string Msg_MarkedBought {
+            get {
+                return ResourceManager.GetString("Msg_MarkedBought", resourceCulture);
+            }
+        }
+        
+        public static string Msg_AddProductToList {
+            get {
+                return ResourceManager.GetString("Msg_AddProductToList", resourceCulture);
+            }
+        }
+        
+        public static string Msg_ScanError {
+            get {
+                return ResourceManager.GetString("Msg_ScanError", resourceCulture);
+            }
+        }
+        
+        public static string Msg_InviteSuccess {
+            get {
+                return ResourceManager.GetString("Msg_InviteSuccess", resourceCulture);
+            }
+        }
+        
+        public static string Msg_ShareFailed {
+            get {
+                return ResourceManager.GetString("Msg_ShareFailed", resourceCulture);
+            }
+        }
+        
+        public static string Msg_EnterCredentials {
+            get {
+                return ResourceManager.GetString("Msg_EnterCredentials", resourceCulture);
+            }
+        }
+        
+        public static string Msg_LoginFailed {
+            get {
+                return ResourceManager.GetString("Msg_LoginFailed", resourceCulture);
+            }
+        }
+        
+        public static string Btn_Verify {
+            get {
+                return ResourceManager.GetString("Btn_Verify", resourceCulture);
+            }
+        }
+        
+        public static string Msg_AccountUnconfirmed {
+            get {
+                return ResourceManager.GetString("Msg_AccountUnconfirmed", resourceCulture);
+            }
+        }
+        
+        public static string Msg_FieldsRequired {
+            get {
+                return ResourceManager.GetString("Msg_FieldsRequired", resourceCulture);
+            }
+        }
+        
+        public static string Msg_AccountCreated {
+            get {
+                return ResourceManager.GetString("Msg_AccountCreated", resourceCulture);
+            }
+        }
+        
+        public static string Msg_UsernameCodeRequired {
+            get {
+                return ResourceManager.GetString("Msg_UsernameCodeRequired", resourceCulture);
+            }
+        }
+        
+        public static string Msg_AccountVerified {
+            get {
+                return ResourceManager.GetString("Msg_AccountVerified", resourceCulture);
+            }
+        }
+        
+        public static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        public static string Success {
+            get {
+                return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        public static string Warning {
+            get {
+                return ResourceManager.GetString("Warning", resourceCulture);
+            }
+        }
+        
+        public static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
+            }
+        }
+        
+        public static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+
+        public static string Placeholder_ItemName {
+            get {
+                  return ResourceManager.GetString("Placeholder_ItemName", resourceCulture);
+            }
+        }
+
+        public static string Unit_Qty {
+            get {
+                  return ResourceManager.GetString("Unit_Qty", resourceCulture);
+            }
+        }
+
+        public static string Unit_Pack {
+            get {
+                  return ResourceManager.GetString("Unit_Pack", resourceCulture);
+            }
+        }
+
+        public static string Placeholder_VerificationCode {
+            get {
+                  return ResourceManager.GetString("Placeholder_VerificationCode", resourceCulture);
+            }
+        }
+
+        public static string Text_AlreadyHaveAccount {
+            get {
+                  return ResourceManager.GetString("Text_AlreadyHaveAccount", resourceCulture);
+            }
+        }
+
+        public static string Text_NeedAccount {
+            get {
+                  return ResourceManager.GetString("Text_NeedAccount", resourceCulture);
+            }
+        }
+
+        public static string Btn_New {
+            get {
+                  return ResourceManager.GetString("Btn_New", resourceCulture);
+            }
+        }
+
+        public static string Msg_NameRequired {
+            get {
+                  return ResourceManager.GetString("Msg_NameRequired", resourceCulture);
+            }
+        }
+
+        public static string Msg_SaveFailed {
+            get {
+                  return ResourceManager.GetString("Msg_SaveFailed", resourceCulture);
+            }
+        }
+
+        public static string Msg_DeleteListConfirmation {
+            get {
+                  return ResourceManager.GetString("Msg_DeleteListConfirmation", resourceCulture);
+            }
+        }
+
+        public static string Msg_DeleteAllDataWarning {
+            get {
+                  return ResourceManager.GetString("Msg_DeleteAllDataWarning", resourceCulture);
+            }
+        }
+
+        public static string Msg_AllDataCleared {
+            get {
+                  return ResourceManager.GetString("Msg_AllDataCleared", resourceCulture);
+            }
+        }
+
+        public static string Title_DataManagement {
+            get {
+                  return ResourceManager.GetString("Title_DataManagement", resourceCulture);
+            }
+        }
+
+        public static string Text_ClearDataWarning {
+            get {
+                  return ResourceManager.GetString("Text_ClearDataWarning", resourceCulture);
+            }
+        }
+
+        public static string Btn_ClearData {
+            get {
+                  return ResourceManager.GetString("Btn_ClearData", resourceCulture);
+            }
+        }
+
+        public static string Title_About {
+            get {
+                  return ResourceManager.GetString("Title_About", resourceCulture);
+            }
+        }
+
+        public static string Text_VerifyingSession {
+            get {
+                  return ResourceManager.GetString("Text_VerifyingSession", resourceCulture);
+            }
+        }
+        
+        public static string QuickTuneTitle {
+            get {
+                  return ResourceManager.GetString("QuickTuneTitle", resourceCulture);
+            }
+        }
+
+        public static string Done {
+            get {
+                  return ResourceManager.GetString("Done", resourceCulture);
+            }
+        }
+
+        public static string BoughtTimes {
+            get {
+                  return ResourceManager.GetString("BoughtTimes", resourceCulture);
+            }
+        }
+        
+        public static string Msg_VoiceAdded {
+            get {
+                  return ResourceManager.GetString("Msg_VoiceAdded", resourceCulture);
+            }
+        }
     }
 }
