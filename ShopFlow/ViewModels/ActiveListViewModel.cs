@@ -101,8 +101,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
         }
         
-        public string ShoppingModeText => IsShoppingMode ? Resources.Strings.AppResources.ShoppingModeActive : Resources.Strings.AppResources.ShoppingMode;
-        }
+        public string ShoppingModeText => IsShoppingMode ? BrenoMachado.ShopFlow.Resources.Strings.AppResources.ShoppingModeActive : BrenoMachado.ShopFlow.Resources.Strings.AppResources.ShoppingMode;
         
         // ... (constructor)
 
