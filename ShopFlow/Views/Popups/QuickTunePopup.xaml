@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="BrenoMachado.ShopFlow.Views.Popups.QuickTunePopup"
+             Color="Transparent">
+
+    <Border StrokeShape="RoundRectangle 20" 
+            BackgroundColor="{AppThemeBinding Light=White, Dark=#1F2937}"
+            StrokeThickness="0"
+            WidthRequest="300"
+            Padding="20">
+            
+        <VerticalStackLayout Spacing="15">
+            <Label Text="Quick Tune" 
+                   FontSize="18" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center"
+                   TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+
+            <!-- Stepper -->
+            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10" HorizontalOptions="Center">
+                <Button Text="-" Clicked="OnMinusClicked" 
+                        WidthRequest="40" HeightRequest="40" 
+                        CornerRadius="20" BackgroundColor="#E5E7EB" TextColor="Black"/>
+                
+                <HorizontalStackLayout VerticalOptions="Center" Spacing="5">
+                    <Label Text="{Binding Quantity}" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                    <Label Text="{Binding Unit}" FontSize="16" VerticalOptions="End" Padding="0,0,0,4" TextColor="Gray"/>
+                </HorizontalStackLayout>
+                
+                <Button Text="+" Clicked="OnPlusClicked"
+                        WidthRequest="40" HeightRequest="40" 
+                        CornerRadius="20" BackgroundColor="#E5E7EB" TextColor="Black"/>
+            </Grid>
+            
+            <!-- Quick Units -->
+            <FlexLayout Wrap="Wrap" JustifyContent="Center" AlignItems="Center" Direction="Row">
+                <Button Text="qty" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
+                <Button Text="kg" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
+                <Button Text="g" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
+                <Button Text="L" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
+                <Button Text="ml" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
+                <Button Text="pack" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
+            </FlexLayout>
+
+            <Button Text="Done" Clicked="OnDoneClicked" 
+                    BackgroundColor="#2563EB" TextColor="White" 
+                    CornerRadius="10" Margin="0,10,0,0"/>
+
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>

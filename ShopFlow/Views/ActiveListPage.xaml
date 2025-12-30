@@ -94,6 +94,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
                             <CheckBox IsChecked="{Binding IsPurchased}" 
@@ -117,6 +118,25 @@
                                        TextColor="#059669"
                                        IsVisible="{Binding Price, Converter={StaticResource IsNotNullConverter}}"/>
                             </VerticalStackLayout>
+                            
+                             <!-- Quantity Badge (Quick Tune) -->
+                            <Border Grid.Column="2" 
+                                    StrokeShape="RoundRectangle 15" 
+                                    BackgroundColor="#EFF6FF" 
+                                    Stroke="#BFDBFE"
+                                    StrokeThickness="1"
+                                    Padding="10,5" 
+                                    VerticalOptions="Center" 
+                                    Margin="5,0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.OpenQuickTuneCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="3">
+                                    <Label Text="{Binding Quantity}" TextColor="#2563EB" FontSize="14" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Unit}" TextColor="#2563EB" FontSize="12" VerticalTextAlignment="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
                         </Grid>
                     </SwipeView>
                 </DataTemplate>

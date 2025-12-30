@@ -3,6 +3,8 @@ using System.Windows.Input;
 using BrenoMachado.ShopFlow.Models;
 using BrenoMachado.ShopFlow.Services;
 using BrenoMachado.ShopFlow.Views;
+using CommunityToolkit.Maui.Views;
+using BrenoMachado.ShopFlow.Views.Popups;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
@@ -74,7 +76,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand ToggleShoppingModeCommand { get; }
         public ICommand ScanCommand { get; }
         public ICommand ShareCommand { get; }
+        public ICommand ShareCommand { get; }
         public ICommand ReadListCommand { get; }
+        public ICommand OpenQuickTuneCommand { get; }
         
         private readonly ISmartService _smartService;
         private readonly IVoiceService _voiceService;
@@ -119,6 +123,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             ScanCommand = new Command(async () => await ScanAsync());
             ShareCommand = new Command(async () => await ShareListAsync());
             ReadListCommand = new Command(async () => await ReadListAsync());
+            OpenQuickTuneCommand = new Command<ShoppingItem>(async (item) => await OpenQuickTuneAsync(item));
         }
 
         // ... 
@@ -551,6 +556,32 @@ namespace BrenoMachado.ShopFlow.ViewModels
              {
                 await Shell.Current.DisplayAlert("Read Error", ex.Message, "OK");
              }
+             catch(Exception ex)
+             {
+                await Shell.Current.DisplayAlert("Read Error", ex.Message, "OK");
+             }
+        }
+
+        async Task OpenQuickTuneAsync(ShoppingItem item)
+        {
+             if (item == null) return;
+             var popup = new QuickTunePopup(item, _shoppingRepository);
+             
+             // Find valid page to show popup
+             var page = Shell.Current.CurrentPage ?? App.Current.MainPage;
+             await page.ShowPopupAsync(popup);
+             
+             // After popup closes (it waits), refresh UI if needed?
+             // Since we bind directly to Item in VM, UI might update automatically via INotifyPropertyChanged
+             // But let's trigger a light refresh or re-sort if quantity affects it (rare)
+             // item.OnPropertyChanged() is local, but list view needs to know?
+             // ObservableCollection handles property changes if item implements INPC.
+             // Our ShoppingItem assumes Fody/PropertyChanged or clean setters.
+             // Inspecting ShoppingItem found it's a simple class.
+             // We might need to force refresh the list if UI doesn't update.
+             // Actually, ShoppingItem does NOT implement INotifyPropertyChanged in Models.
+             // So we need to modify ShoppingItem OR reload the list.
+             await LoadItemsAsync();
         }
     }
 }
