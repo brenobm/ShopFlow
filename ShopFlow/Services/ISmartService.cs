@@ -7,5 +7,6 @@ namespace BrenoMachado.ShopFlow.Services
     public interface ISmartService
     {
         Task<List<string>> GetSuggestionsAsync();
+        (string Name, double Quantity, string Unit) ParseItemInput(string input);
     }
 }

@@ -261,10 +261,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
              if (string.IsNullOrWhiteSpace(name)) return;
 
              try {
-                // await _graphQLService.AddItemAsync(CurrentList.Id, name.Trim(), 1, "qty", "Smart Suggestion");
-                 var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = name.Trim(), Quantity = 1, Unit = "qty", Category = "Smart Suggestion" };
+                 var parsed = _smartService.ParseItemInput(name);
+                 var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = parsed.Name, Quantity = parsed.Quantity, Unit = parsed.Unit, Category = "Smart Suggestion" };
                  await _shoppingRepository.SaveItemAsync(newItem);
-                await LoadItemsAsync(); 
+                 await LoadItemsAsync(); 
              } catch(Exception ex)
              {
                   await Application.Current.MainPage.DisplayAlert("Error", $"Failed to add suggestion: {ex.Message}", "OK");
@@ -324,8 +324,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 var text = await voiceService.ListenAsync();
                 if (!string.IsNullOrWhiteSpace(text))
                 {
-                     // await _graphQLService.AddItemAsync(CurrentList.Id, text.Trim(), 1, "qty", "Voice Added");
-                     var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = text.Trim(), Quantity = 1, Unit = "qty", Category = "Voice Added" };
+                     var parsed = _smartService.ParseItemInput(text);
+                     var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = parsed.Name, Quantity = parsed.Quantity, Unit = parsed.Unit, Category = "Voice Added" };
                      await _shoppingRepository.SaveItemAsync(newItem);
                      await LoadItemsAsync();
                      
@@ -405,7 +405,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     if (add)
                     {
                         // await _graphQLService.AddItemAsync(CurrentList.Id, productName, 1, "qty", category);
-                        var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = productName, Quantity = 1, Unit = "qty", Category = category };
+                        var parsed = _smartService.ParseItemInput(productName);
+                        var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = parsed.Name, Quantity = parsed.Quantity, Unit = parsed.Unit, Category = category };
                         await _shoppingRepository.SaveItemAsync(newItem);
                         await LoadItemsAsync();
                     }
@@ -512,7 +513,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
              }
 
              // await _graphQLService.AddItemAsync(targetList.Id, itemName, 1, "qty", "Siri");
-              var newItem = new ShoppingItem { ListId = targetList.Id, Name = itemName, Quantity = 1, Unit = "qty", Category = "Siri" };
+              var parsed = _smartService.ParseItemInput(itemName);
+              var newItem = new ShoppingItem { ListId = targetList.Id, Name = parsed.Name, Quantity = parsed.Quantity, Unit = parsed.Unit, Category = "Siri" };
               await _shoppingRepository.SaveItemAsync(newItem);
              await LoadItemsAsync();
              // Maybe show a toast
