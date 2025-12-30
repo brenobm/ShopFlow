@@ -7,6 +7,7 @@ public interface ILocalizationService
 {
     CultureInfo GetCurrentCulture();
     void SetCulture(string cultureCode);
+    void Initialize();
 }
 
 public class LocalizationService : ILocalizationService

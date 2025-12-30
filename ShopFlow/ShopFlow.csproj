@@ -143,4 +143,12 @@
 		<PackageReference Include="Plugin.Firebase" Version="3.1.4" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Compile Update="Resources\Strings\AppResources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>AppResources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
 </Project>
