@@ -14,7 +14,7 @@
                 FontSize="12"
                 FontFamily="Monospace" />
 
-        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" Spacing="10" Padding="0,10,0,0">
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10" Padding="0,10,0,0">
             <Button Text="Refresh" Command="{Binding RefreshCommand}" />
             <Button Text="Clear" Command="{Binding ClearCommand}" BackgroundColor="#DC2626" TextColor="White" />
             <Button Text="Copy" Command="{Binding CopyCommand}" BackgroundColor="#4B5563" />
