@@ -283,6 +283,9 @@
   <data name="Unit_Qty" xml:space="preserve">
     <value>qty</value>
   </data>
+  <data name="Unit_Pack" xml:space="preserve">
+    <value>pack</value>
+  </data>
   <data name="Placeholder_VerificationCode" xml:space="preserve">
     <value>Verification Code</value>
   </data>
