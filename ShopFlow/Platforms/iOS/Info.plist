@@ -64,5 +64,10 @@
 	<false/>
 	<key>GADIsAdManagerApp</key>
 	<true/>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>pt</string>
+	</array>
 </dict>
 </plist>

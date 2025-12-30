@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>IntentPhrases</key>
+    <array>
+        <dict>
+            <key>IntentName</key>
+            <string>INAddTasksIntent</string>
+            <key>IntentExamples</key>
+            <array>
+                <string>Add milk in ShopFlow</string>
+                <string>Add items to my ShopFlow list</string>
+                <string>Add bananas to ShopFlow</string>
+            </array>
+        </dict>
+    </array>
+    <key>ParameterVocabularies</key>
+    <array>
+        <dict>
+            <key>ParameterNames</key>
+            <array>
+                <string>INAddTasksIntent.targetTaskList</string>
+            </array>
+            <key>ParameterVocabulary</key>
+            <array>
+                <dict>
+                    <key>VocabularyItemIdentifier</key>
+                    <string>ShopFlow</string>
+                    <key>VocabularyItemSynonyms</key>
+                    <array>
+                        <dict>
+                            <key>VocabularyItemPronunciation</key>
+                            <string>Shop Flow</string>
+                        </dict>
+                        <dict>
+                            <key>VocabularyItemPronunciation</key>
+                            <string>ShopFlow</string>
+                        </dict>
+                    </array>
+                </dict>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>
