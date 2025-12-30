@@ -1,3 +1,6 @@
+using Amazon;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.Core;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,10 +14,13 @@ namespace ProductSearch;
 public class Function
 {
     private static readonly HttpClient _httpClient = new HttpClient();
+    private static readonly IAmazonDynamoDB _dynamoDb = new AmazonDynamoDBClient();
+    private readonly string _metricsTableName;
 
     public Function()
     {
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ShopFlow-Backend/1.0");
+        _metricsTableName = Environment.GetEnvironmentVariable("METRICS_TABLE_NAME") ?? "ShopFlow_BarcodeMetrics";
     }
 
     public async Task<ProductResult?> FunctionHandler(Input input, ILambdaContext context)
@@ -27,6 +33,9 @@ public class Function
         }
 
         context.Logger.LogLine($"Search Request: {barcode}");
+        
+        string status = "Miss";
+        string? productName = null;
 
         try
         {
@@ -40,16 +49,22 @@ public class Function
             
             if (response != null && response.Status == 1 && response.Product != null)
             {
+                status = "Hit";
+                productName = response.Product.ProductName;
+                
                 var result = new ProductResult
                 {
                     Name = response.Product.ProductName,
                     Category = "Groceries", // Mapping logic could be improved here
                     ImageUrl = response.Product.ImageUrl
                 };
+                
+                 await LogMetricAsync(barcode, status, productName, context);
                  return result;
             }
             
              context.Logger.LogLine($"Product not found for barcode: {barcode}");
+             await LogMetricAsync(barcode, status, null, context);
              return null;
 
         }
@@ -57,7 +72,37 @@ public class Function
         {
             context.Logger.LogLine($"Exception during search: {ex.Message}");
             context.Logger.LogLine(ex.StackTrace);
+            await LogMetricAsync(barcode, "Error", null, context);
             return null;
+        }
+    }
+
+    private async Task LogMetricAsync(string barcode, string status, string? productName, ILambdaContext context)
+    {
+        try 
+        {
+            var request = new PutItemRequest
+            {
+                TableName = _metricsTableName,
+                Item = new Dictionary<string, AttributeValue>
+                {
+                    { "barcode", new AttributeValue { S = barcode } },
+                    { "timestamp", new AttributeValue { S = DateTime.UtcNow.ToString("O") } },
+                    { "status", new AttributeValue { S = status } },
+                    { "updatedAt", new AttributeValue { S = DateTime.UtcNow.ToString("O") } }
+                }
+            };
+
+            if (!string.IsNullOrEmpty(productName))
+            {
+                request.Item.Add("productName", new AttributeValue { S = productName });
+            }
+
+            await _dynamoDb.PutItemAsync(request);
+        }
+        catch (Exception ex)
+        {
+             context.Logger.LogLine($"Failed to log metric to DynamoDB: {ex.Message}");
         }
     }
 }

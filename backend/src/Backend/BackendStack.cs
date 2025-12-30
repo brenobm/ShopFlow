@@ -497,6 +497,16 @@ namespace Backend
             new CfnOutput(this, "Region", new CfnOutputProps { Value = this.Region });
             new CfnOutput(this, "ItemsTableName", new CfnOutputProps { Value = itemsTable.TableName });
             new CfnOutput(this, "ListsTableName", new CfnOutputProps { Value = listsTable.TableName });
+            // 5.3. DynamoDB Table (Barcode Metrics - New)
+            var metricsTable = new Table(this, "ShopFlowBarcodeMetrics", new TableProps
+            {
+                TableName = "ShopFlow_BarcodeMetrics",
+                PartitionKey = new Attribute { Name = "barcode", Type = AttributeType.STRING },
+                SortKey = new Attribute { Name = "timestamp", Type = AttributeType.STRING },
+                BillingMode = BillingMode.PAY_PER_REQUEST,
+                RemovalPolicy = RemovalPolicy.DESTROY
+            });
+
         // Product Search Lambda
         var productSearchLambda = new Function(this, "ProductSearchHandler", new FunctionProps
         {
@@ -505,8 +515,14 @@ namespace Backend
             Handler = "ProductSearch::ProductSearch.Function::FunctionHandler",
             MemorySize = 256,
             Timeout = Duration.Seconds(10),
-            LogRetention = RetentionDays.ONE_WEEK
+            LogRetention = RetentionDays.ONE_WEEK,
+            Environment = new Dictionary<string, string>
+            {
+                { "METRICS_TABLE_NAME", metricsTable.TableName }
+            }
         });
+        
+        metricsTable.GrantWriteData(productSearchLambda);
 
         var productSearchDs = api.AddLambdaDataSource("ProductSearchDS", productSearchLambda);
         productSearchDs.CreateResolver("ProductSearchResolver", new ResolverProps
