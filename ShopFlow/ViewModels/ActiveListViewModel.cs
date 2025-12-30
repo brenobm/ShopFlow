@@ -3,6 +3,7 @@ using System.Windows.Input;
 using BrenoMachado.ShopFlow.Models;
 using BrenoMachado.ShopFlow.Services;
 using BrenoMachado.ShopFlow.Views;
+using BrenoMachado.ShopFlow.Repositories;
 using CommunityToolkit.Maui.Views;
 using BrenoMachado.ShopFlow.Views.Popups;
 
@@ -75,7 +76,6 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand ListenCommand { get; }
         public ICommand ToggleShoppingModeCommand { get; }
         public ICommand ScanCommand { get; }
-        public ICommand ShareCommand { get; }
         public ICommand ShareCommand { get; }
         public ICommand ReadListCommand { get; }
         public ICommand OpenQuickTuneCommand { get; }
@@ -551,10 +551,6 @@ namespace BrenoMachado.ShopFlow.ViewModels
              try 
              {
                 await Microsoft.Maui.Media.TextToSpeech.SpeakAsync(textBuilder.ToString());
-             }
-             catch(Exception ex)
-             {
-                await Shell.Current.DisplayAlert("Read Error", ex.Message, "OK");
              }
              catch(Exception ex)
              {

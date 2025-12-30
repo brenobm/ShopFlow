@@ -6,7 +6,8 @@ namespace BrenoMachado.ShopFlow.Services
     public interface ISyncService
     {
         Task SyncAsync();
-        Task PushItemAsync(Models.ShoppingItem item);
+        Task PushChangesAsync();
+        Task PullChangesAsync();
         Task DeleteItemAsync(string itemId);
     }
 }
