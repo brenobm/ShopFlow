@@ -1,27 +1,27 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
+             xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
              x:Class="BrenoMachado.ShopFlow.Views.ReportsPage"
              Title="{Binding Title}"
              BackgroundColor="#F9FAFB">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Refresh" Command="{Binding RefreshCommand}" />
+        <ToolbarItem Text="{x:Static strings:AppResources.Refresh}" Command="{Binding RefreshCommand}" />
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto, *" Padding="20" RowSpacing="20">
         <!-- Weekly Summary Card -->
         <Frame BackgroundColor="White" Padding="20" CornerRadius="10" BorderColor="Transparent" HasShadow="True">
             <StackLayout>
-                <Label Text="Weekly Activity" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                <Label Text="{x:Static strings:AppResources.WeeklySummary}" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
                 <Label Text="{Binding WeeklySummary}" FontSize="16" TextColor="#4B5563" Margin="0,5,0,0"/>
             </StackLayout>
         </Frame>
 
         <!-- Top Items List -->
         <VerticalStackLayout Grid.Row="1" Spacing="10">
-            <Label Text="Top Purchased Items" FontSize="18" FontAttributes="Bold" TextColor="#111827"/>
+            <Label Text="{x:Static strings:AppResources.TopItems}" FontSize="18" FontAttributes="Bold" TextColor="#111827"/>
             
             <CollectionView ItemsSource="{Binding TopItems}" HeightRequest="400">
                 <CollectionView.ItemTemplate>
@@ -35,7 +35,7 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
                 <CollectionView.EmptyView>
-                    <Label Text="No purchase history yet." HorizontalOptions="Center" TextColor="#9CA3AF" Margin="0,20"/>
+                    <Label Text="{x:Static strings:AppResources.NoHistory}" HorizontalOptions="Center" TextColor="#9CA3AF" Margin="0,20"/>
                 </CollectionView.EmptyView>
             </CollectionView>
         </VerticalStackLayout>

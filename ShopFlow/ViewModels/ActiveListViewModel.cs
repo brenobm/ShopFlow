@@ -95,9 +95,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
             {
                 _isShoppingMode = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(ShoppingModeText));
                 ToggleScreenState(value);
                 _ = LoadItemsAsync(); // Refresh list to apply filter
             }
+        }
+        
+        public string ShoppingModeText => IsShoppingMode ? Resources.Strings.AppResources.ShoppingModeActive : Resources.Strings.AppResources.ShoppingMode;
         }
         
         // ... (constructor)

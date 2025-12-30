@@ -1,24 +1,24 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
+             xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
              x:Class="BrenoMachado.ShopFlow.Views.ActiveListPage"
              x:Name="ThisPage"
              Title="{Binding Title}"
              BackgroundColor="#F9FAFB">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Sort" Command="{Binding SortCommand}" Order="Primary" />
-        <ToolbarItem Text="Read List" Command="{Binding ReadListCommand}" Order="Secondary" />
-        <ToolbarItem Text="{Binding IsShoppingMode, Converter={StaticResource ShoppingModeTextConverter}}" 
+        <ToolbarItem Text="{x:Static strings:AppResources.SortBy}" Command="{Binding SortCommand}" Order="Primary" />
+        <ToolbarItem Text="{x:Static strings:AppResources.ReadList}" Command="{Binding ReadListCommand}" Order="Secondary" />
+        <ToolbarItem Text="{Binding ShoppingModeText}" 
                      Command="{Binding ToggleShoppingModeCommand}" />
-        <ToolbarItem Text="Share" Command="{Binding ShareCommand}" Order="Secondary" />
+        <ToolbarItem Text="{x:Static strings:AppResources.Share}" Command="{Binding ShareCommand}" Order="Secondary" />
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto, *">
         <!-- Shopping Mode Status -->
         <Frame Grid.Row="0" BackgroundColor="#DCFCE7" Padding="10" IsVisible="{Binding IsShoppingMode}" Margin="10,5">
-            <Label Text="🛒 Shopping Mode Active (Screen On)" TextColor="#166534" HorizontalOptions="Center" FontAttributes="Bold"/>
+            <Label Text="{x:Static strings:AppResources.ShoppingModeActive}" TextColor="#166534" HorizontalOptions="Center" FontAttributes="Bold"/>
         </Frame>
 
         <!-- Suggestions (Hide in Shopping Mode) -->
@@ -75,11 +75,11 @@
                         </SwipeView.Triggers>
                         <SwipeView.RightItems>
                             <SwipeItems>
-                                <SwipeItem Text="Edit"
+                                <SwipeItem Text="{x:Static strings:AppResources.Edit}"
                                            BackgroundColor="#F59E0B"
                                            Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.EditItemCommand}"
                                            CommandParameter="{Binding .}"/>
-                                <SwipeItem Text="Delete"
+                                <SwipeItem Text="{x:Static strings:AppResources.Delete}"
                                            BackgroundColor="#EF4444"
                                            Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.DeleteItemCommand}"
                                            CommandParameter="{Binding .}"/>

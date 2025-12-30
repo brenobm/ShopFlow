@@ -163,4 +163,19 @@
   <data name="RestartMessage" xml:space="preserve">
     <value>Please restart the app to apply language changes.</value>
   </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="NoHistory" xml:space="preserve">
+    <value>No purchase history yet.</value>
+  </data>
+  <data name="ScanProduct" xml:space="preserve">
+    <value>Scan Product</value>
+  </data>
+  <data name="ScanInstruction" xml:space="preserve">
+    <value>Point camera at barcode</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
 </root>

@@ -1,21 +1,22 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+             xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
              x:Class="BrenoMachado.ShopFlow.Views.ScanPage"
-             Title="Scan Product">
+             Title="{x:Static strings:AppResources.ScanProduct}">
     <Grid>
         <zxing:CameraBarcodeReaderView
             x:Name="cameraView"
             BarcodesDetected="CameraView_BarcodesDetected" />
         
-        <Label Text="Point camera at barcode"
+        <Label Text="{x:Static strings:AppResources.ScanInstruction}"
                TextColor="White"
                FontSize="18"
                HorizontalOptions="Center"
                VerticalOptions="End"
                Margin="20,0,20,50" />
                
-        <Button Text="Close"
+        <Button Text="{x:Static strings:AppResources.Close}"
                 Clicked="CloseButton_Clicked"
                 HorizontalOptions="End"
                 VerticalOptions="Start"
