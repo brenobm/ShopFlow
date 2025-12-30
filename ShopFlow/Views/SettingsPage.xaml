@@ -2,11 +2,25 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
+             xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
              x:Class="BrenoMachado.ShopFlow.Views.SettingsPage"
-             Title="{Binding Title}"
+             Title="{x:Static strings:AppResources.Settings}"
              BackgroundColor="#F9FAFB">
 
     <StackLayout Padding="20" Spacing="20">
+    
+        <!-- Language Selection -->
+        <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
+            <StackLayout Spacing="10">
+                <Label Text="{x:Static strings:AppResources.Language}" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
+                <Picker ItemsSource="{Binding Languages}"
+                        SelectedItem="{Binding SelectedLanguage}"
+                        ItemDisplayBinding="{Binding DisplayName}"
+                        Title="Select Language"
+                        BackgroundColor="#F3F4F6"/>
+            </StackLayout>
+        </Frame>
+
         <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
             <StackLayout Spacing="10">
                 <Label Text="Data Management" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
@@ -20,8 +34,8 @@
 
         <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
             <StackLayout Spacing="10">
-                <Label Text="Notifications" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
-                <Button Text="Test Local Notification" 
+                <Label Text="{x:Static strings:AppResources.Notifications}" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
+                <Button Text="{x:Static strings:AppResources.TestNotification}" 
                         Command="{Binding TestPushCommand}"
                         BackgroundColor="#3B82F6"
                         TextColor="White"/>
@@ -31,9 +45,11 @@
         <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
             <StackLayout Spacing="5">
                  <Label Text="About" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
-                 <Label Text="Smart Shopping" FontSize="16" TextColor="#111827"/>
+                 <Label Text="{x:Static strings:AppResources.AppTitle}" FontSize="16" TextColor="#111827"/>
                  <Label Text="{Binding Version, StringFormat='Version {0}'}" TextColor="#6B7280"/>
             </StackLayout>
         </Frame>
+    </StackLayout>
+</ContentPage>
     </StackLayout>
 </ContentPage>

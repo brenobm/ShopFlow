@@ -85,6 +85,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         private readonly IProductService _productService;
         private readonly ITranslationService _translationService;
         private readonly IDatabaseService _databaseService;
+        private readonly ILocalizationService _localizationService;
 
         bool _isShoppingMode;
         public bool IsShoppingMode
@@ -101,7 +102,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         
         // ... (constructor)
 
-        public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService, IProductService productService, ITranslationService translationService, IDatabaseService databaseService, IShoppingRepository shoppingRepository)
+        public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService, IProductService productService, ITranslationService translationService, IDatabaseService databaseService, IShoppingRepository shoppingRepository, ILocalizationService localizationService)
         {
             _graphQLService = graphQLService;
             _shoppingRepository = shoppingRepository;
@@ -110,6 +111,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             _productService = productService;
             _translationService = translationService;
             _databaseService = databaseService;
+            _localizationService = localizationService;
             
             ListenCommand = new Command(async () => await ListenAsync(voiceService));            
             // ... (rest of constructor commands)
@@ -335,7 +337,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
                      await LoadItemsAsync();
                      
                      // FR-2.5: Voice Confirm
-                     await Microsoft.Maui.Media.TextToSpeech.SpeakAsync($"Added {text}");
+                     var locale = _localizationService.GetCurrentCulture().Name;
+                     var options = new Microsoft.Maui.Media.SpeechOptions { Locale = Microsoft.Maui.Media.TextToSpeech.GetLocalesAsync().Result.FirstOrDefault(l => l.Language == locale) };
+                     await Microsoft.Maui.Media.TextToSpeech.SpeakAsync($"Added {text}", options);
                      
                      await Shell.Current.DisplayAlert("Voice Input", $"Added '{text}'", "OK");
                 }

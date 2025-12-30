@@ -45,6 +45,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IAppNotificationService, NotificationService>();
         builder.Services.AddSingleton<IPushService, PushService>();
         builder.Services.AddSingleton<IShoppingRepository, ShoppingRepository>();
+        builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
         
         // Plugin.LocalNotification
         builder.UseLocalNotification();

@@ -7,11 +7,14 @@ public partial class App : Application
 {
     private readonly IAuthService _authService;
 
-	public App(IAuthService authService, IServiceProvider serviceProvider)
+	public App(IAuthService authService, IServiceProvider serviceProvider, ILocalizationService localizationService)
 	{
 		InitializeComponent();
         _authService = authService;
         _serviceProvider = serviceProvider;
+        
+        // Ensure culture is set immediately
+        localizationService.Initialize();
 	}
 
     private readonly IServiceProvider _serviceProvider;

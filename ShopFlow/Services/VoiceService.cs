@@ -7,7 +7,17 @@ namespace BrenoMachado.ShopFlow.Services
     public class VoiceService : IVoiceService
     {
         private ISpeechToText _speechToText => SpeechToText.Default;
+        private readonly ILocalizationService _localizationService;
 
+        // Add Constructor for DI
+        public VoiceService(ILocalizationService localizationService)
+        {
+            _localizationService = localizationService;
+        }
+        
+        // Add Constructor for backward compatibility if needed, but safer to force DI.
+        // Or if DI fails, fallback? No, we registered it.
+        
         public async Task<string> ListenAsync()
         {
             try
@@ -27,7 +37,7 @@ namespace BrenoMachado.ShopFlow.Services
                     });
 
                     var recognitionResult = await _speechToText.ListenAsync(
-                        CultureInfo.CurrentCulture,
+                        _localizationService.GetCurrentCulture(),
                         progress,
                         CancellationToken.None);
                     

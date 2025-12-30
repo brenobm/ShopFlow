@@ -13,11 +13,52 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         public string Version => "1.0.0";
 
-        public SettingsViewModel(IDatabaseService databaseService, IAppNotificationService notificationService)
+        public class LanguageModel
+        {
+            public string Name { get; set; }
+            public string Code { get; set; }
+            public string Flag { get; set; }
+            public string DisplayName => $"{Flag} {Name}";
+        }
+
+        public List<LanguageModel> Languages { get; } = new List<LanguageModel>
+        {
+            new LanguageModel { Name = "English - Canada", Code = "en-CA", Flag = "🇨🇦" },
+            new LanguageModel { Name = "Português - Brasil", Code = "pt-BR", Flag = "🇧🇷" }
+        };
+
+        private LanguageModel _selectedLanguage;
+        public LanguageModel SelectedLanguage
+        {
+            get => _selectedLanguage;
+            set
+            {
+                if (_selectedLanguage != value)
+                {
+                    _selectedLanguage = value;
+                    OnPropertyChanged();
+                    ChangeLanguage(value);
+                }
+            }
+        }
+
+        private readonly ILocalizationService _localizationService;
+
+        public SettingsViewModel(IDatabaseService databaseService, IAppNotificationService notificationService, ILocalizationService localizationService)
         {
             _databaseService = databaseService;
             _notificationService = notificationService;
-            Title = "Settings";
+            _localizationService = localizationService;
+            
+            Title = Resources.Strings.AppResources.Settings;
+            
+            // Set initial selected
+            var currentCode = _localizationService.GetCurrentCulture().Name;
+            // Default to EN if not found or partial match
+            SelectedLanguage = Languages.FirstOrDefault(l => l.Code == currentCode) 
+                             ?? Languages.FirstOrDefault(l => currentCode.StartsWith("pt") && l.Code == "pt-BR")
+                             ?? Languages.FirstOrDefault(l => l.Code == "en-CA");
+
             ClearDataCommand = new Command(async () => await ClearDataAsync());
             TestPushCommand = new Command(async () => await TestPushAsync());
             
@@ -25,9 +66,21 @@ namespace BrenoMachado.ShopFlow.ViewModels
             _ = _notificationService.InitializeAsync();
         }
 
+        private async void ChangeLanguage(LanguageModel language)
+        {
+            if (language == null) return;
+            
+            var current = _localizationService.GetCurrentCulture().Name;
+            if (current != language.Code)
+            {
+                _localizationService.SetCulture(language.Code);
+                await Shell.Current.DisplayAlert(Resources.Strings.AppResources.RestartRequired, Resources.Strings.AppResources.RestartMessage, "OK");
+            }
+        }
+
         async Task TestPushAsync()
         {
-            await _notificationService.ShowLocalNotification("Test Notification", "This is a local alert from ShopFlow!");
+            await _notificationService.ShowLocalNotification(Resources.Strings.AppResources.Notifications, Resources.Strings.AppResources.TestNotification);
             // Also try to get token
             try {
                 var token = await _notificationService.GetDeviceTokenAsync();
