@@ -7,7 +7,7 @@ public partial class App : Application
 {
     private readonly IAuthService _authService;
 
-	public App(IAuthService authService, IServiceProvider serviceProvider, ILocalizationService localizationService)
+	public App(IAuthService authService, IServiceProvider serviceProvider, ILocalizationService localizationService, IOfflineSyncService offlineSyncService)
 	{
 		InitializeComponent();
         _authService = authService;
@@ -15,6 +15,9 @@ public partial class App : Application
         
         // Ensure culture is set immediately
         localizationService.Initialize();
+        
+        // Weekly Sync
+        Task.Run(async () => await offlineSyncService.SyncOpenFoodFactsAsync());
 	}
 
     private readonly IServiceProvider _serviceProvider;

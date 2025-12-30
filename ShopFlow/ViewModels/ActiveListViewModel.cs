@@ -364,25 +364,67 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 string? productName = null;
                 string category = "Scanned";
 
-                // 2. Lookup OpenFoodFacts
-                var offProduct = await _productService.LookupProductAsync(barcode);
-                if (offProduct != null && !string.IsNullOrWhiteSpace(offProduct.Name))
+                // 2. Lookup Local Database
+                var cached = await _databaseService.GetCachedProductAsync(barcode);
+                if (cached != null)
                 {
-                    productName = offProduct.Name;
-                    category = offProduct.Category ?? category;
+                    productName = cached.Name;
+                    category = cached.Category ?? category;
+                    // Optional: Update LastUpdated or hit count if we tracked it
                 }
                 else
                 {
-                    // 3. Fallback: Lookup Global Product Table
-                    var globalProduct = await _graphQLService.GetGlobalProductAsync(barcode);
+                    // 3. Lookup Online (OpenFoodFacts)
+                    var offProduct = await _productService.LookupProductAsync(barcode);
+                    bool foundOnline = offProduct != null && !string.IsNullOrWhiteSpace(offProduct.Name);
+                    
+                    // Metric: Log result
+                    await _databaseService.LogBarcodeSearchAsync(barcode, foundOnline);
+
+                    if (foundOnline)
+                    {
+                        productName = offProduct.Name;
+                        category = offProduct.Category ?? category;
+                        
+                        // 3.1. Save to Local Database
+                        await _databaseService.SaveCachedProductAsync(new CachedProduct 
+                        {
+                            Barcode = barcode,
+                            Name = productName,
+                            Category = category,
+                            LastUpdated = DateTime.UtcNow
+                        });
+                    }
+                    else
+                    {
+                        // 4. Fallback: Manual (User said "If not found online, add manually")
+                        // Keeping GlobalProduct logic as a secondary online source or assuming Global IS the manual registry mainly
+                        // If we strictly follow prompt "If not found online, add manually", we go to registration.
+                        // I will preserve existing GlobalProduct check as 'Online' fallback if desired, but user focused on OFF.
+                        // For safety, let's proceed to Manual/Global check as "not found in OFF".
+                    }
+                }
+
+                // Global Product Fallback (Legacy/Extended Online)
+                if (string.IsNullOrWhiteSpace(productName))
+                {
+                     var globalProduct = await _graphQLService.GetGlobalProductAsync(barcode);
                     if (globalProduct != null)
                     {
                         productName = globalProduct.Name;
                         category = globalProduct.Category ?? category;
+                        // Cache this too?
+                         await _databaseService.SaveCachedProductAsync(new CachedProduct 
+                        {
+                            Barcode = barcode,
+                            Name = productName,
+                            Category = category,
+                            LastUpdated = DateTime.UtcNow
+                        });
                     }
                 }
 
-                // 4. Not Found anywhere? -> Register
+                // 5. Not Found anywhere? -> Register
                 if (string.IsNullOrWhiteSpace(productName))
                 {
                     bool register = await Shell.Current.DisplayAlert("Not Found", "Product not found. Do you want to register it?", "Yes", "No");
@@ -391,11 +433,19 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     productName = await Shell.Current.DisplayPromptAsync("Register Product", "Enter product name:");
                     if (string.IsNullOrWhiteSpace(productName)) return;
 
-                    // Save to Global Table for future (Fire and Forget or Await?)
-                    // Await to ensure it works
+                    // Manual Entry Logic
+                     // Save to Global Table
                     try 
                     {
                         await _graphQLService.CreateGlobalProductAsync(barcode, productName, category);
+                        // Also Save to Local Cache so next time it's instant
+                        await _databaseService.SaveCachedProductAsync(new CachedProduct 
+                        {
+                            Barcode = barcode,
+                            Name = productName,
+                            Category = category,
+                            LastUpdated = DateTime.UtcNow
+                        });
                     }
                     catch (Exception ex)
                     {
@@ -403,7 +453,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     }
                 }
                 
-                // 5. Smart Matching (Common Flow)
+                // 6. Smart Matching (Common Flow)
                 bool matchFound = await SmartMatchAndMarkAsync(productName);
 
                 if (matchFound)
@@ -412,11 +462,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 }
                 else
                 {
-                    // 6. Add if new
+                    // 7. Add if new
                     bool add = await Shell.Current.DisplayAlert("New Item", $"Add '{productName}' to list?", "Yes", "No");
                     if (add)
                     {
-                        // await _graphQLService.AddItemAsync(CurrentList.Id, productName, 1, "qty", category);
                         var parsed = _smartService.ParseItemInput(productName);
                         var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = parsed.Name, Quantity = parsed.Quantity, Unit = parsed.Unit, Category = category };
                         await _shoppingRepository.SaveItemAsync(newItem);

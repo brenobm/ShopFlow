@@ -22,5 +22,13 @@ namespace BrenoMachado.ShopFlow.Services
 
         Task LogPurchaseAsync(ShoppingItem item);
         Task<List<PurchaseHistory>> GetPurchaseHistoryAsync();
+
+        // Cached Products
+        Task<CachedProduct> GetCachedProductAsync(string barcode);
+        Task SaveCachedProductAsync(CachedProduct product);
+        Task<List<CachedProduct>> GetAllCachedProductsAsync();
+
+        // Metrics
+        Task LogBarcodeSearchAsync(string barcode, bool found);
     }
 }

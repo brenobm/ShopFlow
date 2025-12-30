@@ -19,6 +19,8 @@ namespace BrenoMachado.ShopFlow.Services
             await _database.CreateTableAsync<ShoppingList>();
             await _database.CreateTableAsync<ShoppingItem>();
             await _database.CreateTableAsync<PurchaseHistory>();
+            await _database.CreateTableAsync<CachedProduct>();
+            await _database.CreateTableAsync<BarcodeMetric>();
         }
 
         public async Task<List<ShoppingList>> GetListsAsync()
@@ -154,10 +156,49 @@ namespace BrenoMachado.ShopFlow.Services
             }
         }
 
-        public async Task<List<PurchaseHistory>> GetPurchaseHistoryAsync()
+    public async Task<List<PurchaseHistory>> GetPurchaseHistoryAsync()
         {
             await Init();
             return await _database.Table<PurchaseHistory>().ToListAsync();
+        }
+
+        // Cached Products
+        public async Task<CachedProduct> GetCachedProductAsync(string barcode)
+        {
+            await Init();
+            return await _database.Table<CachedProduct>().Where(p => p.Barcode == barcode).FirstOrDefaultAsync();
+        }
+
+        public async Task SaveCachedProductAsync(CachedProduct product)
+        {
+            await Init();
+            var existing = await GetCachedProductAsync(product.Barcode);
+            if (existing == null)
+            {
+                await _database.InsertAsync(product);
+            }
+            else
+            {
+                await _database.UpdateAsync(product);
+            }
+        }
+        
+        public async Task<List<CachedProduct>> GetAllCachedProductsAsync()
+        {
+             await Init();
+             return await _database.Table<CachedProduct>().ToListAsync();
+        }
+
+        // Metrics
+        public async Task LogBarcodeSearchAsync(string barcode, bool found)
+        {
+            await Init();
+            await _database.InsertAsync(new BarcodeMetric
+            {
+                Barcode = barcode,
+                WasFoundOnline = found,
+                DateSearched = DateTime.UtcNow
+            });
         }
     }
 }
