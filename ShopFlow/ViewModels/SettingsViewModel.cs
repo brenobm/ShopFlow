@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.Views;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {

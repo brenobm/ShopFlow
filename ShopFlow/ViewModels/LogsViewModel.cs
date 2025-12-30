@@ -11,7 +11,14 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public string Logs
         {
             get => _logs;
-            set => SetProperty(ref _logs, value);
+            set
+            {
+                if (_logs != value)
+                {
+                    _logs = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public ICommand RefreshCommand { get; }

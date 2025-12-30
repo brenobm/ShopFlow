@@ -301,4 +301,76 @@
   <data name="Placeholder_ItemName" xml:space="preserve">
     <value>ex: Bananas</value>
   </data>
+  <data name="Msg_PermissionDenied" xml:space="preserve">
+    <value>Permissão Negada</value>
+  </data>
+  <data name="Msg_MicRequired" xml:space="preserve">
+    <value>Permissão de microfone é necessária para usar comandos de voz.</value>
+  </data>
+  <data name="Msg_SpeechRequired" xml:space="preserve">
+    <value>Permissão de reconhecimento de fala é necessária para usar comandos de voz.</value>
+  </data>
+  <data name="Msg_VoiceError" xml:space="preserve">
+    <value>Reconhecimento de voz encontrou um erro. Tente novamente.</value>
+  </data>
+  <data name="Msg_RemoveItemConfirmation" xml:space="preserve">
+    <value>Tem certeza que deseja remover '{0}'?</value>
+  </data>
+  <data name="Msg_ProductNotFoundRegister" xml:space="preserve">
+    <value>Produto '{0}' não encontrado localmente. Deseja registrá-lo?</value>
+  </data>
+  <data name="Msg_MarkedBought" xml:space="preserve">
+    <value>'{0}' marcado como comprado.</value>
+  </data>
+  <data name="Msg_AddProductToList" xml:space="preserve">
+    <value>Adicionar '{0}' à sua lista de compras?</value>
+  </data>
+  <data name="Msg_ScanError" xml:space="preserve">
+    <value>Falha ao ler código de barras.</value>
+  </data>
+  <data name="Msg_InviteSuccess" xml:space="preserve">
+    <value>Convite enviado com sucesso!</value>
+  </data>
+  <data name="Msg_ShareFailed" xml:space="preserve">
+    <value>Falha ao compartilhar lista.</value>
+  </data>
+  <data name="Msg_EnterCredentials" xml:space="preserve">
+    <value>Por favor, insira usuário e senha.</value>
+  </data>
+  <data name="Msg_LoginFailed" xml:space="preserve">
+    <value>Login falhou. Verifique suas credenciais.</value>
+  </data>
+  <data name="Btn_Verify" xml:space="preserve">
+    <value>Verificar</value>
+  </data>
+  <data name="Msg_AccountUnconfirmed" xml:space="preserve">
+    <value>Conta existe mas não está confirmada. Insira seu código de verificação.</value>
+  </data>
+  <data name="Msg_FieldsRequired" xml:space="preserve">
+    <value>Todos os campos são obrigatórios.</value>
+  </data>
+  <data name="Msg_AccountCreated" xml:space="preserve">
+    <value>Conta criada! Verifique seu email para o código.</value>
+  </data>
+  <data name="Msg_UsernameCodeRequired" xml:space="preserve">
+    <value>Usuário e Código são obrigatórios.</value>
+  </data>
+  <data name="Msg_AccountVerified" xml:space="preserve">
+    <value>Conta verificada! Você pode logar agora.</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Erro</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Sucesso</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Aviso</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Sim</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Não</value>
+  </data>
 </root>
