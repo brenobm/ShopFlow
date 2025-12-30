@@ -39,6 +39,11 @@ public class ShoppingItem : System.ComponentModel.INotifyPropertyChanged
     public string Category { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? PurchasedAt { get; set; }
+    
+    // Sync Flags
+    public bool IsDirty { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     public static List<string> DefaultCategories = new List<string>
     {

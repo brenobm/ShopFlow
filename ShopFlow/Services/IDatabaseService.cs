@@ -9,10 +9,14 @@ namespace BrenoMachado.ShopFlow.Services
         Task SaveListAsync(ShoppingList list);
         Task DeleteListAsync(ShoppingList list);
         
-        Task<List<ShoppingItem>> GetItemsAsync(string listId);
+    Task<List<ShoppingItem>> GetItemsAsync(string listId);
         Task<ShoppingItem> GetItemAsync(string itemId);
         Task SaveItemAsync(ShoppingItem item);
         Task DeleteItemAsync(ShoppingItem item);
+        
+        Task<List<ShoppingItem>> GetDirtyItemsAsync();
+        Task<List<ShoppingList>> GetDirtyListsAsync();
+        Task UpdateItemSyncStatusAsync(ShoppingItem item);
         
         Task<List<ShoppingItem>> GetPurchasedItemsAsync();
 

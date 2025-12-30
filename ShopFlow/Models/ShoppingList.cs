@@ -12,6 +12,10 @@ public class ShoppingList
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool? IsDefault { get; set; }
     
+    // Sync Flags
+    public bool IsDirty { get; set; }
+    public bool IsDeleted { get; set; }
+    
     [Ignore]
     public List<ShoppingItem> Items { get; set; } = new List<ShoppingItem>();
 }

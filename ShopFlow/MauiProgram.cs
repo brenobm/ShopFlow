@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using BrenoMachado.ShopFlow.Services;
 using BrenoMachado.ShopFlow.ViewModels;
+using BrenoMachado.ShopFlow.Repositories;
 using BrenoMachado.ShopFlow.Views;
 using ZXing.Net.Maui.Controls;
 using Plugin.LocalNotification;
@@ -43,6 +44,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ITranslationService, AwsTranslateService>();
         builder.Services.AddSingleton<IAppNotificationService, NotificationService>();
         builder.Services.AddSingleton<IPushService, PushService>();
+        builder.Services.AddSingleton<IShoppingRepository, ShoppingRepository>();
         
         // Plugin.LocalNotification
         builder.UseLocalNotification();

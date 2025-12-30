@@ -67,7 +67,7 @@ namespace BrenoMachado.ShopFlow.Services
         {
             await Init();
             return await _database.Table<ShoppingItem>()
-                            .Where(t => t.ListId == listId)
+                            .Where(t => t.ListId == listId && !t.IsDeleted) // Filter out deleted
                             .OrderBy(x => x.IsPurchased)
                             .ThenBy(x => x.CreatedAt)
                             .ToListAsync();
@@ -82,6 +82,9 @@ namespace BrenoMachado.ShopFlow.Services
         public async Task SaveItemAsync(ShoppingItem item)
         {
             await Init();
+            item.IsDirty = true; // Mark as Dirty
+            item.LastUpdated = DateTime.UtcNow;
+
              if (string.IsNullOrEmpty(item.Id))
             {
                 item.Id = Guid.NewGuid().ToString();
@@ -100,7 +103,29 @@ namespace BrenoMachado.ShopFlow.Services
         public async Task DeleteItemAsync(ShoppingItem item)
         {
             await Init();
-            await _database.DeleteAsync(item);
+            item.IsDeleted = true;
+            item.IsDirty = true;
+            item.LastUpdated = DateTime.UtcNow;
+            await _database.UpdateAsync(item); // Soft Delete
+        }
+        
+        public async Task<List<ShoppingItem>> GetDirtyItemsAsync()
+        {
+            await Init();
+            return await _database.Table<ShoppingItem>().Where(i => i.IsDirty).ToListAsync();
+        }
+
+        public async Task<List<ShoppingList>> GetDirtyListsAsync()
+        {
+            await Init();
+            return await _database.Table<ShoppingList>().Where(l => l.IsDirty).ToListAsync();
+        }
+
+        public async Task UpdateItemSyncStatusAsync(ShoppingItem item)
+        {
+            await Init();
+            // Directly update the record without modifying IsDirty/LastUpdated logic
+            await _database.UpdateAsync(item);
         }
         public async Task<List<ShoppingItem>> GetPurchasedItemsAsync()
         {

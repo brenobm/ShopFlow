@@ -22,6 +22,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
         }
         private readonly IGraphQLService _graphQLService;
+        private readonly IShoppingRepository _shoppingRepository;
         
         string _listId;
         public string ListId
@@ -96,9 +97,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
         
         // ... (constructor)
 
-        public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService, IProductService productService, ITranslationService translationService, IDatabaseService databaseService)
+        public ActiveListViewModel(IGraphQLService graphQLService, IVoiceService voiceService, ISmartService smartService, IProductService productService, ITranslationService translationService, IDatabaseService databaseService, IShoppingRepository shoppingRepository)
         {
             _graphQLService = graphQLService;
+            _shoppingRepository = shoppingRepository;
             _smartService = smartService;
             _voiceService = voiceService;
             _productService = productService;
@@ -142,6 +144,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         public async Task RefreshAsync()
         {
+            // Trigger Cloud Sync
+            await _shoppingRepository.SyncAsync();
             await LoadItemsAsync();
         }
 
@@ -257,7 +261,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
              if (string.IsNullOrWhiteSpace(name)) return;
 
              try {
-                await _graphQLService.AddItemAsync(CurrentList.Id, name.Trim(), 1, "qty", "Smart Suggestion");
+                // await _graphQLService.AddItemAsync(CurrentList.Id, name.Trim(), 1, "qty", "Smart Suggestion");
+                 var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = name.Trim(), Quantity = 1, Unit = "qty", Category = "Smart Suggestion" };
+                 await _shoppingRepository.SaveItemAsync(newItem);
                 await LoadItemsAsync(); 
              } catch(Exception ex)
              {
@@ -278,7 +284,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             item.IsPurchased = !item.IsPurchased;
 
             try {
-                await _graphQLService.UpdateItemAsync(item);
+                await _shoppingRepository.SaveItemAsync(item);
                 
                 // Log purchase if item is now purchased
                 if (item.IsPurchased)
@@ -303,7 +309,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             if(confirm)
             {
                 try {
-                    await _graphQLService.DeleteItemAsync(item.ListId, item.Id);
+                   await _shoppingRepository.DeleteItemAsync(item);
                     await LoadItemsAsync();
                 } catch(Exception ex) {
                      await Application.Current.MainPage.DisplayAlert("Error", $"Failed to delete: {ex.Message}", "OK");
@@ -318,7 +324,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 var text = await voiceService.ListenAsync();
                 if (!string.IsNullOrWhiteSpace(text))
                 {
-                     await _graphQLService.AddItemAsync(CurrentList.Id, text.Trim(), 1, "qty", "Voice Added");
+                     // await _graphQLService.AddItemAsync(CurrentList.Id, text.Trim(), 1, "qty", "Voice Added");
+                     var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = text.Trim(), Quantity = 1, Unit = "qty", Category = "Voice Added" };
+                     await _shoppingRepository.SaveItemAsync(newItem);
                      await LoadItemsAsync();
                      
                      // FR-2.5: Voice Confirm
@@ -396,7 +404,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     bool add = await Shell.Current.DisplayAlert("New Item", $"Add '{productName}' to list?", "Yes", "No");
                     if (add)
                     {
-                        await _graphQLService.AddItemAsync(CurrentList.Id, productName, 1, "qty", category);
+                        // await _graphQLService.AddItemAsync(CurrentList.Id, productName, 1, "qty", category);
+                        var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = productName, Quantity = 1, Unit = "qty", Category = category };
+                        await _shoppingRepository.SaveItemAsync(newItem);
                         await LoadItemsAsync();
                     }
                 }
@@ -501,7 +511,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
                  }
              }
 
-             await _graphQLService.AddItemAsync(targetList.Id, itemName, 1, "qty", "Siri");
+             // await _graphQLService.AddItemAsync(targetList.Id, itemName, 1, "qty", "Siri");
+              var newItem = new ShoppingItem { ListId = targetList.Id, Name = itemName, Quantity = 1, Unit = "qty", Category = "Siri" };
+              await _shoppingRepository.SaveItemAsync(newItem);
              await LoadItemsAsync();
              // Maybe show a toast
         }

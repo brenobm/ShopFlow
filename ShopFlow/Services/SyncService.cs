@@ -40,13 +40,18 @@ namespace BrenoMachado.ShopFlow.Services
 
         public async Task SyncAsync()
         {
+            await PushChangesAsync();
+            await PullChangesAsync();
+        }
+
+        public async Task PullChangesAsync()
+        {
             if (!await _authService.IsAuthenticatedAsync()) return;
             await InitClient();
 
             try
             {
                 var userId = _authService.GetCurrentUserId();
-                // 1. Pull from Cloud
                 var request = new QueryRequest
                 {
                     TableName = AwsConfig.ItemsTableName,
@@ -56,58 +61,153 @@ namespace BrenoMachado.ShopFlow.Services
                     }
                 };
 
-                // NOTE: This will fail if table doesn't exist or permissions denied (Anonymous)
-                // We wrap in try-catch to allow local-only usage if cloud fails
                 var response = await _dynamoClient.QueryAsync(request);
                 
                 foreach (var item in response.Items)
                 {
-                    // Map DynamoDB item to ShoppingItem and save local
-                    // This is skipped for now as we don't have the table
-                }
-
-                // 2. Push Local to Cloud (Naive: Push all)
-                var localItems = await _databaseService.GetItemsAsync("default"); // Assuming default list for now?
-                foreach(var item in localItems)
-                {
-                    await PushItemAsync(item);
+                    await ProcessCloudItemAsync(item);
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Sync Error: {ex.Message}");
+                Debug.WriteLine($"Sync Pull Error: {ex.Message}");
             }
         }
 
-        public async Task PushItemAsync(ShoppingItem item)
+        private async Task ProcessCloudItemAsync(Dictionary<string, AttributeValue> cloudItem)
+        {
+             try 
+             {
+                 string id = cloudItem["Id"].S;
+                 var localItem = await _databaseService.GetItemAsync(id);
+                 
+                 // Map Cloud Item to Model
+                 var newItem = new ShoppingItem
+                 {
+                     Id = id,
+                     Name = cloudItem["Name"].S,
+                     IsPurchased = cloudItem["IsPurchased"].BOOL,
+                     Category = cloudItem.ContainsKey("Category") ? cloudItem["Category"].S : "Uncategorized",
+                     ListId = cloudItem.ContainsKey("listId") ? cloudItem["listId"].S : "default",
+                     IsDirty = false, // Clean from cloud
+                     IsDeleted = false
+                 };
+
+                 if (cloudItem.ContainsKey("UpdatedAt") && DateTime.TryParse(cloudItem["UpdatedAt"].S, out var cloudDate))
+                 {
+                     newItem.LastUpdated = cloudDate;
+                 }
+
+                 if (localItem != null)
+                 {
+                     // Conflict Resolution: Last Write Wins
+                     if (localItem.IsDirty)
+                     {
+                         if(localItem.LastUpdated > newItem.LastUpdated)
+                         {
+                             return; // Keep local change
+                         }
+                     }
+                     // Else: Overwrite local with cloud
+                     // Copy over properties that might not be in cloud but are local? 
+                     // For now, assume cloud is truth for shared props.
+                     // Preserve local ID and other props? Model is simple enough.
+                     // We must ensure we don't accidentally wipe generic props if they aren't in cloud map.
+                     // But our map covers most.
+                 }
+
+                 await _databaseService.UpdateItemSyncStatusAsync(newItem);
+             }
+             catch(Exception ex)
+             {
+                 Debug.WriteLine($"Error processing cloud item: {ex.Message}");
+             }
+        }
+
+        public async Task PushChangesAsync()
         {
             if (!await _authService.IsAuthenticatedAsync()) return;
             await InitClient();
+            
+            var dirtyItems = await _databaseService.GetDirtyItemsAsync();
+            if (!dirtyItems.Any()) return;
 
-            try
+            foreach (var item in dirtyItems)
             {
-                var userId = _authService.GetCurrentUserId();
-                var attributeMap = new Dictionary<string, AttributeValue>
+                bool success = false;
+                 try
                 {
-                    { "UserId", new AttributeValue { S = userId } },
-                    { "Id", new AttributeValue { S = item.Id } },
-                    { "Name", new AttributeValue { S = item.Name } },
-                    { "IsPurchased", new AttributeValue { BOOL = item.IsPurchased } },
-                    { "Category", new AttributeValue { S = item.Category ?? "" } }
-                };
-
-                var request = new PutItemRequest
+                    if (item.IsDeleted)
+                    {
+                        await DeleteItemOnCloudAsync(item);
+                        // If hard delete from cloud success, allow hard delete from local??
+                        // For now we keep soft delete in local to prevent zombie resurrection, but mark dirty=false
+                        success = true;
+                    }
+                    else
+                    {
+                        await PushItemToCloudAsync(item);
+                        success = true;
+                    }
+                }
+                catch (Exception ex)
                 {
-                    TableName = AwsConfig.ItemsTableName,
-                    Item = attributeMap
-                };
+                    Debug.WriteLine($"Sync Push Error for {item.Name}: {ex.Message}");
+                }
 
-                await _dynamoClient.PutItemAsync(request);
+                if (success)
+                {
+                    // Update Local
+                    item.IsDirty = false;
+                    
+                    if (item.IsDeleted)
+                    {
+                        // If successfully deleted from cloud, we can remove from local to keep DB clean?
+                        // Or keep as "Tombstone"? Let's keep as tombstone for now but not dirty.
+                        await _databaseService.UpdateItemSyncStatusAsync(item);
+                    }
+                    else
+                    {
+                        await _databaseService.UpdateItemSyncStatusAsync(item);
+                    }
+                }
             }
-             catch (Exception ex)
-            {
-                Debug.WriteLine($"PushItem Error: {ex.Message}");
-            }
+        }
+
+        private async Task PushItemToCloudAsync(ShoppingItem item)
+        {
+             var userId = _authService.GetCurrentUserId();
+             var attributeMap = new Dictionary<string, AttributeValue>
+             {
+                 { "UserId", new AttributeValue { S = userId } },
+                 { "Id", new AttributeValue { S = item.Id } },
+                 { "Name", new AttributeValue { S = item.Name } },
+                 { "IsPurchased", new AttributeValue { BOOL = item.IsPurchased } },
+                 { "Category", new AttributeValue { S = item.Category ?? "" } },
+                 { "listId", new AttributeValue { S = item.ListId ?? "default" } },
+                 { "UpdatedAt", new AttributeValue { S = (item.LastUpdated ?? DateTime.UtcNow).ToString("O") } }
+             };
+             // ... PutItemRequest
+             var request = new PutItemRequest
+             {
+                 TableName = AwsConfig.ItemsTableName,
+                 Item = attributeMap
+             };
+             await _dynamoClient.PutItemAsync(request);
+        }
+
+        private async Task DeleteItemOnCloudAsync(ShoppingItem item)
+        {
+             var userId = _authService.GetCurrentUserId();
+             var request = new DeleteItemRequest
+             {
+                 TableName = AwsConfig.ItemsTableName,
+                 Key = new Dictionary<string, AttributeValue> {
+                     { "UserId", new AttributeValue { S = userId } },
+                     { "Id", new AttributeValue { S = item.Id } }
+                 }
+             };
+             await _dynamoClient.DeleteItemAsync(request);
         }
 
         public async Task DeleteItemAsync(string itemId)
