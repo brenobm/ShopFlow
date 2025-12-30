@@ -9,6 +9,7 @@ using BrenoMachado.ShopFlow.Views.Popups;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
+    using AppResources = BrenoMachado.ShopFlow.Resources.Strings.AppResources;
     [QueryProperty(nameof(ListId), "Id")]
     public class ActiveListViewModel : BaseViewModel, IQueryAttributable
     {
@@ -315,14 +316,14 @@ namespace BrenoMachado.ShopFlow.ViewModels
         async Task DeleteItemAsync(ShoppingItem item)
         {
             if(item == null) return;
-            bool confirm = await Shell.Current.DisplayAlert("Delete", $"Remove {item.Name}?", "Yes", "No");
+            bool confirm = await Shell.Current.DisplayAlert(AppResources.Delete, string.Format(AppResources.Msg_RemoveItemConfirmation, item.Name), AppResources.Yes, AppResources.No);
             if(confirm)
             {
                 try {
                    await _shoppingRepository.DeleteItemAsync(item);
                     await LoadItemsAsync();
                 } catch(Exception ex) {
-                     await Application.Current.MainPage.DisplayAlert("Error", $"Failed to delete: {ex.Message}", "OK");
+                     await Application.Current.MainPage.DisplayAlert(AppResources.Error, $"Failed to delete: {ex.Message}", "OK");
                 }
             }
         }
@@ -427,7 +428,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 // 5. Not Found anywhere? -> Register
                 if (string.IsNullOrWhiteSpace(productName))
                 {
-                    bool register = await Shell.Current.DisplayAlert("Not Found", "Product not found. Do you want to register it?", "Yes", "No");
+                    bool register = await Shell.Current.DisplayAlert(AppResources.Warning, AppResources.Msg_ProductNotFoundRegister, AppResources.Yes, AppResources.No);
                     if (!register) return;
 
                     productName = await Shell.Current.DisplayPromptAsync("Register Product", "Enter product name:");
@@ -458,12 +459,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
                 if (matchFound)
                 {
-                     await Shell.Current.DisplayAlert("Match!", $"Marked '{productName}' as bought.", "OK");
+                     await Shell.Current.DisplayAlert("Match!", string.Format(AppResources.Msg_MarkedBought, productName), "OK");
                 }
                 else
                 {
                     // 7. Add if new
-                    bool add = await Shell.Current.DisplayAlert("New Item", $"Add '{productName}' to list?", "Yes", "No");
+                    bool add = await Shell.Current.DisplayAlert(AppResources.AddItem, string.Format(AppResources.Msg_AddProductToList, productName), AppResources.Yes, AppResources.No);
                     if (add)
                     {
                         var parsed = _smartService.ParseItemInput(productName);
@@ -475,7 +476,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Error", $"Scan error: {ex.Message}", "OK");
+                await Shell.Current.DisplayAlert(AppResources.Error, string.Format(AppResources.Msg_ScanError, ex.Message), "OK");
             }
         }
 
@@ -527,11 +528,11 @@ namespace BrenoMachado.ShopFlow.ViewModels
             try
             {
                 await _graphQLService.ShareListAsync(CurrentList.Id, email.Trim());
-                await Application.Current.MainPage.DisplayAlert("Success", $"Invited {email} to list.", "OK");
+                await Application.Current.MainPage.DisplayAlert(AppResources.Success, string.Format(AppResources.Msg_InviteSuccess, email), "OK");
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", $"Failed to share list: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert(AppResources.Error, string.Format(AppResources.Msg_ShareFailed, ex.Message), "OK");
             }
         }
 
@@ -606,7 +607,18 @@ namespace BrenoMachado.ShopFlow.ViewModels
              
              try 
              {
-                await Microsoft.Maui.Media.TextToSpeech.SpeakAsync(textBuilder.ToString());
+                 var settings = new SpeechOptions()
+                 {
+                     Locale = await Microsoft.Maui.Media.TextToSpeech.GetLocalesAsync().ContinueWith(t => 
+                     {
+                        var locales = t.Result;
+                        var currentCulture = _localizationService.GetCurrentCulture();
+                        // Find best matching locale (e.g. pt-BR)
+                        return locales.FirstOrDefault(l => l.Language == currentCulture.TwoLetterISOLanguageName) ?? locales.FirstOrDefault();
+                     })
+                 };
+
+                await Microsoft.Maui.Media.TextToSpeech.SpeakAsync(textBuilder.ToString(), settings);
              }
              catch(Exception ex)
              {

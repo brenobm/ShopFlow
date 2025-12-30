@@ -4,6 +4,7 @@ using BrenoMachado.ShopFlow.Views;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
+    using AppResources = BrenoMachado.ShopFlow.Resources.Strings.AppResources;
     public class LoginViewModel : BaseViewModel
     {
         private readonly IAuthService _authService;
@@ -73,7 +74,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                await Application.Current.MainPage.DisplayAlert("Error", "Please enter username and password", "OK");
+                await Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.Msg_EnterCredentials, "OK");
                 IsBusy = false;
                 return;
             }
@@ -93,19 +94,19 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 else
                 {
                     Console.WriteLine("[LoginViewModel] Login failed (success=false). Showing alert.");
-                    await Application.Current.MainPage.DisplayAlert("Error", "Login failed. Check credentials.", "OK");
+                    await Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.Msg_LoginFailed, "OK");
                 }
             }
             catch (Amazon.CognitoIdentityProvider.Model.UserNotConfirmedException)
             {
                 Console.WriteLine("[LoginViewModel] UserNotConfirmedException caught.");
-                await Application.Current.MainPage.DisplayAlert("Verify", "Account exists but is not confirmed. Please check your email for the code.", "OK");
+                await Application.Current.MainPage.DisplayAlert(AppResources.Btn_Verify, AppResources.Msg_AccountUnconfirmed, "OK");
                 IsVerification = true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[LoginViewModel] Exception caught: {ex.Message}");
-                await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                await Application.Current.MainPage.DisplayAlert(AppResources.Error, ex.Message, "OK");
             }
             finally
             {
@@ -121,7 +122,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(Email))
             {
-                await Application.Current.MainPage.DisplayAlert("Error", "All fields are required", "OK");
+                await Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.Msg_FieldsRequired, "OK");
                 IsBusy = false;
                 return;
             }
@@ -132,14 +133,14 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 if (success)
                 {
 
-                    await Application.Current.MainPage.DisplayAlert("Success", "Account created! Please check your email for the verification code.", "OK");
+                    await Application.Current.MainPage.DisplayAlert(AppResources.Success, AppResources.Msg_AccountCreated, "OK");
                     IsVerification = true; 
                     IsSignUp = false;
                 }
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                await Application.Current.MainPage.DisplayAlert(AppResources.Error, ex.Message, "OK");
             }
             finally
             {
@@ -153,7 +154,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(VerificationCode))
             {
-                await Application.Current.MainPage.DisplayAlert("Error", "Username and Code are required", "OK");
+                await Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.Msg_UsernameCodeRequired, "OK");
                 IsBusy = false;
                 return;
             }
@@ -163,14 +164,14 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 bool success = await _authService.ConfirmSignUpAsync(Username, VerificationCode);
                 if (success)
                 {
-                    await Application.Current.MainPage.DisplayAlert("Success", "Account verified! You can now login.", "OK");
+                    await Application.Current.MainPage.DisplayAlert(AppResources.Success, AppResources.Msg_AccountVerified, "OK");
                     IsVerification = false;
                     IsSignUp = false; // Go to Login
                 }
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                await Application.Current.MainPage.DisplayAlert(AppResources.Error, ex.Message, "OK");
             }
             finally
             {

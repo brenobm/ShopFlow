@@ -178,4 +178,124 @@
   <data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="QuickTuneTitle" xml:space="preserve">
+    <value>Quick Tune</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="BoughtTimes" xml:space="preserve">
+    <value>Bought {0} times</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Msg_LoginFailed" xml:space="preserve">
+    <value>Login failed. Check credentials.</value>
+  </data>
+  <data name="Msg_EnterCredentials" xml:space="preserve">
+    <value>Please enter username and password</value>
+  </data>
+  <data name="Msg_AccountUnconfirmed" xml:space="preserve">
+    <value>Account exists but is not confirmed. Please check your email for the code.</value>
+  </data>
+  <data name="Msg_FieldsRequired" xml:space="preserve">
+    <value>All fields are required</value>
+  </data>
+  <data name="Msg_AccountCreated" xml:space="preserve">
+    <value>Account created! Please check your email for the verification code.</value>
+  </data>
+  <data name="Msg_UsernameCodeRequired" xml:space="preserve">
+    <value>Username and Code are required</value>
+  </data>
+  <data name="Msg_AccountVerified" xml:space="preserve">
+    <value>Account verified! You can now login.</value>
+  </data>
+  <data name="Msg_NameRequired" xml:space="preserve">
+    <value>Name is required</value>
+  </data>
+  <data name="Msg_SaveFailed" xml:space="preserve">
+    <value>Save failed: {0}</value>
+  </data>
+  <data name="Msg_DeleteListConfirmation" xml:space="preserve">
+    <value>Delete list '{0}'?</value>
+  </data>
+  <data name="Msg_DeleteAllDataWarning" xml:space="preserve">
+    <value>This will delete ALL your lists and items. This action cannot be undone.</value>
+  </data>
+  <data name="Msg_AllDataCleared" xml:space="preserve">
+    <value>All data cleared.</value>
+  </data>
+  <data name="Title_DataManagement" xml:space="preserve">
+    <value>Data Management</value>
+  </data>
+  <data name="Text_ClearDataWarning" xml:space="preserve">
+    <value>Clear all your shopping lists and items. This cannot be undone.</value>
+  </data>
+  <data name="Btn_ClearData" xml:space="preserve">
+    <value>Clear All Data</value>
+  </data>
+  <data name="Title_About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="Btn_Verify" xml:space="preserve">
+    <value>Verify</value>
+  </data>
+  <data name="Text_VerifyingSession" xml:space="preserve">
+    <value>Verifying session...</value>
+  </data>
+  <data name="Msg_InviteSuccess" xml:space="preserve">
+    <value>Invited {0} to list.</value>
+  </data>
+  <data name="Msg_RemoveItemConfirmation" xml:space="preserve">
+    <value>Remove {0}?</value>
+  </data>
+  <data name="Msg_VoiceAdded" xml:space="preserve">
+    <value>Added '{0}'</value>
+  </data>
+  <data name="Msg_ProductNotFoundRegister" xml:space="preserve">
+    <value>Product not found. Do you want to register it?</value>
+  </data>
+  <data name="Msg_MarkedBought" xml:space="preserve">
+    <value>Marked '{0}' as bought.</value>
+  </data>
+  <data name="Msg_AddProductToList" xml:space="preserve">
+    <value>Add '{0}' to list?</value>
+  </data>
+  <data name="Msg_PermissionDenied" xml:space="preserve">
+    <value>Permission Denied</value>
+  </data>
+  <data name="Msg_MicRequired" xml:space="preserve">
+    <value>Microphone permission is required.</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Unit_Qty" xml:space="preserve">
+    <value>qty</value>
+  </data>
+  <data name="Placeholder_VerificationCode" xml:space="preserve">
+    <value>Verification Code</value>
+  </data>
+  <data name="Text_AlreadyHaveAccount" xml:space="preserve">
+    <value>Already have an account? Login</value>
+  </data>
+  <data name="Text_NeedAccount" xml:space="preserve">
+    <value>Need an account? Sign Up</value>
+  </data>
+  <data name="Btn_New" xml:space="preserve">
+    <value>+ New</value>
+  </data>
+  <data name="Placeholder_ItemName" xml:space="preserve">
+    <value>e.g., Bananas</value>
+  </data>
 </root>

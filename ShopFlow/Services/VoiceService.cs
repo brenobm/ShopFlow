@@ -4,6 +4,7 @@ using CommunityToolkit.Maui.Media;
 
 namespace BrenoMachado.ShopFlow.Services
 {
+    using AppResources = BrenoMachado.ShopFlow.Resources.Strings.AppResources;
     public class VoiceService : IVoiceService
     {
         private ISpeechToText _speechToText => SpeechToText.Default;
@@ -14,9 +15,6 @@ namespace BrenoMachado.ShopFlow.Services
         {
             _localizationService = localizationService;
         }
-        
-        // Add Constructor for backward compatibility if needed, but safer to force DI.
-        // Or if DI fails, fallback? No, we registered it.
         
         public async Task<string> ListenAsync()
         {
@@ -31,7 +29,7 @@ namespace BrenoMachado.ShopFlow.Services
                     var micStatus = await Permissions.RequestAsync<Permissions.Microphone>();
                     if (micStatus != PermissionStatus.Granted)
                     {
-                         await Shell.Current.DisplayAlert("Permission Denied", "Microphone permission is required.", "OK");
+                         await Shell.Current.DisplayAlert(AppResources.Msg_PermissionDenied, AppResources.Msg_MicRequired, "OK");
                          return null;
                     }
 
@@ -41,7 +39,7 @@ namespace BrenoMachado.ShopFlow.Services
                         var speechStatus = await Permissions.RequestAsync<Permissions.Speech>();
                         if (speechStatus != PermissionStatus.Granted)
                         {
-                            await Shell.Current.DisplayAlert("Permission Denied", "Speech Recognition permission is required.", "OK");
+                            await Shell.Current.DisplayAlert(AppResources.Msg_PermissionDenied, AppResources.Msg_SpeechRequired, "OK");
                             return null;
                         }
                     }
@@ -66,7 +64,7 @@ namespace BrenoMachado.ShopFlow.Services
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Voice Error", $"An internal error occurred: {ex.Message}", "OK");
+                await Shell.Current.DisplayAlert(AppResources.Error, string.Format(AppResources.Msg_VoiceError, ex.Message), "OK");
                 return null;
             }
         }

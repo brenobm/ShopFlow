@@ -17,7 +17,7 @@
         <Entry Placeholder="{x:Static strings:AppResources.Password}" Text="{Binding Password}" IsPassword="True" IsVisible="{Binding IsVerification, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}"/>
 
         <!-- Verification Code -->
-        <Entry Placeholder="Verification Code" Text="{Binding VerificationCode}" IsVisible="{Binding IsVerification}" Keyboard="Numeric"/>
+        <Entry Placeholder="{x:Static strings:AppResources.Placeholder_VerificationCode}" Text="{Binding VerificationCode}" IsVisible="{Binding IsVerification}" Keyboard="Numeric"/>
 
         <Button Text="{x:Static strings:AppResources.LoginButton}" 
                 Command="{Binding LoginCommand}" 
@@ -31,19 +31,19 @@
                 BackgroundColor="#10B981" 
                 TextColor="White"/>
 
-        <Button Text="Verify" 
+        <Button Text="{x:Static strings:AppResources.Btn_Verify}" 
                 Command="{Binding VerifyCommand}" 
                 IsVisible="{Binding IsVerification}"
                 BackgroundColor="#F59E0B" 
                 TextColor="White"/>
 
-        <Button Text="{Binding IsSignUp, StringFormat='Already have an account? Login'}" 
+        <Button Text="{Binding IsSignUp, StringFormat='{x:Static strings:AppResources.Text_AlreadyHaveAccount}'}" 
                 Command="{Binding ToggleModeCommand}"
                 BackgroundColor="Transparent"
                 TextColor="#2563EB"
                 IsVisible="{Binding IsSignUp}"/>
 
-        <Button Text="{Binding IsLogin, StringFormat='Need an account? Sign Up'}" 
+        <Button Text="{Binding IsLogin, StringFormat='{x:Static strings:AppResources.Text_NeedAccount}'}" 
                 Command="{Binding ToggleModeCommand}"
                 BackgroundColor="Transparent"
                 TextColor="#2563EB"

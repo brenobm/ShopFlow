@@ -23,9 +23,9 @@
 
         <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
             <StackLayout Spacing="10">
-                <Label Text="Data Management" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
-                <Label Text="Clear all your shopping lists and items. This cannot be undone." TextColor="#6B7280" FontSize="14"/>
-                <Button Text="Clear All Data" 
+                <Label Text="{x:Static strings:AppResources.Title_DataManagement}" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
+                <Label Text="{x:Static strings:AppResources.Text_ClearDataWarning}" TextColor="#6B7280" FontSize="14"/>
+                <Button Text="{x:Static strings:AppResources.Btn_ClearData}" 
                         Command="{Binding ClearDataCommand}"
                         BackgroundColor="#EF4444"
                         TextColor="White"/>
@@ -44,7 +44,7 @@
 
         <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
             <StackLayout Spacing="5">
-                 <Label Text="About" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
+                 <Label Text="{x:Static strings:AppResources.Title_About}" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
                  <Label Text="{x:Static strings:AppResources.AppTitle}" FontSize="16" TextColor="#111827"/>
                  <Label Text="{Binding Version, StringFormat='Version {0}'}" TextColor="#6B7280"/>
             </StackLayout>

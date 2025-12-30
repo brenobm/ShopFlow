@@ -29,7 +29,7 @@
                         <Frame Margin="0,5" Padding="15" BackgroundColor="White" CornerRadius="8" BorderColor="Transparent" HasShadow="False">
                             <Grid ColumnDefinitions="*, Auto">
                                 <Label Text="{Binding Name}" FontSize="16" TextColor="#374151" VerticalOptions="Center"/>
-                                <Label Grid.Column="1" Text="{Binding Count, StringFormat='Bought {0} times'}" FontSize="14" TextColor="#6B7280" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="{Binding Count, StringFormat='{x:Static strings:AppResources.BoughtTimes}'}" FontSize="14" TextColor="#6B7280" VerticalOptions="Center"/>
                             </Grid>
                         </Frame>
                     </DataTemplate>

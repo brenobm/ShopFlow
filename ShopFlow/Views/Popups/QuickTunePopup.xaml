@@ -12,7 +12,7 @@
             Padding="20">
             
         <VerticalStackLayout Spacing="15">
-            <Label Text="Quick Tune" 
+            <Label Text="{x:Static strings:AppResources.QuickTuneTitle}" 
                    FontSize="18" 
                    FontAttributes="Bold" 
                    HorizontalOptions="Center"
@@ -36,15 +36,15 @@
             
             <!-- Quick Units -->
             <FlexLayout Wrap="Wrap" JustifyContent="Center" AlignItems="Center" Direction="Row">
-                <Button Text="qty" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
+                <Button Text="{x:Static strings:AppResources.Unit_Qty}" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
                 <Button Text="kg" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
                 <Button Text="g" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
                 <Button Text="L" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
                 <Button Text="ml" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
-                <Button Text="pack" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
+                <Button Text="{x:Static strings:AppResources.Unit_Pack}" Clicked="OnUnitClicked" Margin="4" Padding="10,0" HeightRequest="30" FontSize="12" BackgroundColor="#F3F4F6" TextColor="Black" CornerRadius="15"/>
             </FlexLayout>
 
-            <Button Text="Done" Clicked="OnDoneClicked" 
+            <Button Text="{x:Static strings:AppResources.Done}" Clicked="OnDoneClicked" 
                     BackgroundColor="#2563EB" TextColor="White" 
                     CornerRadius="10" Margin="0,10,0,0"/>
 

@@ -178,4 +178,124 @@
   <data name="Close" xml:space="preserve">
     <value>Fechar</value>
   </data>
+  <data name="QuickTuneTitle" xml:space="preserve">
+    <value>Ajuste Rápido</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Concluir</value>
+  </data>
+  <data name="BoughtTimes" xml:space="preserve">
+    <value>Comprado {0} vezes</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Erro</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Sucesso</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Aviso</value>
+  </data>
+  <data name="Msg_LoginFailed" xml:space="preserve">
+    <value>Login falhou. Verifique suas credenciais.</value>
+  </data>
+  <data name="Msg_EnterCredentials" xml:space="preserve">
+    <value>Por favor, digite usuário e senha</value>
+  </data>
+  <data name="Msg_AccountUnconfirmed" xml:space="preserve">
+    <value>Conta existe mas não está confirmada. Verifique seu email.</value>
+  </data>
+  <data name="Msg_FieldsRequired" xml:space="preserve">
+    <value>Todos os campos são obrigatórios</value>
+  </data>
+  <data name="Msg_AccountCreated" xml:space="preserve">
+    <value>Conta criada! Verifique seu email para o código de confirmação.</value>
+  </data>
+  <data name="Msg_UsernameCodeRequired" xml:space="preserve">
+    <value>Usuário e Código são obrigatórios</value>
+  </data>
+  <data name="Msg_AccountVerified" xml:space="preserve">
+    <value>Conta verificada! Você pode logar agora.</value>
+  </data>
+  <data name="Msg_NameRequired" xml:space="preserve">
+    <value>Nome é obrigatório</value>
+  </data>
+  <data name="Msg_SaveFailed" xml:space="preserve">
+    <value>Falha ao salvar: {0}</value>
+  </data>
+  <data name="Msg_DeleteListConfirmation" xml:space="preserve">
+    <value>Excluir lista '{0}'?</value>
+  </data>
+  <data name="Msg_DeleteAllDataWarning" xml:space="preserve">
+    <value>Isso apagará TODAS as listas e itens. Esta ação não pode ser desfeita.</value>
+  </data>
+  <data name="Msg_AllDataCleared" xml:space="preserve">
+    <value>Todos os dados apagados.</value>
+  </data>
+  <data name="Title_DataManagement" xml:space="preserve">
+    <value>Gerenciamento de Dados</value>
+  </data>
+  <data name="Text_ClearDataWarning" xml:space="preserve">
+    <value>Limpar todas as listas e itens. Isso não pode ser desfeito.</value>
+  </data>
+  <data name="Btn_ClearData" xml:space="preserve">
+    <value>Limpar Tudo</value>
+  </data>
+  <data name="Title_About" xml:space="preserve">
+    <value>Sobre</value>
+  </data>
+  <data name="Btn_Verify" xml:space="preserve">
+    <value>Verificar</value>
+  </data>
+  <data name="Text_VerifyingSession" xml:space="preserve">
+    <value>Verificando sessão...</value>
+  </data>
+  <data name="Msg_InviteSuccess" xml:space="preserve">
+    <value>Convidou {0} para a lista.</value>
+  </data>
+  <data name="Msg_RemoveItemConfirmation" xml:space="preserve">
+    <value>Remover {0}?</value>
+  </data>
+  <data name="Msg_VoiceAdded" xml:space="preserve">
+    <value>Adicionado '{0}'</value>
+  </data>
+  <data name="Msg_ProductNotFoundRegister" xml:space="preserve">
+    <value>Produto não encontrado. Deseja cadastrá-lo?</value>
+  </data>
+  <data name="Msg_MarkedBought" xml:space="preserve">
+    <value>Marcado '{0}' como comprado.</value>
+  </data>
+  <data name="Msg_AddProductToList" xml:space="preserve">
+    <value>Adicionar '{0}' à lista?</value>
+  </data>
+  <data name="Msg_PermissionDenied" xml:space="preserve">
+    <value>Permissão Negada</value>
+  </data>
+  <data name="Msg_MicRequired" xml:space="preserve">
+    <value>Permissão de microfone necessária.</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Sim</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Não</value>
+  </data>
+  <data name="Unit_Qty" xml:space="preserve">
+    <value>un</value>
+  </data>
+  <data name="Placeholder_VerificationCode" xml:space="preserve">
+    <value>Código de Verificação</value>
+  </data>
+  <data name="Text_AlreadyHaveAccount" xml:space="preserve">
+    <value>Já tem uma conta? Entrar</value>
+  </data>
+  <data name="Text_NeedAccount" xml:space="preserve">
+    <value>Precisa de uma conta? Cadastre-se</value>
+  </data>
+  <data name="Btn_New" xml:space="preserve">
+    <value>+ Novo</value>
+  </data>
+  <data name="Placeholder_ItemName" xml:space="preserve">
+    <value>ex: Bananas</value>
+  </data>
 </root>
