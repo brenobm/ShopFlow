@@ -30,18 +30,18 @@ namespace BrenoMachado.ShopFlow.Services
                     {
                         string platform = DeviceInfo.Platform.ToString();
                         await _graphQLService.RegisterDeviceAsync(token, platform);
-                        Console.WriteLine($"[PushService] Registered device token: {token}");
+                        FileLoggerService.LogStatic($"[PushService] Registered device token: {token}");
                     }
                 }
                 catch (Exception ex)
                 {
-                     Console.WriteLine($"[PushService] Firebase Token Error: {ex.Message}");
+                     FileLoggerService.LogStatic($"[PushService] Firebase Token Error: {ex.Message}");
                 }
 #endif
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[PushService] Error registering for push: {ex.Message}");
+                FileLoggerService.LogStatic($"[PushService] Error registering for push: {ex.Message}");
             }
         }
     }

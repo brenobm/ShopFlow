@@ -70,7 +70,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
             if (IsBusy) return;
             IsBusy = true;
-            Console.WriteLine("[LoginViewModel] LoginAsync started.");
+            FileLoggerService.LogStatic("[LoginViewModel] LoginAsync started.");
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
@@ -99,19 +99,19 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
             catch (Amazon.CognitoIdentityProvider.Model.UserNotConfirmedException)
             {
-                Console.WriteLine("[LoginViewModel] UserNotConfirmedException caught.");
+                FileLoggerService.LogStatic("[LoginViewModel] UserNotConfirmedException caught.");
                 await Application.Current.MainPage.DisplayAlert(AppResources.Btn_Verify, AppResources.Msg_AccountUnconfirmed, "OK");
                 IsVerification = true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[LoginViewModel] Exception caught: {ex.Message}");
+                FileLoggerService.LogStatic($"[LoginViewModel] Exception caught: {ex.Message}");
                 await Application.Current.MainPage.DisplayAlert(AppResources.Error, ex.Message, "OK");
             }
             finally
             {
                 IsBusy = false;
-                Console.WriteLine("[LoginViewModel] IsBusy set to false.");
+                FileLoggerService.LogStatic("[LoginViewModel] IsBusy set to false.");
             }
         }
 

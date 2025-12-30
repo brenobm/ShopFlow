@@ -63,7 +63,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading stats: {ex.Message}");
+                FileLoggerService.LogStatic($"Error loading stats: {ex.Message}");
             }
             finally
             {

@@ -38,7 +38,7 @@ namespace BrenoMachado.ShopFlow.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"SignUp Error: {ex.Message}");
+                FileLoggerService.LogStatic($"SignUp Error: {ex.Message}");
                 throw; // Rethrow to show message in ViewModel
             }
         }
@@ -61,14 +61,14 @@ namespace BrenoMachado.ShopFlow.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Confirmation Error: {ex.Message}");
+                FileLoggerService.LogStatic($"Confirmation Error: {ex.Message}");
                 throw;
             }
         }
 
         public async Task<bool> LoginAsync(string username, string password)
         {
-            Console.WriteLine($"[AuthService] LoginAsync called for user: {username}");
+            FileLoggerService.LogStatic($"[AuthService] LoginAsync called for user: {username}");
             try
             {
                 var user = new CognitoUser(username, AwsConfig.UserPoolClientId, _userPool, _providerClient);
@@ -101,8 +101,8 @@ namespace BrenoMachado.ShopFlow.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[AuthService] Login Error: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Login Error: {ex.Message}");
+                FileLoggerService.LogStatic($"[AuthService] Login Error: {ex.Message}");
+                FileLoggerService.LogStatic($"Login Error: {ex.Message}");
                 throw;
             }
         }
@@ -156,7 +156,7 @@ namespace BrenoMachado.ShopFlow.Services
             } 
             catch (Exception ex)
             {
-                Console.WriteLine($"[AuthService] Auto-login failed: {ex.Message}");
+                FileLoggerService.LogStatic($"[AuthService] Auto-login failed: {ex.Message}");
                 // Clean up invalid state
                 SecureStorage.Remove("auth_refresh_token");
             }

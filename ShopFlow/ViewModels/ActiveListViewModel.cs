@@ -144,7 +144,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading list: {ex.Message}");
+                FileLoggerService.LogStatic($"Error loading list: {ex.Message}");
             }
         }
 
@@ -220,7 +220,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
              } 
              catch(Exception ex)
              {
-                 System.Diagnostics.Debug.WriteLine($"Error loading items: {ex.Message}");
+                 FileLoggerService.LogStatic($"Error loading items: {ex.Message}");
              }
         }
 
@@ -450,7 +450,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Failed to save global product: {ex.Message}");
+                        FileLoggerService.LogStatic($"Failed to save global product: {ex.Message}");
                     }
                 }
                 

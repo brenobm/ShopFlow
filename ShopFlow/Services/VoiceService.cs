@@ -18,13 +18,13 @@ namespace BrenoMachado.ShopFlow.Services
         
         public async Task<string> ListenAsync()
         {
-            System.Diagnostics.Debug.WriteLine("VoiceService.ListenAsync Called");
+            FileLoggerService.LogStatic("VoiceService.ListenAsync Called");
             try
             {
                 // Ensure we are on the Main Thread for iOS Speech Recognition
                 return await MainThread.InvokeOnMainThreadAsync(async () => 
                 {
-                    System.Diagnostics.Debug.WriteLine("Requesting Permissions...");
+                    FileLoggerService.LogStatic("Requesting Permissions...");
                     
                     var micStatus = await Permissions.RequestAsync<Permissions.Microphone>();
                     if (micStatus != PermissionStatus.Granted)
@@ -49,14 +49,14 @@ namespace BrenoMachado.ShopFlow.Services
                          System.Diagnostics.Debug.WriteLine($"Partial: {partialText}");
                     });
 
-                    System.Diagnostics.Debug.WriteLine($"Starting ListenAsync with culture: {_localizationService.GetCurrentCulture().Name}");
+                    FileLoggerService.LogStatic($"Starting ListenAsync with culture: {_localizationService.GetCurrentCulture().Name}");
                     
                     var recognitionResult = await _speechToText.ListenAsync(
                         _localizationService.GetCurrentCulture(),
                         progress,
                         CancellationToken.None);
                     
-                    System.Diagnostics.Debug.WriteLine($"Recognition Result: {recognitionResult.IsSuccessful} - {recognitionResult.Text}");
+                    FileLoggerService.LogStatic($"Recognition Result: {recognitionResult.IsSuccessful} - {recognitionResult.Text}");
                     return recognitionResult.IsSuccessful ? recognitionResult.Text : null;
                 });
 

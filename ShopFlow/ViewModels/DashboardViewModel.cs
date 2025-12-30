@@ -75,7 +75,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     }
                     catch (Exception syncEx)
                     {
-                        Console.WriteLine($"Cloud Sync Failed: {syncEx.Message}");
+                        FileLoggerService.LogStatic($"Cloud Sync Failed: {syncEx.Message}");
                         // Suppress error so user still sees local data
                     }
                 }
@@ -128,7 +128,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                      }
                      catch (Exception cloudEx)
                      {
-                         Console.WriteLine($"Cloud Create Failed: {cloudEx.Message}");
+                         FileLoggerService.LogStatic($"Cloud Create Failed: {cloudEx.Message}");
                          // Fallback to offline creation if cloud fails
                          newList.IsDirty = true;
                      }

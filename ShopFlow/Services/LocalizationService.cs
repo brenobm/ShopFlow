@@ -47,7 +47,7 @@ public class LocalizationService : ILocalizationService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to set culture {cultureCode}: {ex.Message}");
+            FileLoggerService.LogStatic($"Failed to set culture {cultureCode}: {ex.Message}");
         }
     }
 }

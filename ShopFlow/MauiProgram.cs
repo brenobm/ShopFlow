@@ -46,6 +46,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IPushService, PushService>();
         builder.Services.AddSingleton<IShoppingRepository, ShoppingRepository>();
         builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
+        builder.Services.AddSingleton<ILoggerService, FileLoggerService>();
         builder.Services.AddSingleton<IOfflineSyncService, OfflineSyncService>();
         
         // Plugin.LocalNotification
@@ -76,6 +77,7 @@ public static class MauiProgram
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<ReportsViewModel>();
+        builder.Services.AddTransient<LogsViewModel>();
 
         // Views
         builder.Services.AddSingleton<DashboardPage>();
@@ -83,8 +85,8 @@ public static class MauiProgram
         builder.Services.AddTransient<ItemDetailPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<ReportsPage>();
-        
         builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<LogsPage>();
 
         return builder.Build();
     }

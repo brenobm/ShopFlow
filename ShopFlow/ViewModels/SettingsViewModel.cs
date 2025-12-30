@@ -44,6 +44,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         private readonly ILocalizationService _localizationService;
 
+        public ICommand GoToLogsCommand { get; }
+
+        // ...
+
         public SettingsViewModel(IDatabaseService databaseService, IAppNotificationService notificationService, ILocalizationService localizationService)
         {
             _databaseService = databaseService;
@@ -61,6 +65,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             ClearDataCommand = new Command(async () => await ClearDataAsync());
             TestPushCommand = new Command(async () => await TestPushAsync());
+            GoToLogsCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(LogsPage)));
             
             // Auto-init on settings open (or app start ideally)
             _ = _notificationService.InitializeAsync();
@@ -84,7 +89,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             // Also try to get token
             try {
                 var token = await _notificationService.GetDeviceTokenAsync();
-                Console.WriteLine($"Token: {token}");
+                FileLoggerService.LogStatic($"Token: {token}");
             } catch {}
         }
 

@@ -2,6 +2,8 @@
 using Intents;
 using UIKit;
 
+using BrenoMachado.ShopFlow.Services;
+
 namespace BrenoMachado.ShopFlow;
 
 [Register("AppDelegate")]
@@ -27,16 +29,16 @@ public class AppDelegate : MauiUIApplicationDelegate
             switch (status)
             {
                 case Intents.INSiriAuthorizationStatus.Authorized:
-                    Console.WriteLine("Siri Authorized");
+                    FileLoggerService.LogStatic("Siri Authorized");
                     break;
                 case Intents.INSiriAuthorizationStatus.Denied:
-                    Console.WriteLine("Siri Denied");
+                    FileLoggerService.LogStatic("Siri Denied");
                     break;
                 case Intents.INSiriAuthorizationStatus.NotDetermined:
-                    Console.WriteLine("Siri Not Determined");
+                    FileLoggerService.LogStatic("Siri Not Determined");
                     break;
                 case Intents.INSiriAuthorizationStatus.Restricted:
-                    Console.WriteLine("Siri Restricted");
+                    FileLoggerService.LogStatic("Siri Restricted");
                     break;
             }
         });
@@ -58,7 +60,7 @@ public class AppDelegate : MauiUIApplicationDelegate
                  foreach (var item in items)
                  {
                      var itemName = item.SpokenPhrase;
-                     Console.WriteLine($"Siri Request to Add: {itemName}");
+                     FileLoggerService.LogStatic($"Siri Request to Add: {itemName}");
                      
                      // Dispatch to main thread to navigate/add
                      MainThread.BeginInvokeOnMainThread(async () => 
@@ -73,7 +75,7 @@ public class AppDelegate : MauiUIApplicationDelegate
 
         if (userActivity.ActivityType == "com.brenomachado.shopflow.additem")
         {
-            Console.WriteLine("Opened via Siri Shortcut");
+            FileLoggerService.LogStatic("Opened via Siri Shortcut");
             return true;
         }
         return base.ContinueUserActivity(application, userActivity, completionHandler);

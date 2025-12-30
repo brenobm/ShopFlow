@@ -70,7 +70,7 @@ namespace BrenoMachado.ShopFlow.Services
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Sync Pull Error: {ex.Message}");
+                FileLoggerService.LogStatic($"Sync Pull Error: {ex.Message}");
             }
         }
 
@@ -120,7 +120,7 @@ namespace BrenoMachado.ShopFlow.Services
              }
              catch(Exception ex)
              {
-                 Debug.WriteLine($"Error processing cloud item: {ex.Message}");
+                 FileLoggerService.LogStatic($"Error processing cloud item: {ex.Message}");
              }
         }
 
@@ -152,7 +152,7 @@ namespace BrenoMachado.ShopFlow.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Sync Push Error for {item.Name}: {ex.Message}");
+                    FileLoggerService.LogStatic($"Sync Push Error for {item.Name}: {ex.Message}");
                 }
 
                 if (success)
@@ -231,7 +231,7 @@ namespace BrenoMachado.ShopFlow.Services
             }
              catch (Exception ex)
             {
-                Debug.WriteLine($"DeleteItem Error: {ex.Message}");
+                FileLoggerService.LogStatic($"DeleteItem Error: {ex.Message}");
             }
         }
     }

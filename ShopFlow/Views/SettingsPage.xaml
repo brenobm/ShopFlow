@@ -39,6 +39,10 @@
                         Command="{Binding TestPushCommand}"
                         BackgroundColor="#3B82F6"
                         TextColor="White"/>
+                <Button Text="View App Logs" 
+                        Command="{Binding GoToLogsCommand}"
+                        BackgroundColor="#6B7280"
+                        TextColor="White"/>
             </StackLayout>
         </Frame>
 

@@ -53,7 +53,7 @@ namespace BrenoMachado.ShopFlow.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"OFF Sync Failed: {ex.Message}");
+                FileLoggerService.LogStatic($"OFF Sync Failed: {ex.Message}");
             }
         }
     }

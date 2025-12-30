@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
+             x:Class="BrenoMachado.ShopFlow.Views.LogsPage"
+             Title="{Binding Title}"
+             BackgroundColor="White">
+
+    <Grid RowDefinitions="*,Auto" Padding="10">
+        <Editor Text="{Binding Logs}" 
+                IsReadOnly="True" 
+                AutoSize="TextChanges" 
+                VerticalOptions="FillAndExpand" 
+                FontSize="12"
+                FontFamily="Monospace" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" Spacing="10" Padding="0,10,0,0">
+            <Button Text="Refresh" Command="{Binding RefreshCommand}" />
+            <Button Text="Clear" Command="{Binding ClearCommand}" BackgroundColor="#DC2626" TextColor="White" />
+            <Button Text="Copy" Command="{Binding CopyCommand}" BackgroundColor="#4B5563" />
+        </Grid>
+        
+        <ActivityIndicator IsRunning="{Binding IsBusy}" 
+                           IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center" 
+                           VerticalOptions="Center"
+                           Color="{StaticResource Primary}" />
+    </Grid>
+</ContentPage>

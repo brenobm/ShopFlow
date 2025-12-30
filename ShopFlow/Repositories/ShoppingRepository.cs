@@ -30,7 +30,7 @@ namespace BrenoMachado.ShopFlow.Repositories
         {
             if (e.NetworkAccess == NetworkAccess.Internet)
             {
-                Debug.WriteLine("Connectivity Restored: Triggering Sync");
+                FileLoggerService.LogStatic("Connectivity Restored: Triggering Sync");
                 FireAndForgetSync();
             }
         }
