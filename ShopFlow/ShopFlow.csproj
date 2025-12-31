@@ -82,6 +82,9 @@
 	  <ApplicationVersion>45</ApplicationVersion>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<_SuppressXcodeVersionCheck>true</_SuppressXcodeVersionCheck>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<!-- App Icon -->
