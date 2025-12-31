@@ -511,11 +511,11 @@ namespace Backend
         var productSearchLambda = new Function(this, "ProductSearchHandler", new FunctionProps
         {
             Runtime = Runtime.DOTNET_8,
-            Code = Code.FromAsset("src/Lambdas/ProductSearch"),
+            Code = Amazon.CDK.AWS.Lambda.Code.FromAsset("src/Lambdas/ProductSearch"),
             Handler = "ProductSearch::ProductSearch.Function::FunctionHandler",
             MemorySize = 256,
             Timeout = Duration.Seconds(10),
-            LogRetention = RetentionDays.ONE_WEEK,
+            LogRetention = Amazon.CDK.AWS.Logs.RetentionDays.ONE_WEEK,
             Environment = new Dictionary<string, string>
             {
                 { "METRICS_TABLE_NAME", metricsTable.TableName }
