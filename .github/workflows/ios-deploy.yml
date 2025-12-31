@@ -20,6 +20,16 @@ jobs:
     - name: Install MAUI Workload
       run: dotnet workload install maui-ios maui-android maui-maccatalyst
 
+    # Add this step to restore the file
+    - name: Restore GoogleService-Info.plist
+      run: |
+        echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 --decode > Platforms/iOS/GoogleService-Info.plist
+
+    # Add this step to restore the file
+    - name: Restore google-services.json
+      run: |
+        echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 --decode > Platforms/Android/google-services.json
+
     # Install the Apple Certificate and Provisioning Profile
     - name: Install Apple Certificate
       uses: apple-actions/import-codesign-certs@v3
@@ -53,7 +63,7 @@ jobs:
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v1
       with:
-        app-path: 'bin/Release/net10.0-ios/ios-arm64/publish/ShopFlow.ipa'
+        app-path: 'bin/Release/net10.0-ios/ios-arm64/publish//ShopFlow.ipa'
         issuer-id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         api-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
         api-private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
