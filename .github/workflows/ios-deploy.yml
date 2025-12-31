@@ -39,13 +39,13 @@ jobs:
     # Build the App (Generates .ipa)
     - name: Build .NET MAUI iOS App
       run: |
-        dotnet publish -f net8.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="Apple Distribution: Your Name (TEAMID)" -p:CodesignProvision="MauiAppStoreProfile"
+        dotnet publish -f net10.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="Apple Distribution: Breno Batista Machado (8L386BMNSL)" -p:CodesignProvision="GitHubAppleStore"
 
     # Upload to TestFlight
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v1
       with:
-        app-path: 'bin/Release/net8.0-ios/ios-arm64/publish/YourApp.ipa'
+        app-path: 'bin/Release/net10.0-ios/ios-arm64/publish/ShopFlow.ipa'
         issuer-id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         api-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
         api-private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
