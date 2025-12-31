@@ -23,12 +23,12 @@ jobs:
     # Add this step to restore the file
     - name: Restore GoogleService-Info.plist
       run: |
-        echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 --decode > Platforms/iOS/GoogleService-Info.plist
+        echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 --decode > ShopFlow/Platforms/iOS/GoogleService-Info.plist
 
     # Add this step to restore the file
     - name: Restore google-services.json
       run: |
-        echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 --decode > Platforms/Android/google-services.json
+        echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 --decode > ShopFlow/Platforms/Android/google-services.json
 
     # Install the Apple Certificate and Provisioning Profile
     - name: Install Apple Certificate
