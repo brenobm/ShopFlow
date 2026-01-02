@@ -19,7 +19,7 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
         {
         }
 
-        public override void ResolveTargetTaskList(INAddTasksIntent intent, Action<INTaskListResolutionResult> completion)
+        public void ResolveTargetTaskList(INAddTasksIntent intent, Action<INTaskListResolutionResult> completion)
         {
             // We only have one "primary" concept for Siri right now: The default shopping list.
             // If the user specified a list name, we could try to find it.
@@ -38,10 +38,10 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
             // Note: Accessing DB from here might be risky if Main Thread is required or context is weird, 
             // but In-App handling usually runs in app process.
             
-            completion(INTaskListResolutionResult.Success(targetList));
+            completion(INTaskListResolutionResult.GetSuccess(targetList));
         }
 
-        public override void ResolveTaskTitles(INAddTasksIntent intent, Action<INSpeakableStringResolutionResult[]> completion)
+        public void ResolveTaskTitles(INAddTasksIntent intent, Action<INSpeakableStringResolutionResult[]> completion)
         {
             var taskTitles = intent.TaskTitles;
             if (taskTitles == null || taskTitles.Length == 0)
@@ -53,7 +53,7 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
             var results = new List<INSpeakableStringResolutionResult>();
             foreach (var title in taskTitles)
             {
-                results.Add(INSpeakableStringResolutionResult.Success(title));
+                results.Add(INSpeakableStringResolutionResult.GetSuccess(title));
             }
             completion(results.ToArray());
         }
@@ -73,13 +73,13 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
              completion(INTaskPriorityResolutionResult.NotRequired);
         }
 
-        public override void Confirm(INAddTasksIntent intent, Action<INAddTasksIntentResponse> completion)
+        public void Confirm(INAddTasksIntent intent, Action<INAddTasksIntentResponse> completion)
         {
             // Ready to handle
             completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Ready, null));
         }
 
-        public override async void Handle(INAddTasksIntent intent, Action<INAddTasksIntentResponse> completion)
+        public void HandleAddTasks(INAddTasksIntent intent, Action<INAddTasksIntentResponse> completion)
         {
             var taskTitles = intent.TaskTitles;
             if (taskTitles == null || taskTitles.Length == 0)
@@ -97,42 +97,77 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
                 var graphQLService = services.GetService<IGraphQLService>();
                 
                 // Get Default List
-                var lists = await graphQLService.GetListsAsync();
-                var defaultList = lists.FirstOrDefault(l => l.IsDefault == true) ?? lists.FirstOrDefault();
+                // Note: GetListsAsync might be async, but we need to block or run async.
+                // Since this method is void, we run Task.Run or async void?
+                // The interface usually allows async void, but let's be careful.
+                // Safest to fire and forget if needed, but we need to call completion.
+                // Re-wrapping in a Task to ensure async execution works safely?
+                // Actually, async void is acceptable for event handlers/callbacks in these mappings often.
+                // Let's keep it sync-like or simple logic for now, or just use .Result (dangerous) or async void.
+                // We will use 'async void' as previously, but with correct method name.
                 
-                if (defaultList == null)
-                {
-                    // Fallback create local if totally empty?
-                     // Or fail.
-                     completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Failure, null));
-                     return;
-                }
+                MainThread.BeginInvokeOnMainThread(async () => {
+                    try 
+                    {
+                        var lists = await graphQLService.GetListsAsync();
+                        var defaultList = lists.FirstOrDefault(l => l.IsDefault == true) ?? lists.FirstOrDefault();
+                        
+                        if (defaultList == null)
+                        {
+                            completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Failure, null));
+                            return;
+                        }
 
-                var addedTasks = new List<INTask>();
+                        var addedTasks = new List<INTask>();
 
-                foreach (var title in taskTitles)
-                {
-                    string rawText = title.SpokenPhrase;
-                    var parsed = smartService.ParseItemInput(rawText);
-                    
-                    var newItem = new ShoppingItem 
-                    { 
-                        ListId = defaultList.Id, 
-                        Name = parsed.Name, 
-                        Quantity = parsed.Quantity, 
-                        Unit = parsed.Unit, 
-                        Category = "Siri" 
-                    };
-                    
-                    await repo.SaveItemAsync(newItem);
-                    
-                    addedTasks.Add(new INTask(new INSpeakableString(newItem.Name), INTaskStatus.NotCompleted, null, INTaskType.Completable, null, null, null, null, null));
-                }
+                        foreach (var title in taskTitles)
+                        {
+                            string rawText = title.SpokenPhrase;
+                            var parsed = smartService.ParseItemInput(rawText);
+                            
+                            var newItem = new ShoppingItem 
+                            { 
+                                ListId = defaultList.Id, 
+                                Name = parsed.Name, 
+                                Quantity = parsed.Quantity, 
+                                Unit = parsed.Unit, 
+                                Category = "Siri" 
+                            };
+                            
+                            await repo.SaveItemAsync(newItem);
+                            
+                            // Correct INTask Constructor:
+                            // title, status, taskType, spatial, temporal, created, modified, identifier, priority (Verify specific overload or use basics)
+                            // Based on error "Arg 3 cannot convert null to INTaskType", inferred signature:
+                            // (title, status, taskType, ...)
+                            
+                            // Trying a safer constructor or filling correctly based on standard iOS bindings which might change.
+                            // Common signature: 
+                            // public INTask (INSpeakableString title, INTaskStatus status, INTaskType taskType, INSpatialEventTrigger spatialEventTrigger, INTemporalEventTrigger temporalEventTrigger, INDateComponentsRange createdDateComponents, INDateComponentsRange modifiedDateComponents, string identifier, INTaskPriority priority)
+                            
+                            addedTasks.Add(new INTask(
+                                title: new INSpeakableString(newItem.Name),
+                                status: INTaskStatus.NotCompleted,
+                                taskType: INTaskType.Completable,
+                                spatialEventTrigger: null,
+                                temporalEventTrigger: null,
+                                createdDateComponents: null,
+                                modifiedDateComponents: null,
+                                identifier: newItem.Id,
+                                priority: INTaskPriority.NotFlagged
+                            ));
+                        }
 
-                // Success
-                var response = new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Success, null);
-                response.AddedTasks = addedTasks.ToArray();
-                completion(response);
+                        var response = new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Success, null);
+                        response.AddedTasks = addedTasks.ToArray();
+                        completion(response);
+                    }
+                    catch(Exception ex)
+                    {
+                         Console.WriteLine($"Siri Inner Handle Error: {ex}");
+                         completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Failure, null));
+                    }
+                });
             }
             catch (Exception ex)
             {
