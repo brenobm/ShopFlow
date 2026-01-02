@@ -115,8 +115,8 @@
 
 	<ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
 		<BundleResource Include="Platforms/iOS/GoogleService-Info.plist" LogicalName="GoogleService-Info.plist" Condition="Exists('Platforms/iOS/GoogleService-Info.plist')" />
-		<BundleResource Include="Platforms\iOS\en.lproj\AppIntentVocabulary.plist" />
-		<BundleResource Include="Platforms\iOS\pt.lproj\AppIntentVocabulary.plist" />
+		<BundleResource Include="Platforms/iOS/en.lproj/AppIntentVocabulary.plist" />
+		<BundleResource Include="Platforms/iOS/pt.lproj/AppIntentVocabulary.plist" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework.Contains('-android'))">

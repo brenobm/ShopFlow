@@ -284,6 +284,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task AddItemAsync()
         {
+             if (CurrentList == null)
+             {
+                 // Try to resolve default list
+                 var lists = await _graphQLService.GetListsAsync();
+                 CurrentList = lists.FirstOrDefault(l => l.IsDefault == true) ?? lists.FirstOrDefault() ?? new ShoppingList { Id = Guid.NewGuid().ToString(), Name = "My List", IsDefault = true };
+             }
+
              await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?ListId={CurrentList.Id}");
         }
 
