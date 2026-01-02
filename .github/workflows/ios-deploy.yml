@@ -63,7 +63,7 @@ jobs:
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v1
       with:
-        app-path: 'bin/Release/net10.0-ios/ios-arm64/publish//ShopFlow.ipa'
+        app-path: 'bin/Release/net10.0-ios/ios-arm64/publish/ShopFlow.ipa'
         issuer-id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         api-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
         api-private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
