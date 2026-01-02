@@ -81,5 +81,16 @@ public class AppDelegate : MauiUIApplicationDelegate
         return base.ContinueUserActivity(application, userActivity, completionHandler);
     }
 
+    public override UIViewController? GetViewController(UIApplication application, string[] restorationIdentifierComponents, NSCoder coder) => base.GetViewController(application, restorationIdentifierComponents, coder);
+
+    public override NSObject GetHandlerForIntent(UIApplication application, INIntent intent)
+    {
+        if (intent is INAddTasksIntent)
+        {
+            return new BrenoMachado.ShopFlow.Platforms.iOS.AddTasksIntentHandler();
+        }
+        return base.GetHandlerForIntent(application, intent);
+    }
+    
 	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 }
