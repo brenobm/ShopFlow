@@ -60,7 +60,7 @@ public class ShoppingItem : System.ComponentModel.INotifyPropertyChanged
         "Other"
     };
 
-    public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 }

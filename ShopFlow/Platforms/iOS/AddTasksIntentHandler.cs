@@ -7,11 +7,15 @@ using Microsoft.Maui;
 
 namespace BrenoMachado.ShopFlow.Platforms.iOS
 {
-    public class AddTasksIntentHandler : INAddTasksIntentHandling
+    [Register("AddTasksIntentHandler")]
+    public class AddTasksIntentHandler : NSObject, IINAddTasksIntentHandling
     {
-        // Must be empty constructor for generic instantiation if needed, but we might pass dependencies manually if we use DI
-        // Ideally we resolve dependencies via MauiApp.Current.Services
+        // Must be empty constructor for generic instantiation if needed
         public AddTasksIntentHandler()
+        {
+        }
+
+        public AddTasksIntentHandler(IntPtr handle) : base(handle)
         {
         }
 
@@ -52,6 +56,21 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
                 results.Add(INSpeakableStringResolutionResult.Success(title));
             }
             completion(results.ToArray());
+        }
+
+        public void ResolveSpatialEventTrigger(INAddTasksIntent intent, Action<INSpatialEventTriggerResolutionResult> completion)
+        {
+            completion(INSpatialEventTriggerResolutionResult.NotRequired);
+        }
+
+        public void ResolveTemporalEventTrigger(INAddTasksIntent intent, Action<INTemporalEventTriggerResolutionResult> completion)
+        {
+            completion(INTemporalEventTriggerResolutionResult.NotRequired);
+        }
+
+        public void ResolvePriority(INAddTasksIntent intent, Action<INTaskPriorityResolutionResult> completion)
+        {
+             completion(INTaskPriorityResolutionResult.NotRequired);
         }
 
         public override void Confirm(INAddTasksIntent intent, Action<INAddTasksIntentResponse> completion)
