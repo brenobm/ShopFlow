@@ -43,6 +43,9 @@ public class AppDelegate : MauiUIApplicationDelegate
             }
         });
 
+        // Initialize Firebase
+        Firebase.Core.App.Configure();
+
         return base.FinishedLaunching(application, launchOptions);
     }
 

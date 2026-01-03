@@ -480,6 +480,11 @@ namespace Backend
             globalProductsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
             deviceTokensTable.GrantWriteData(identityPool.AuthenticatedRole); // AppSync writes via Resolver, but Role needs access potentially if configured in AppSync UserPoolConfig default
 
+            // Fix: Grant access to legacy table "ShopFlow_Items" used by the App
+            var legacyItemsTable = Table.FromTableName(this, "ShopFlowItemsLegacy", "ShopFlow_Items");
+            legacyItemsTable.GrantReadData(identityPool.AuthenticatedRole);
+            legacyItemsTable.GrantWriteData(identityPool.AuthenticatedRole);
+
            
             /*
             // Allow Lambda to Use Pinpoint
