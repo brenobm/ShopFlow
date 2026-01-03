@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
              xmlns:partials="clr-namespace:BrenoMachado.ShopFlow.Views.Partials"
              xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
+             xmlns:views="clr-namespace:BrenoMachado.ShopFlow.Views"
              x:Class="BrenoMachado.ShopFlow.Views.MainContainerPage"
              BackgroundColor="#f3f4f6"
              Title="{Binding Title, Mode=OneWay}">
@@ -11,6 +12,13 @@
     <ContentPage.BindingContext>
         <vm:MainContainerViewModel />
     </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <views:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <views:BoolToTextColorConverter x:Key="BoolToTextColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid IgnoreSafeArea="True">
         <!-- Main Content Area -->
@@ -68,11 +76,5 @@
         </Border>
     </Grid>
 
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <!-- We need converters for the selection state style -->
-            <!-- Ideally would use VisualStateManager but Converters are quick for this pill logic -->
-            <!-- I will add the converters in the code behind or global resources if they don't exist -->
-        </ResourceDictionary>
-    </ContentPage.Resources>
+
 </ContentPage>
