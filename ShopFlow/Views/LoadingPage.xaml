@@ -5,9 +5,17 @@
              x:Class="BrenoMachado.ShopFlow.Views.LoadingPage"
              BackgroundColor="White">
     <Grid>
+        <Grid>
         <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
-            <ActivityIndicator IsRunning="True" Color="#2563EB" HeightRequest="50" WidthRequest="50"/>
-            <Label Text="{x:Static strings:AppResources.Text_VerifyingSession}" TextColor="#6B7280" HorizontalOptions="Center"/>
+            <ActivityIndicator IsRunning="True" Color="{StaticResource Primary}" />
+            <Label Text="{x:Static strings:AppResources.Text_VerifyingSession}" 
+                   HorizontalOptions="Center" />
+            
+            <!-- DEBUGGING START -->
+            <Button Text="Show Logs" Clicked="OnShowLogsClicked" BackgroundColor="DarkRed" TextColor="White" Margin="0,50,0,0" />
+            <Button Text="Login (Manual)" Clicked="OnManualLoginClicked" BackgroundColor="Gray" TextColor="White" />
+            <!-- DEBUGGING END -->
         </VerticalStackLayout>
+    </Grid>
     </Grid>
 </ContentPage>

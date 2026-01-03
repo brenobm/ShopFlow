@@ -24,6 +24,9 @@ public partial class LoadingPage : ContentPage
     {
         try
         {
+            // Logging start
+            FileLoggerService.LogStatic("[LoadingPage] Starting CheckAuthAsync...");
+            
             // Add a small delay for UX
             await Task.Delay(500);
 
@@ -36,39 +39,73 @@ public partial class LoadingPage : ContentPage
 
             if (completedTask == timeoutTask)
             {
-                // Timeout occurred
-                System.Diagnostics.Debug.WriteLine($"[LoadingPage] Auth check timed out!");
+                FileLoggerService.LogStatic("[LoadingPage] Auth check timed out!");
                 await DisplayAlert("Error", "Authentication check timed out. Please try again.", "OK");
-                
-                // Fallback to login to avoid getting stuck
-                var loginPage = _serviceProvider.GetService<LoginPage>();
-                Application.Current.MainPage = loginPage;
+                // REVERT: Uncomment to enable auto-navigation
+                // var loginPage = _serviceProvider.GetService<LoginPage>();
+                // Application.Current.MainPage = loginPage;
                 return;
             }
 
-            bool isAuthenticated = await authTask; // Result is already available
-            System.Diagnostics.Debug.WriteLine($"[LoadingPage] Authenticated: {isAuthenticated}");
+            bool isAuthenticated = await authTask; 
+            FileLoggerService.LogStatic($"[LoadingPage] Authenticated: {isAuthenticated}");
 
             if (isAuthenticated)
             {
-                var pushService = _serviceProvider.GetService<IPushService>();
-                Application.Current.MainPage = new AppShell(_authService, pushService);
+                FileLoggerService.LogStatic("[LoadingPage] Preparing to navigate to AppShell (Authenticated)...");
+                // REVERT: Uncomment to enable auto-navigation
+                // var pushService = _serviceProvider.GetService<IPushService>();
+                // Application.Current.MainPage = new AppShell(_authService, pushService);
+                
+                await DisplayAlert("Debug", "Authenticated! Ready to navigate to AppShell. Check Logs.", "OK");
             }
             else
             {
-                 // Resolve LoginPage via DI to ensure ViewModel injection
-                 var loginPage = _serviceProvider.GetService<LoginPage>();
-                 Application.Current.MainPage = loginPage;
+                 FileLoggerService.LogStatic("[LoadingPage] Not Authenticated. Preparing to navigate to LoginPage...");
+                 // REVERT: Uncomment to enable auto-navigation
+                 // var loginPage = _serviceProvider.GetService<LoginPage>();
+                 // Application.Current.MainPage = loginPage;
+                 
+                 await DisplayAlert("Debug", "Not Authenticated. Ready to navigate to LoginPage. Check Logs.", "OK");
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[LoadingPage] Error: {ex}");
+            FileLoggerService.LogStatic($"[LoadingPage] Error: {ex}");
             await DisplayAlert("Error", $"Startup Error: {ex.Message}", "OK");
             
-            // Fallback to login on error
-            var loginPage = _serviceProvider.GetService<LoginPage>();
-            Application.Current.MainPage = loginPage;
+            // REVERT: Uncomment to enable auto-navigation
+            // var loginPage = _serviceProvider.GetService<LoginPage>();
+            // Application.Current.MainPage = loginPage;
+        }
+    }
+    
+    // DEBUGGING HANDLERS
+    private async void OnShowLogsClicked(object sender, EventArgs e)
+    {
+        try 
+        {
+            var logger = FileLoggerService.Instance;
+            var vm = new BrenoMachado.ShopFlow.ViewModels.LogsViewModel(logger);
+            var page = new LogsPage(vm);
+            await Navigation.PushModalAsync(page);
+        }
+        catch(Exception ex)
+        {
+            await DisplayAlert("Error", "Could not open logs: " + ex.Message, "OK");
+        }
+    }
+
+    private void OnManualLoginClicked(object sender, EventArgs e)
+    {
+        try
+        {
+             var loginPage = _serviceProvider.GetService<LoginPage>();
+             Application.Current.MainPage = loginPage;
+        }
+        catch(Exception ex)
+        {
+            DisplayAlert("Error", "Could not navigate: " + ex.Message, "OK");
         }
     }
 }
