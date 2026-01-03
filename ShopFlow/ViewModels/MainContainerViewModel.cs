@@ -14,8 +14,17 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         public MainContainerViewModel()
         {
-            Title = "ShopFlow";
-            IsListsViewVisible = true;
+            try
+            {
+                FileLoggerService.LogStatic("[MainContainerViewModel] Constructor started.");
+                Title = "ShopFlow";
+                IsListsViewVisible = true;
+                FileLoggerService.LogStatic("[MainContainerViewModel] Constructor finished.");
+            }
+            catch (Exception ex)
+            {
+                FileLoggerService.LogStatic($"[MainContainerViewModel] CRASH in Constructor: {ex}");
+            }
         }
 
         [RelayCommand]

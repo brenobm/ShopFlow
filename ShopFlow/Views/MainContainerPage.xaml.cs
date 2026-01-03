@@ -8,7 +8,30 @@ namespace BrenoMachado.ShopFlow.Views
     {
         public MainContainerPage()
         {
-            InitializeComponent();
+            try
+            {
+                FileLoggerService.LogStatic("[MainContainerPage] Constructor started.");
+                InitializeComponent();
+                FileLoggerService.LogStatic("[MainContainerPage] Constructor finished (InitializeComponent done).");
+            }
+            catch (Exception ex)
+            {
+                FileLoggerService.LogStatic($"[MainContainerPage] CRASH in Constructor: {ex}");
+                // Try to show alert if possible (might not be if page is crashing)
+            }
+        }
+
+        protected override void OnAppearing()
+        {
+             try
+            {
+                base.OnAppearing();
+                FileLoggerService.LogStatic("[MainContainerPage] OnAppearing called.");
+            }
+            catch (Exception ex)
+            {
+                FileLoggerService.LogStatic($"[MainContainerPage] CRASH in OnAppearing: {ex}");
+            }
         }
     }
     
