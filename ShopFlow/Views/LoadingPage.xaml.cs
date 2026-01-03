@@ -14,6 +14,14 @@ public partial class LoadingPage : ContentPage
         _serviceProvider = serviceProvider;
     }
 
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await CheckAuthAsync();
+    }
+
+    async Task CheckAuthAsync()
+    {
         try
         {
             // Add a small delay for UX
@@ -39,20 +47,6 @@ public partial class LoadingPage : ContentPage
             }
 
             bool isAuthenticated = await authTask; // Result is already available
-
-            System.Diagnostics.Debug.WriteLine($"[LoadingPage] Authenticated: {isAuthenticated}");
-            
-            // ... strict transition logic ...
-
-    async Task CheckAuthAsync()
-    {
-        try
-        {
-            // Add a small delay to ensure UI renders if check is too fast (optional, but good for smooth UX)
-            await Task.Delay(500);
-
-            bool isAuthenticated = await _authService.IsAuthenticatedAsync();
-
             System.Diagnostics.Debug.WriteLine($"[LoadingPage] Authenticated: {isAuthenticated}");
 
             if (isAuthenticated)
@@ -70,8 +64,11 @@ public partial class LoadingPage : ContentPage
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[LoadingPage] Error: {ex}");
-            // Optional: Show alert
             await DisplayAlert("Error", $"Startup Error: {ex.Message}", "OK");
+            
+            // Fallback to login on error
+            var loginPage = _serviceProvider.GetService<LoginPage>();
+            Application.Current.MainPage = loginPage;
         }
     }
 }
