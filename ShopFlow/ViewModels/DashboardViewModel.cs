@@ -96,54 +96,61 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                Lists.Clear();
-                int index = 0;
-                var ordered = source.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name);
-                
-                foreach (var list in ordered)
+                try
                 {
-                    // Initials Logic
-                    // For now, use "SF" or first letter of List Name as we don't have Owner Profile Name avail yet
-                    // (OwnerId is a GUID). 
-                    string initials = "SF";
-                    if (!string.IsNullOrEmpty(list.Name))
+                    if (source == null) return;
+                    
+                    Lists.Clear();
+                    int index = 0;
+                    var ordered = source.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name);
+                    
+                    foreach (var list in ordered)
                     {
-                        var parts = list.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length >= 2)
-                            initials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
-                        else if (parts.Length == 1)
-                            initials = $"{parts[0][0]}".ToUpper();
-                    }
-                    list.Initials = initials;
+                        // Initials Logic
+                        string initials = "SF";
+                        if (!string.IsNullOrEmpty(list.Name))
+                        {
+                            var parts = list.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length >= 2)
+                                initials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
+                            else if (parts.Length == 1)
+                                initials = $"{parts[0][0]}".ToUpper();
+                        }
+                        list.Initials = initials;
 
-                    // Color Logic (Cycle: Green -> Orange -> Blue -> Pink)
-                    int cycle = index % 4;
-                    switch (cycle)
-                    {
-                        case 0: // Green
-                            list.PrimaryColor = Color.FromArgb("#34D399");
-                            list.SecondaryColor = Color.FromArgb("#059669");
-                            list.TotalItemsCount = 32; list.BoughtItemsCount = 17; // Mock
-                            break;
-                        case 1: // Orange
-                            list.PrimaryColor = Color.FromArgb("#FBBF24");
-                            list.SecondaryColor = Color.FromArgb("#D97706");
-                            list.TotalItemsCount = 10; list.BoughtItemsCount = 3; // Mock
-                            break;
-                        case 2: // Blue
-                            list.PrimaryColor = Color.FromArgb("#60A5FA");
-                            list.SecondaryColor = Color.FromArgb("#2563EB");
-                            list.TotalItemsCount = 24; list.BoughtItemsCount = 8; // Mock
-                            break;
-                        case 3: // Pink
-                            list.PrimaryColor = Color.FromArgb("#F472B6");
-                            list.SecondaryColor = Color.FromArgb("#DB2777");
-                            list.TotalItemsCount = 5; list.BoughtItemsCount = 5; // Mock
-                            break;
-                    }
+                        // Color Logic
+                        int cycle = index % 4;
+                        switch (cycle)
+                        {
+                            case 0: // Green
+                                list.PrimaryColor = Color.FromArgb("#34D399");
+                                list.SecondaryColor = Color.FromArgb("#059669");
+                                list.TotalItemsCount = 32; list.BoughtItemsCount = 17; // Mock
+                                break;
+                            case 1: // Orange
+                                list.PrimaryColor = Color.FromArgb("#FBBF24");
+                                list.SecondaryColor = Color.FromArgb("#D97706");
+                                list.TotalItemsCount = 10; list.BoughtItemsCount = 3; // Mock
+                                break;
+                            case 2: // Blue
+                                list.PrimaryColor = Color.FromArgb("#60A5FA");
+                                list.SecondaryColor = Color.FromArgb("#2563EB");
+                                list.TotalItemsCount = 24; list.BoughtItemsCount = 8; // Mock
+                                break;
+                            case 3: // Pink
+                                list.PrimaryColor = Color.FromArgb("#F472B6");
+                                list.SecondaryColor = Color.FromArgb("#DB2777");
+                                list.TotalItemsCount = 5; list.BoughtItemsCount = 5; // Mock
+                                break;
+                        }
 
-                    Lists.Add(list);
-                    index++;
+                        Lists.Add(list);
+                        index++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    FileLoggerService.LogStatic($"[DashboardViewModel] UI Update Failed: {ex}");
                 }
             });
         }
