@@ -42,6 +42,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task LoadListsAsync()
         {
+            // Delay to allow navigation/UI transitions to complete (Fixes iOS Back Navigation Crash)
+            await Task.Delay(300);
+
             if (IsBusy) return;
 
             try
