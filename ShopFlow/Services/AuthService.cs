@@ -125,8 +125,10 @@ namespace BrenoMachado.ShopFlow.Services
 
             try 
             {
-                var refreshToken = await SecureStorage.GetAsync("auth_refresh_token");
-                var username = await SecureStorage.GetAsync("auth_username");
+                Console.WriteLine("[AuthService] IsAuthenticatedAsync: Accessing SecureStorage...");
+                var refreshToken = await SecureStorage.GetAsync("auth_refresh_token").ConfigureAwait(false);
+                var username = await SecureStorage.GetAsync("auth_username").ConfigureAwait(false);
+                Console.WriteLine($"[AuthService] IsAuthenticatedAsync: Token found: {!string.IsNullOrEmpty(refreshToken)}, User: {username}");
 
                 if (!string.IsNullOrEmpty(refreshToken) && !string.IsNullOrEmpty(username))
                 {
@@ -136,8 +138,10 @@ namespace BrenoMachado.ShopFlow.Services
                      user.SessionTokens = new CognitoUserSession(null, null, refreshToken, DateTime.Now, DateTime.Now.AddHours(1));
 
                      // Attempt to refresh
+                     Console.WriteLine("[AuthService] Starting Refresh Token Auth...");
                      var authRequest = new InitiateRefreshTokenAuthRequest { AuthFlowType = AuthFlowType.REFRESH_TOKEN_AUTH };
-                     var authResponse = await user.StartWithRefreshTokenAuthAsync(authRequest);
+                     var authResponse = await user.StartWithRefreshTokenAuthAsync(authRequest).ConfigureAwait(false);
+                     Console.WriteLine("[AuthService] Refresh Token Auth completed.");
                      
                      if (authResponse.AuthenticationResult != null)
                      {

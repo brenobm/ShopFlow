@@ -8,11 +8,16 @@ namespace BrenoMachado.ShopFlow.Views.Partials
         public DashboardView()
         {
             InitializeComponent();
-            // Resolve ViewModel. ideally passed in via Constructor if instantiated by DI, but for XAML inclusion we might need manual resolve or BindingContext inheritance
-            // Since this is a sub-view, let's grab the VM from the ServiceProvider
-            if (IPlatformApplication.Current?.Services != null)
+            try
             {
-                 BindingContext = IPlatformApplication.Current.Services.GetService<DashboardViewModel>();
+                if (IPlatformApplication.Current?.Services != null)
+                {
+                     BindingContext = IPlatformApplication.Current.Services.GetService<DashboardViewModel>();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DashboardView] Error resolving VM: {ex}");
             }
         }
     }

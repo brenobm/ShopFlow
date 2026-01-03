@@ -8,9 +8,16 @@ namespace BrenoMachado.ShopFlow.Views.Partials
         public ReportsView()
         {
             InitializeComponent();
-             if (IPlatformApplication.Current?.Services != null)
+            try
             {
-                 BindingContext = IPlatformApplication.Current.Services.GetService<ReportsViewModel>();
+                 if (IPlatformApplication.Current?.Services != null)
+                {
+                     BindingContext = IPlatformApplication.Current.Services.GetService<ReportsViewModel>();
+                }
+            }
+             catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ReportsView] Error resolving VM: {ex}");
             }
         }
     }
