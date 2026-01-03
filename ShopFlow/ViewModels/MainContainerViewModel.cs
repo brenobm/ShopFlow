@@ -43,5 +43,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
             IsReportsViewVisible = true;
             Title = "Reports & History";
         }
+
+        [RelayCommand]
+        private async Task GoToSettings()
+        {
+            // TEMPORARY: Open Logs Page as per user request
+            await Shell.Current.Navigation.PushModalAsync(new Views.LogsPage(new LogsViewModel(FileLoggerService.Instance)));
+        }
     }
 }
