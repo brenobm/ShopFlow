@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
+             xmlns:partials="clr-namespace:BrenoMachado.ShopFlow.Views.Partials"
+             xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
+             x:Class="BrenoMachado.ShopFlow.Views.MainContainerPage"
+             BackgroundColor="#f3f4f6"
+             Title="{Binding Title, Mode=OneWay}">
+
+    <ContentPage.BindingContext>
+        <vm:MainContainerViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid IgnoreSafeArea="True">
+        <!-- Main Content Area -->
+        <Grid>
+            <partials:DashboardView IsVisible="{Binding IsListsViewVisible}" />
+            <partials:ReportsView IsVisible="{Binding IsReportsViewVisible}" />
+        </Grid>
+
+        <!-- Floating Navigation Pill -->
+        <Border VerticalOptions="End" 
+                HorizontalOptions="Center" 
+                Margin="0,0,0,30" 
+                StrokeShape="RoundRectangle 30"
+                StrokeThickness="0"
+                BackgroundColor="White"
+                HeightRequest="60"
+                WidthRequest="220"
+                Shadow="{Shadow Brush=Black, Offset='0,4', Radius=10, Opacity=0.1}">
+            
+            <Grid ColumnDefinitions="*,*" Padding="5">
+                <!-- Lists Tab -->
+                <Grid GestureDetector.Recognizers="{TapGestureRecognizer Command={Binding SwitchToListsCommand}}">
+                    <Border StrokeShape="RoundRectangle 25" 
+                            StrokeThickness="0"
+                            BackgroundColor="{Binding IsListsViewVisible, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Selected'}"
+                            Margin="0">
+                        <Label Text="{x:Static strings:AppResources.Lists}" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center"
+                               FontAttributes="Bold"
+                               TextColor="{Binding IsListsViewVisible, Converter={StaticResource BoolToTextColorConverter}}" />
+                    </Border>
+                </Grid>
+
+                <!-- Reports Tab -->
+                <Grid Grid.Column="1" GestureDetector.Recognizers="{TapGestureRecognizer Command={Binding SwitchToReportsCommand}}">
+                    <Border StrokeShape="RoundRectangle 25" 
+                            StrokeThickness="0"
+                            BackgroundColor="{Binding IsReportsViewVisible, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Selected'}"
+                            Margin="0">
+                        <Label Text="{x:Static strings:AppResources.Reports}" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center"
+                               FontAttributes="Bold"
+                               TextColor="{Binding IsReportsViewVisible, Converter={StaticResource BoolToTextColorConverter}}" />
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- We need converters for the selection state style -->
+            <!-- Ideally would use VisualStateManager but Converters are quick for this pill logic -->
+            <!-- I will add the converters in the code behind or global resources if they don't exist -->
+        </ResourceDictionary>
+    </ContentPage.Resources>
+</ContentPage>

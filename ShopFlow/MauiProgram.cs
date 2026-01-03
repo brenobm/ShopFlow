@@ -71,6 +71,7 @@ public static class MauiProgram
         builder.UseBarcodeReader(); // Initialize ZXing
 
         // ViewModels
+        builder.Services.AddSingleton<MainContainerViewModel>();
         builder.Services.AddSingleton<DashboardViewModel>();
         builder.Services.AddTransient<ActiveListViewModel>();
         builder.Services.AddTransient<ItemDetailViewModel>();
@@ -80,6 +81,7 @@ public static class MauiProgram
         builder.Services.AddTransient<LogsViewModel>();
 
         // Views
+        builder.Services.AddSingleton<MainContainerPage>();
         builder.Services.AddSingleton<DashboardPage>();
         builder.Services.AddTransient<ActiveListPage>();
         builder.Services.AddTransient<ItemDetailPage>();

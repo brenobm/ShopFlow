@@ -9,13 +9,9 @@
 
 
 
-    <TabBar Route="Main">
-        <Tab Title="Lists" Icon="icon_dashboard.png">
-            <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" Route="DashboardPage" />
-        </Tab>
-        <Tab Title="Reports" Icon="icon_dashboard.png">
-            <ShellContent ContentTemplate="{DataTemplate views:ReportsPage}" Route="ReportsPage" />
-        </Tab>
-    </TabBar>
+    <ShellContent
+        Title="ShopFlow"
+        ContentTemplate="{DataTemplate views:MainContainerPage}"
+        Route="MainContainerPage" />
 
 </Shell>
