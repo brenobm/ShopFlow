@@ -1,39 +1,16 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
-    public class BaseViewModel : INotifyPropertyChanged
+    public partial class BaseViewModel : ObservableObject
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public void OnPropertyChanged([CallerMemberName] string name = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-            
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsNotBusy))]
         bool _isBusy;
-        public bool IsBusy
-        {
-            get => _isBusy;
-            set
-            {
-                if (_isBusy == value)
-                    return;
-                _isBusy = value;
-                OnPropertyChanged();
-            }
-        }
-        
+
+        [ObservableProperty]
         string _title;
-        public string Title
-        {
-            get => _title;
-            set
-            {
-                if (_title == value)
-                    return;
-                _title = value;
-                OnPropertyChanged();
-            }
-        }
+
+        public bool IsNotBusy => !IsBusy;
     }
 }
