@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
              xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
-             x:Class="BrenoMachado.ShopFlow.Views.Partials.DashboardView"
+             x:Class="BrenoMachado.ShopFlow.Views.Partials.DashboardView">
     <!-- Global Gradient Background -->
     <ContentView.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
@@ -28,7 +28,7 @@
                    Text="+" 
                    TextColor="White" 
                    FontSize="40" 
-                   FontAttributes="Light"
+                   FontAttributes="None"
                    VerticalOptions="Start"
                    HorizontalOptions="End"
                    Margin="0,10,0,0">
