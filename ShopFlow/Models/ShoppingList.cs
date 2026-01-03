@@ -26,4 +26,13 @@ public class ShoppingList
     public Microsoft.Maui.Graphics.Color PrimaryColor { get; set; }
     [Ignore]
     public Microsoft.Maui.Graphics.Color SecondaryColor { get; set; }
+    
+    // Stats for Dashboard
+    [Ignore]
+    public int TotalItemsCount { get; set; }
+    [Ignore]
+    public int BoughtItemsCount { get; set; }
+    
+    [Ignore]
+    public double Progress => TotalItemsCount == 0 ? 0 : (double)BoughtItemsCount / TotalItemsCount;
 }

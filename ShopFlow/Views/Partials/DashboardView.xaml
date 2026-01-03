@@ -7,71 +7,69 @@
              BackgroundColor="#F9FAFB">
     
     <!-- Modern Dashboard Grid -->
-    <Grid RowDefinitions="60, *" BackgroundColor="{StaticResource Secondary}"> 
-        <!-- Row 0: Header -->
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Primary}" Padding="16,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+    <Grid RowDefinitions="120, *" BackgroundColor="#F0F2F5"> 
+        <!-- Row 0: Rounded Header -->
+        <Border Grid.Row="0" 
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 0,0,30,30"
+                Margin="0,0,0,0">
+             <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#7C3AED" Offset="0.0" /> <!-- Purple -->
+                    <GradientStop Color="#2563EB" Offset="1.0" /> <!-- Blue -->
+                </LinearGradientBrush>
+            </Border.Background>
             
-            <!-- Menu Icon (Left) -->
-            <Image Grid.Column="0" 
-                   Source="menu_icon.png"  
-                   HeightRequest="24" 
-                   WidthRequest="24" 
-                   VerticalOptions="Center"
-                   BackgroundColor="Transparent">
-                   <Image.GestureRecognizers>
-                       <!-- FIX 3: Wire to Open Logs -->
-                       <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=GoToLogsCommand}" />
-                   </Image.GestureRecognizers>
-            </Image>
-            <Label Grid.Column="0" Text="☰" TextColor="White" FontSize="24" VerticalOptions="Center" IsVisible="False"/>
+            <Grid Padding="20,10,20,0" ColumnDefinitions="*, Auto">
+                <!-- Title -->
+                <Label Grid.Column="0" 
+                       Text="Shopping Lists" 
+                       TextColor="White" 
+                       FontSize="28" 
+                       FontAttributes="Bold" 
+                       VerticalOptions="Center" />
 
-            <!-- Title (Center) -->
-            <Label Grid.Column="1" 
-                   Text="ShopFlow" 
-                   TextColor="White" 
-                   FontSize="20" 
-                   FontAttributes="Bold" 
-                   HorizontalOptions="Center" 
-                   VerticalOptions="Center" />
-
-            <!-- Profile Icon (Right) -->
-             <Image Grid.Column="2" 
-                   Source="profile_icon.png" 
-                   HeightRequest="30" 
-                   WidthRequest="30" 
-                   VerticalOptions="Center"
-                   Aspect="AspectFill">
-                   <Image.Clip>
-                       <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15" />
-                   </Image.Clip>
-            </Image>
-             <Label Grid.Column="2" Text="👤" TextColor="White" FontSize="24" VerticalOptions="Center" IsVisible="False"/>
-        </Grid>
+                <!-- Add Button (Plus) -->
+                <Border Grid.Column="1"
+                        HeightRequest="40"
+                        WidthRequest="40"
+                        StrokeShape="RoundRectangle 20"
+                        StrokeThickness="1"
+                        Stroke="White"
+                        BackgroundColor="Transparent"
+                        VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding AddListCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="+" 
+                           TextColor="White" 
+                           FontSize="24" 
+                           HorizontalOptions="Center" 
+                           VerticalOptions="Center" 
+                           Margin="0,-2,0,0"/>
+                </Border>
+            </Grid>
+        </Border>
 
         <!-- Row 1: Content -->
         <CollectionView Grid.Row="1" 
                         ItemsSource="{Binding Lists}"
                         SelectionMode="None"
-                        BackgroundColor="#F0F2F5"
-                        Margin="0">
+                        BackgroundColor="Transparent"
+                        Margin="0,20,0,0"> <!-- Top margin to separate from rounded header -->
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Orientation="Vertical" 
-                                 Span="2" 
-                                 VerticalItemSpacing="12" 
-                                 HorizontalItemSpacing="12" />
+                                 Span="1" 
+                                 VerticalItemSpacing="16" 
+                                 HorizontalItemSpacing="16" />
             </CollectionView.ItemsLayout>
             
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Border HeightRequest="160"
+                    <Border HeightRequest="130"
                             StrokeShape="RoundRectangle 20"
                             StrokeThickness="0"
-                            Margin="8"> <!-- 16 padding on collectionview handled via outer margin or padding -->
+                            Margin="16,0"> <!-- Horizontal margin for side padding -->
                         
                         <Border.Shadow>
                             <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.1" />
@@ -89,53 +87,44 @@
                                                   CommandParameter="{Binding .}" />
                         </Border.GestureRecognizers>
 
-                        <Grid Padding="16">
-                            <!-- Top Left: Name -->
-                            <Label Text="{Binding Name}"
-                                   TextColor="White"
-                                   FontSize="16"
-                                   FontAttributes="Bold"
-                                   MaxLines="2"
-                                   LineBreakMode="TailTruncation"
-                                   VerticalOptions="Start"
-                                   HorizontalOptions="Start" />
-                            
-                            <!-- Middle: Progress Bar (Mock) -->
-                             <Grid VerticalOptions="Center" Margin="0,10">
-                                <!-- Background Track -->
-                                <BoxView HeightRequest="4" 
-                                         Color="White" 
-                                         Opacity="0.3" 
-                                         CornerRadius="2" 
-                                         HorizontalOptions="Fill" />
-                                <!-- Fill (Mock 60%) -->
-                                <BoxView HeightRequest="4" 
-                                         Color="White" 
-                                         Opacity="1.0" 
-                                         CornerRadius="2" 
-                                         WidthRequest="60" 
-                                         HorizontalOptions="Start" />
+                        <Grid Padding="16" RowDefinitions="Auto,*,Auto">
+                            <!-- Top: Title and Icon -->
+                            <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0"
+                                       Text="{Binding Name}"
+                                       TextColor="White"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       LineBreakMode="TailTruncation" />
+                                
+                                <!-- Icon Placeholder -->
+                                <Label Grid.Column="1"
+                                       Text="🛒" 
+                                       FontSize="24"
+                                       TextColor="White"
+                                       Opacity="0.8" />
                             </Grid>
+                            
+                            <!-- Middle: Stats -->
+                            <VerticalStackLayout Grid.Row="1" VerticalOptions="Center" Spacing="2">
+                                <Label Text="{Binding TotalItemsCount, StringFormat='{0} items'}"
+                                       TextColor="White"
+                                       FontSize="14"
+                                       Opacity="0.9" />
+                                <Label Text="{Binding BoughtItemsCount, StringFormat='{0} items'}"
+                                       TextColor="White"
+                                       FontSize="12"
+                                       Opacity="0.7" />
+                            </VerticalStackLayout>
 
-                            <!-- Bottom Right: Collaborators -->
-                            <HorizontalStackLayout VerticalOptions="End" 
-                                                   HorizontalOptions="End" 
-                                                   BindableLayout.ItemsSource="{Binding .}" 
-                                                   Spacing="-8"> <!-- Negative spacing for overlap -->
-                                <!-- We just show one bubble for Owner/Self for now since we don't have list of collaborators in model yet -->
-                                <Border StrokeShape="RoundRectangle 15"
-                                        StrokeThickness="0"
-                                        HeightRequest="30"
-                                        WidthRequest="30"
-                                        BackgroundColor="#33FFFFFF">
-                                    <Label Text="{Binding Initials}" 
-                                           TextColor="White" 
-                                           FontSize="10" 
-                                           FontAttributes="Bold"
-                                           HorizontalOptions="Center" 
-                                           VerticalOptions="Center"/>
-                                </Border>
-                            </HorizontalStackLayout>
+                            <!-- Bottom: Progress Bar -->
+                             <!-- Bottom: Progress Bar -->
+                             <Grid Grid.Row="2" VerticalOptions="End" Margin="0,10,0,0">
+                                <ProgressBar Progress="{Binding Progress}" 
+                                             ProgressColor="White" 
+                                             ScaleY="2.0"
+                                             BackgroundColor="#4CFFFFFF" /> <!-- 30% White -->
+                            </Grid>
                         </Grid>
                     </Border>
                 </DataTemplate>
@@ -145,20 +134,4 @@
                  <BoxView HeightRequest="100" Color="Transparent" />
             </CollectionView.Footer>
         </CollectionView>
-
-        <!-- Floating Action Button -->
-        <Button Grid.Row="1"
-                Text="+"
-                Command="{Binding AddListCommand}"
-                BackgroundColor="#2563EB"
-                TextColor="White"
-                CornerRadius="30"
-                HeightRequest="60"
-                WidthRequest="60"
-                FontSize="30"
-                Margin="20,20,20,80" 
-                HorizontalOptions="End"
-                VerticalOptions="End"
-                Shadow="{Shadow Brush=Black, Offset='0,5', Radius=5, Opacity=0.2}"/>
-    </Grid>
 </ContentView>

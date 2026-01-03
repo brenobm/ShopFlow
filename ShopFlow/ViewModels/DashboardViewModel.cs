@@ -121,18 +121,22 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     case 0: // Green
                         list.PrimaryColor = Color.FromArgb("#34D399");
                         list.SecondaryColor = Color.FromArgb("#059669");
+                        list.TotalItemsCount = 32; list.BoughtItemsCount = 17; // Mock
                         break;
                     case 1: // Orange
                         list.PrimaryColor = Color.FromArgb("#FBBF24");
                         list.SecondaryColor = Color.FromArgb("#D97706");
+                        list.TotalItemsCount = 10; list.BoughtItemsCount = 3; // Mock
                         break;
                     case 2: // Blue
                         list.PrimaryColor = Color.FromArgb("#60A5FA");
                         list.SecondaryColor = Color.FromArgb("#2563EB");
+                        list.TotalItemsCount = 24; list.BoughtItemsCount = 8; // Mock
                         break;
                     case 3: // Pink
                         list.PrimaryColor = Color.FromArgb("#F472B6");
                         list.SecondaryColor = Color.FromArgb("#DB2777");
+                        list.TotalItemsCount = 5; list.BoughtItemsCount = 5; // Mock
                         break;
                 }
 

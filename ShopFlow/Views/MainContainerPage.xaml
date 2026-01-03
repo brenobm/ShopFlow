@@ -8,6 +8,7 @@
              x:Class="BrenoMachado.ShopFlow.Views.MainContainerPage"
              x:Name="MainPageRoot"
              BackgroundColor="#f3f4f6"
+             Shell.NavBarIsVisible="False"
              Title="{Binding Title, Mode=OneWay}">
 
     <ContentPage.BindingContext>
@@ -21,57 +22,90 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid IgnoreSafeArea="True">
+    <Grid IgnoreSafeArea="True" RowDefinitions="*, 80">
         <!-- Main Content Area -->
-        <Grid>
+        <Grid Grid.Row="0">
             <partials:DashboardView IsVisible="{Binding BindingContext.IsListsViewVisible, Source={x:Reference MainPageRoot}}" />
             <partials:ReportsView IsVisible="{Binding BindingContext.IsReportsViewVisible, Source={x:Reference MainPageRoot}}" />
         </Grid>
 
-        <!-- Floating Navigation Pill -->
-        <Border VerticalOptions="End" 
-                HorizontalOptions="Center" 
-                Margin="0,0,0,30" 
-                StrokeShape="RoundRectangle 30"
+        <!-- Bottom Navigation Bar -->
+        <Border Grid.Row="1" 
+                BackgroundColor="White" 
                 StrokeThickness="0"
-                BackgroundColor="White"
-                HeightRequest="60"
-                WidthRequest="220"
-                Shadow="{Shadow Brush=Black, Offset='0,4', Radius=10, Opacity=0.1}">
-            
-            <Grid ColumnDefinitions="*,*" Padding="5">
-                <!-- Lists Tab -->
-                <Grid>
+                Shadow="{Shadow Brush=Black, Offset='0,-2', Radius=10, Opacity=0.1}">
+            <Grid ColumnDefinitions="*,*,*,*">
+                <!-- Tab 1: Dashboard (Lists) -->
+                <Grid Grid.Column="0">
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding SwitchToListsCommand}" />
                     </Grid.GestureRecognizers>
-                    <Border StrokeShape="RoundRectangle 25" 
-                            StrokeThickness="0"
-                            BackgroundColor="{Binding IsListsViewVisible, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Selected'}"
-                            Margin="0">
-                        <Label Text="{x:Static strings:AppResources.Lists}" 
-                               HorizontalOptions="Center" 
-                               VerticalOptions="Center"
-                               FontAttributes="Bold"
-                               TextColor="{Binding IsListsViewVisible, Converter={StaticResource BoolToTextColorConverter}}" />
-                    </Border>
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="2">
+                        <!-- Icon (Home) -->
+                         <Image Source="home.png" HeightRequest="24" WidthRequest="24">
+                             <Image.Triggers>
+                                 <DataTrigger TargetType="Image" Binding="{Binding IsListsViewVisible}" Value="True">
+                                     <Setter Property="Source" Value="home_filled.png" />
+                                     <!-- Fallback color tint if using SVG/FontImageSource would be better, but assuming PNGs -->
+                                 </DataTrigger>
+                             </Image.Triggers>
+                         </Image>
+                         <!-- Fallback Label since we might not have 'home.png' -->
+                         <Label Text="🏠" FontSize="24" HorizontalOptions="Center" IsVisible="False" /> 
+                         
+                         <!-- Indicator/Label -->
+                         <Label Text="{x:Static strings:AppResources.Lists}" 
+                                FontSize="10"
+                                HorizontalOptions="Center"
+                                TextColor="{Binding IsListsViewVisible, Converter={StaticResource BoolToColorConverter}}" /> 
+                                <!-- Note: reuse BoolToColorConverter (True -> Dark, False -> Transp? No, we need Gray) -->
+                    </VerticalStackLayout>
                 </Grid>
 
-                <!-- Reports Tab -->
+                <!-- Tab 2: Reports -->
                 <Grid Grid.Column="1">
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding SwitchToReportsCommand}" />
                     </Grid.GestureRecognizers>
-                    <Border StrokeShape="RoundRectangle 25" 
-                            StrokeThickness="0"
-                            BackgroundColor="{Binding IsReportsViewVisible, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Selected'}"
-                            Margin="0">
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="2">
+                        <Label Text="📊" FontSize="24" HorizontalOptions="Center" TextColor="#6B7280">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsReportsViewVisible}" Value="True">
+                                    <Setter Property="TextColor" Value="#2563EB" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
                         <Label Text="{x:Static strings:AppResources.Reports}" 
-                               HorizontalOptions="Center" 
-                               VerticalOptions="Center"
-                               FontAttributes="Bold"
-                               TextColor="{Binding IsReportsViewVisible, Converter={StaticResource BoolToTextColorConverter}}" />
-                    </Border>
+                               FontSize="10"
+                               HorizontalOptions="Center"
+                               TextColor="#6B7280">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsReportsViewVisible}" Value="True">
+                                    <Setter Property="TextColor" Value="#2563EB" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Tab 3: Profile (Placeholder) -->
+                <Grid Grid.Column="2">
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="2">
+                        <Label Text="👤" FontSize="24" HorizontalOptions="Center" TextColor="#9CA3AF" />
+                        <Label Text="Profile" FontSize="10" HorizontalOptions="Center" TextColor="#9CA3AF" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Tab 4: Settings -->
+                <Grid Grid.Column="3">
+                    <Grid.GestureRecognizers>
+                         <!-- Directly Nav to Settings using VM Command if avail, or code behind -->
+                         <TapGestureRecognizer Command="{Binding GoToSettingsCommand}" />
+                    </Grid.GestureRecognizers>
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="2">
+                        <Label Text="⚙️" FontSize="24" HorizontalOptions="Center" TextColor="#6B7280" />
+                        <Label Text="Settings" FontSize="10" HorizontalOptions="Center" TextColor="#6B7280" />
+                    </VerticalStackLayout>
                 </Grid>
             </Grid>
         </Border>
