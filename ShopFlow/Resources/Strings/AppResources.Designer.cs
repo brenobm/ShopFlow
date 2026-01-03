@@ -691,5 +691,11 @@ namespace BrenoMachado.ShopFlow.Resources.Strings {
                   return ResourceManager.GetString("Msg_VoiceAdded", resourceCulture);
             }
         }
+
+        public static string Lists {
+            get {
+                  return ResourceManager.GetString("Lists", resourceCulture);
+            }
+        }
     }
 }
