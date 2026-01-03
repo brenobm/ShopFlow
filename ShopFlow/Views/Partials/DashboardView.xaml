@@ -135,5 +135,4 @@
             </CollectionView.Footer>
         </CollectionView>
      </Grid>
-     </Grid>
 </ContentView>
