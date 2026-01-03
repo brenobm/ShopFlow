@@ -6,6 +6,7 @@
              xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
              xmlns:views="clr-namespace:BrenoMachado.ShopFlow.Views"
              x:Class="BrenoMachado.ShopFlow.Views.MainContainerPage"
+             x:Name="MainPageRoot"
              BackgroundColor="#f3f4f6"
              Title="{Binding Title, Mode=OneWay}">
 
@@ -23,8 +24,8 @@
     <Grid IgnoreSafeArea="True">
         <!-- Main Content Area -->
         <Grid>
-            <partials:DashboardView IsVisible="{Binding IsListsViewVisible}" />
-            <partials:ReportsView IsVisible="{Binding IsReportsViewVisible}" />
+            <partials:DashboardView IsVisible="{Binding BindingContext.IsListsViewVisible, Source={x:Reference MainPageRoot}}" />
+            <partials:ReportsView IsVisible="{Binding BindingContext.IsReportsViewVisible, Source={x:Reference MainPageRoot}}" />
         </Grid>
 
         <!-- Floating Navigation Pill -->

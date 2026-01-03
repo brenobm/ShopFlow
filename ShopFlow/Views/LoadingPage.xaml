@@ -11,9 +11,9 @@
             <Label Text="{x:Static strings:AppResources.Text_VerifyingSession}" 
                    HorizontalOptions="Center" />
             
-            <!-- DEBUGGING START -->
-            <Button Text="Show Logs" Clicked="OnShowLogsClicked" BackgroundColor="DarkRed" TextColor="White" Margin="0,50,0,0" />
-            <Button Text="Login (Manual)" Clicked="OnManualLoginClicked" BackgroundColor="Gray" TextColor="White" />
+            <!-- DEBUGGING START (Disabled) -->
+            <!-- <Button Text="Show Logs" Clicked="OnShowLogsClicked" BackgroundColor="DarkRed" TextColor="White" Margin="0,50,0,0" /> -->
+            <!-- <Button Text="Login (Manual)" Clicked="OnManualLoginClicked" BackgroundColor="Gray" TextColor="White" /> -->
             <!-- DEBUGGING END -->
         </VerticalStackLayout>
     </Grid>

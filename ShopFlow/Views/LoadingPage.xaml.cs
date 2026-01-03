@@ -53,20 +53,20 @@ public partial class LoadingPage : ContentPage
             if (isAuthenticated)
             {
                 FileLoggerService.LogStatic("[LoadingPage] Preparing to navigate to AppShell (Authenticated)...");
-                // REVERT: Uncomment to enable auto-navigation
-                // var pushService = _serviceProvider.GetService<IPushService>();
-                // Application.Current.MainPage = new AppShell(_authService, pushService);
+                // REVERT: Uncommented to enable auto-navigation
+                var pushService = _serviceProvider.GetService<IPushService>();
+                Application.Current.MainPage = new AppShell(_authService, pushService);
                 
-                await DisplayAlert("Debug", "Authenticated! Ready to navigate to AppShell. Check Logs.", "OK");
+                // await DisplayAlert("Debug", "Authenticated! Ready to navigate to AppShell. Check Logs.", "OK");
             }
             else
             {
                  FileLoggerService.LogStatic("[LoadingPage] Not Authenticated. Preparing to navigate to LoginPage...");
-                 // REVERT: Uncomment to enable auto-navigation
-                 // var loginPage = _serviceProvider.GetService<LoginPage>();
-                 // Application.Current.MainPage = loginPage;
+                 // REVERT: Uncommented to enable auto-navigation
+                 var loginPage = _serviceProvider.GetService<LoginPage>();
+                 Application.Current.MainPage = loginPage;
                  
-                 await DisplayAlert("Debug", "Not Authenticated. Ready to navigate to LoginPage. Check Logs.", "OK");
+                 // await DisplayAlert("Debug", "Not Authenticated. Ready to navigate to LoginPage. Check Logs.", "OK");
             }
         }
         catch (Exception ex)
