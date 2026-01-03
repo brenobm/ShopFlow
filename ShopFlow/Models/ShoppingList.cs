@@ -18,4 +18,12 @@ public class ShoppingList
     
     [Ignore]
     public List<ShoppingItem> Items { get; set; } = new List<ShoppingItem>();
+
+    // UI Properties (Not persisted)
+    [Ignore]
+    public string Initials { get; set; }
+    [Ignore]
+    public Microsoft.Maui.Graphics.Color PrimaryColor { get; set; }
+    [Ignore]
+    public Microsoft.Maui.Graphics.Color SecondaryColor { get; set; }
 }

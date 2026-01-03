@@ -93,9 +93,49 @@ namespace BrenoMachado.ShopFlow.ViewModels
         private void UpdateListsCollection(List<ShoppingList> source)
         {
             Lists.Clear();
-            foreach (var list in source.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name))
+            int index = 0;
+            var ordered = source.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name);
+            
+            foreach (var list in ordered)
             {
+                // Initials Logic
+                // For now, use "SF" or first letter of List Name as we don't have Owner Profile Name avail yet
+                // (OwnerId is a GUID). 
+                string initials = "SF";
+                if (!string.IsNullOrEmpty(list.Name))
+                {
+                    var parts = list.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 2)
+                        initials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
+                    else if (parts.Length == 1)
+                        initials = $"{parts[0][0]}".ToUpper();
+                }
+                list.Initials = initials;
+
+                // Color Logic (Cycle: Green -> Orange -> Blue -> Pink)
+                int cycle = index % 4;
+                switch (cycle)
+                {
+                    case 0: // Green
+                        list.PrimaryColor = Color.FromArgb("#34D399");
+                        list.SecondaryColor = Color.FromArgb("#059669");
+                        break;
+                    case 1: // Orange
+                        list.PrimaryColor = Color.FromArgb("#FBBF24");
+                        list.SecondaryColor = Color.FromArgb("#D97706");
+                        break;
+                    case 2: // Blue
+                        list.PrimaryColor = Color.FromArgb("#60A5FA");
+                        list.SecondaryColor = Color.FromArgb("#2563EB");
+                        break;
+                    case 3: // Pink
+                        list.PrimaryColor = Color.FromArgb("#F472B6");
+                        list.SecondaryColor = Color.FromArgb("#DB2777");
+                        break;
+                }
+
                 Lists.Add(list);
+                index++;
             }
         }
         

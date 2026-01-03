@@ -6,73 +6,143 @@
              x:Class="BrenoMachado.ShopFlow.Views.Partials.DashboardView"
              BackgroundColor="#F9FAFB">
     
-    <!-- Migrated Grid from DashboardPage -->
-    <Grid RowDefinitions="*, Auto">
-         <CollectionView Grid.Row="0" 
+    <!-- Modern Dashboard Grid -->
+    <Grid RowDefinitions="60, *" BackgroundColor="{StaticResource Secondary}"> 
+        <!-- Row 0: Header -->
+        <Grid Grid.Row="0" BackgroundColor="{StaticResource Primary}" Padding="16,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <!-- Menu Icon (Left) -->
+            <Image Grid.Column="0" 
+                   Source="menu_icon.png"  
+                   HeightRequest="24" 
+                   WidthRequest="24" 
+                   VerticalOptions="Center">
+                   <!-- Fallback if no icon: use Label -->
+            </Image>
+            <Label Grid.Column="0" Text="☰" TextColor="White" FontSize="24" VerticalOptions="Center" IsVisible="False"/>
+
+            <!-- Title (Center) -->
+            <Label Grid.Column="1" 
+                   Text="ShopFlow" 
+                   TextColor="White" 
+                   FontSize="20" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   VerticalOptions="Center" />
+
+            <!-- Profile Icon (Right) -->
+             <Image Grid.Column="2" 
+                   Source="profile_icon.png" 
+                   HeightRequest="30" 
+                   WidthRequest="30" 
+                   VerticalOptions="Center"
+                   Aspect="AspectFill">
+                   <Image.Clip>
+                       <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15" />
+                   </Image.Clip>
+            </Image>
+             <Label Grid.Column="2" Text="👤" TextColor="White" FontSize="24" VerticalOptions="Center" IsVisible="False"/>
+        </Grid>
+
+        <!-- Row 1: Content -->
+        <CollectionView Grid.Row="1" 
                         ItemsSource="{Binding Lists}"
                         SelectionMode="None"
-                        Margin="10">
+                        BackgroundColor="#F0F2F5"
+                        Margin="0">
             <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="10"/>
+                <GridItemsLayout Orientation="Vertical" 
+                                 Span="2" 
+                                 VerticalItemSpacing="12" 
+                                 HorizontalItemSpacing="12" />
             </CollectionView.ItemsLayout>
+            
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <SwipeView> <!-- ... (SwipeView content same as original) ... -->
-                        <SwipeView.RightItems>
-                            <SwipeItems>
-                                <SwipeItem Text="{x:Static strings:AppResources.Edit}"
-                                           BackgroundColor="#F59E0B"
-                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=EditListCommand}"
-                                           CommandParameter="{Binding .}"/>
-                                <SwipeItem Text="{x:Static strings:AppResources.Delete}"
-                                           BackgroundColor="#EF4444"
-                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=DeleteListCommand}"
-                                           CommandParameter="{Binding .}"/>
-                                <SwipeItem Text="{x:Static strings:AppResources.Share}"
-                                           BackgroundColor="#3B82F6"
-                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=ShareListCommand}"
-                                           CommandParameter="{Binding .}"/>
-                            </SwipeItems>
-                        </SwipeView.RightItems>
-                        <Frame CornerRadius="10" HasShadow="True" BorderColor="Transparent" Padding="0">
-                            <Frame.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=OpenListCommand}"
-                                                      CommandParameter="{Binding .}" />
-                            </Frame.GestureRecognizers>
-                            <Grid Padding="15" BackgroundColor="White" ColumnDefinitions="*, Auto">
-                                <Label Grid.Column="0" 
-                                       Text="{Binding Name}" 
-                                       FontSize="18" 
-                                       TextColor="#1F2937" 
-                                       FontAttributes="Bold"
-                                       VerticalOptions="Center"/>
-                                
-                                <Button Grid.Column="1"
-                                        Text="★"
-                                        TextColor="#9CA3AF"
-                                        BackgroundColor="Transparent"
-                                        FontSize="24"
-                                        Padding="0"
-                                        HeightRequest="40"
-                                        WidthRequest="40"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=SetDefaultListCommand}"
-                                        CommandParameter="{Binding .}">
-                                    <Button.Triggers>
-                                        <DataTrigger TargetType="Button" Binding="{Binding IsDefault}" Value="True">
-                                            <Setter Property="TextColor" Value="#F59E0B" />
-                                        </DataTrigger>
-                                    </Button.Triggers>
-                                </Button>
+                    <Border HeightRequest="160"
+                            StrokeShape="RoundRectangle 20"
+                            StrokeThickness="0"
+                            Margin="8"> <!-- 16 padding on collectionview handled via outer margin or padding -->
+                        
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.1" />
+                        </Border.Shadow>
+                        
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="{Binding PrimaryColor}" Offset="0.0" />
+                                <GradientStop Color="{Binding SecondaryColor}" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=OpenListCommand}"
+                                                  CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+
+                        <Grid Padding="16">
+                            <!-- Top Left: Name -->
+                            <Label Text="{Binding Name}"
+                                   TextColor="White"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   MaxLines="2"
+                                   LineBreakMode="TailTruncation"
+                                   VerticalOptions="Start"
+                                   HorizontalOptions="Start" />
+                            
+                            <!-- Middle: Progress Bar (Mock) -->
+                             <Grid VerticalOptions="Center" Margin="0,10">
+                                <!-- Background Track -->
+                                <BoxView HeightRequest="4" 
+                                         Color="White" 
+                                         Opacity="0.3" 
+                                         CornerRadius="2" 
+                                         HorizontalOptions="Fill" />
+                                <!-- Fill (Mock 60%) -->
+                                <BoxView HeightRequest="4" 
+                                         Color="White" 
+                                         Opacity="1.0" 
+                                         CornerRadius="2" 
+                                         WidthRequest="60" 
+                                         HorizontalOptions="Start" />
                             </Grid>
-                        </Frame>
-                    </SwipeView>
+
+                            <!-- Bottom Right: Collaborators -->
+                            <HorizontalStackLayout VerticalOptions="End" 
+                                                   HorizontalOptions="End" 
+                                                   BindableLayout.ItemsSource="{Binding .}" 
+                                                   Spacing="-8"> <!-- Negative spacing for overlap -->
+                                <!-- We just show one bubble for Owner/Self for now since we don't have list of collaborators in model yet -->
+                                <Border StrokeShape="RoundRectangle 15"
+                                        StrokeThickness="0"
+                                        HeightRequest="30"
+                                        WidthRequest="30"
+                                        BackgroundColor="#33FFFFFF">
+                                    <Label Text="{Binding Initials}" 
+                                           TextColor="White" 
+                                           FontSize="10" 
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="Center" 
+                                           VerticalOptions="Center"/>
+                                </Border>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            
             <CollectionView.Footer>
-                <BoxView HeightRequest="100" Color="Transparent" />
+                 <BoxView HeightRequest="100" Color="Transparent" />
             </CollectionView.Footer>
         </CollectionView>
 
+        <!-- Floating Action Button -->
         <Button Grid.Row="1"
                 Text="+"
                 Command="{Binding AddListCommand}"
@@ -86,6 +156,5 @@
                 HorizontalOptions="End"
                 VerticalOptions="End"
                 Shadow="{Shadow Brush=Black, Offset='0,5', Radius=5, Opacity=0.2}"/>
-                <!-- Adjusted Margin Bottom to account for Floating Pill -->
     </Grid>
 </ContentView>
