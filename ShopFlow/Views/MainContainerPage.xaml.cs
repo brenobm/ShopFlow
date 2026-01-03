@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using Microsoft.Maui.Controls;
 using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.ViewModels;
 
 namespace BrenoMachado.ShopFlow.Views
 {
@@ -13,12 +14,12 @@ namespace BrenoMachado.ShopFlow.Views
             {
                 FileLoggerService.LogStatic("[MainContainerPage] Constructor started.");
                 InitializeComponent();
+                NavigationPage.SetHasNavigationBar(this, false); // FIX 1: Hide default header
                 FileLoggerService.LogStatic("[MainContainerPage] Constructor finished (InitializeComponent done).");
             }
             catch (Exception ex)
             {
                 FileLoggerService.LogStatic($"[MainContainerPage] CRASH in Constructor: {ex}");
-                // Try to show alert if possible (might not be if page is crashing)
             }
         }
 
@@ -28,6 +29,19 @@ namespace BrenoMachado.ShopFlow.Views
             {
                 base.OnAppearing();
                 FileLoggerService.LogStatic("[MainContainerPage] OnAppearing called.");
+                
+                // FIX 2: Manually trigger OnAppearing for child ViewModels to load data
+                if (BindingContext is MainContainerViewModel vm)
+                {
+                    // If we had access to Child VMs here we could call them.
+                    // Instead, let's find the DashboardView in the visual tree or use MessagingCenter? 
+                    // Better: MainContainerViewModel could expose CurrentPageVM.
+                    // EASIEST FIX: Use MessagingCenter or just find the ViewModel from DI since it is Singleton?
+                    // Actually, DashboardView resolves its own VM. 
+                    
+                    var dashboardVM = IPlatformApplication.Current.Services.GetService<DashboardViewModel>();
+                    dashboardVM?.OnAppearing();
+                }
             }
             catch (Exception ex)
             {

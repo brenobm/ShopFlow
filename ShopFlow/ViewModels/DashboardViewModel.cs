@@ -20,6 +20,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand DeleteListCommand { get; }
         public ICommand ShareListCommand { get; }
         public ICommand GoToSettingsCommand { get; }
+        public ICommand GoToLogsCommand { get; } // New Command
         public ICommand SetDefaultListCommand { get; }
 
         public DashboardViewModel(IGraphQLService graphQLService, IDatabaseService databaseService)
@@ -35,6 +36,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             DeleteListCommand = new Command<ShoppingList>(async (list) => await DeleteListAsync(list));
             ShareListCommand = new Command<ShoppingList>(async (list) => await ShareListAsync(list));
             GoToSettingsCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(Views.SettingsPage)));
+            GoToLogsCommand = new Command(async () => await Shell.Current.Navigation.PushModalAsync(new LogsPage(new LogsViewModel(Services.FileLoggerService.Instance))));
             SetDefaultListCommand = new Command<ShoppingList>(async (list) => await SetDefaultListAsync(list));
         }
 

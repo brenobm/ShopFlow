@@ -21,8 +21,12 @@
                    Source="menu_icon.png"  
                    HeightRequest="24" 
                    WidthRequest="24" 
-                   VerticalOptions="Center">
-                   <!-- Fallback if no icon: use Label -->
+                   VerticalOptions="Center"
+                   BackgroundColor="Transparent">
+                   <Image.GestureRecognizers>
+                       <!-- FIX 3: Wire to Open Logs -->
+                       <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=GoToLogsCommand}" />
+                   </Image.GestureRecognizers>
             </Image>
             <Label Grid.Column="0" Text="☰" TextColor="White" FontSize="24" VerticalOptions="Center" IsVisible="False"/>
 
