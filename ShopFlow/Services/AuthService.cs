@@ -137,6 +137,14 @@ namespace BrenoMachado.ShopFlow.Services
                      // Manually set the session tokens with the refresh token
                      user.SessionTokens = new CognitoUserSession(null, null, refreshToken, DateTime.Now, DateTime.Now.AddHours(1));
 
+                     // Check Connectivity BEFORE attempting network call to avoid timeouts
+                     if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+                     {
+                         FileLoggerService.LogStatic("[AuthService] Offline detected. Skipping network refresh and trusting local credentials.");
+                         _currentUser = user; // Trust local user
+                         return true;
+                     }
+
                      // Attempt to refresh
                      FileLoggerService.LogStatic("[AuthService] Starting Refresh Token Auth...");
                      var authRequest = new InitiateRefreshTokenAuthRequest { AuthFlowType = AuthFlowType.REFRESH_TOKEN_AUTH };

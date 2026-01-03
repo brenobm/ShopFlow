@@ -32,18 +32,17 @@ public partial class LoadingPage : ContentPage
 
             // Create the auth task
             var authTask = _authService.IsAuthenticatedAsync();
-            // Create a timeout task (e.g., 5 seconds)
-            var timeoutTask = Task.Delay(5000);
+            // Create a timeout task (8 seconds)
+            var timeoutTask = Task.Delay(8000);
 
             var completedTask = await Task.WhenAny(authTask, timeoutTask);
 
             if (completedTask == timeoutTask)
             {
                 FileLoggerService.LogStatic("[LoadingPage] Auth check timed out!");
-                await DisplayAlert("Error", "Authentication check timed out. Please try again.", "OK");
-                // REVERT: Uncomment to enable auto-navigation
-                // var loginPage = _serviceProvider.GetService<LoginPage>();
-                // Application.Current.MainPage = loginPage;
+                // Don't hang. Go to Login.
+                var loginPage = _serviceProvider.GetService<LoginPage>();
+                Application.Current.MainPage = loginPage;
                 return;
             }
 
