@@ -161,8 +161,25 @@ namespace BrenoMachado.ShopFlow.Services
             catch (Exception ex)
             {
                 FileLoggerService.LogStatic($"[AuthService] Auto-login failed: {ex.Message}");
-                // Clean up invalid state
+                
+                // CRITICAL FIX: If offline, do NOT clear credentials. Assume valid.
+                if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+                {
+                    FileLoggerService.LogStatic("[AuthService] Offline mode detected. Trusting local credentials.");
+                    
+                    // Reconstruct user object from local storage so the app works
+                    var username = await SecureStorage.GetAsync("auth_username");
+                    if (!string.IsNullOrEmpty(username))
+                    {
+                        var user = new CognitoUser(username, AwsConfig.UserPoolClientId, _userPool, _providerClient);
+                        _currentUser = user;
+                        return true; 
+                    }
+                }
+
+                // If online and failed, then it's a real auth error. Clear state.
                 SecureStorage.Remove("auth_refresh_token");
+                SecureStorage.Remove("auth_username");
             }
 
             return false; 
