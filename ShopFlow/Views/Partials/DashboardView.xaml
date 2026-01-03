@@ -134,4 +134,6 @@
                  <BoxView HeightRequest="100" Color="Transparent" />
             </CollectionView.Footer>
         </CollectionView>
+     </Grid>
+     </Grid>
 </ContentView>
