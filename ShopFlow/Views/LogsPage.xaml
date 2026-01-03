@@ -4,7 +4,7 @@
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
              x:Class="BrenoMachado.ShopFlow.Views.LogsPage"
              Title="{Binding Title}"
-             BackgroundColor="White">
+             BackgroundColor="#1e1e1e">
 
     <Grid RowDefinitions="*,Auto" Padding="10">
         <Editor Text="{Binding Logs}" 
@@ -12,6 +12,8 @@
                 AutoSize="TextChanges" 
                 VerticalOptions="FillAndExpand" 
                 FontSize="12"
+                TextColor="#dcdcdc"
+                BackgroundColor="#1e1e1e"
                 FontFamily="Monospace" />
 
         <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10" Padding="0,10,0,0">
