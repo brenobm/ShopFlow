@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
+using BrenoMachado.ShopFlow.Services;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {

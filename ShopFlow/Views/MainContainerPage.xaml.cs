@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using Microsoft.Maui.Controls;
+using BrenoMachado.ShopFlow.Services;
 
 namespace BrenoMachado.ShopFlow.Views
 {
