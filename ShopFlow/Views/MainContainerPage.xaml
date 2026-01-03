@@ -32,7 +32,10 @@
             
             <Grid ColumnDefinitions="*,*" Padding="5">
                 <!-- Lists Tab -->
-                <Grid GestureDetector.Recognizers="{TapGestureRecognizer Command={Binding SwitchToListsCommand}}">
+                <Grid>
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SwitchToListsCommand}" />
+                    </Grid.GestureRecognizers>
                     <Border StrokeShape="RoundRectangle 25" 
                             StrokeThickness="0"
                             BackgroundColor="{Binding IsListsViewVisible, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Selected'}"
@@ -46,7 +49,10 @@
                 </Grid>
 
                 <!-- Reports Tab -->
-                <Grid Grid.Column="1" GestureDetector.Recognizers="{TapGestureRecognizer Command={Binding SwitchToReportsCommand}}">
+                <Grid Grid.Column="1">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SwitchToReportsCommand}" />
+                    </Grid.GestureRecognizers>
                     <Border StrokeShape="RoundRectangle 25" 
                             StrokeThickness="0"
                             BackgroundColor="{Binding IsReportsViewVisible, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Selected'}"
