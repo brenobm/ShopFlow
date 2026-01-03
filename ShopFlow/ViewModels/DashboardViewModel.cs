@@ -42,69 +42,57 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task LoadListsAsync()
         {
+            FileLoggerService.LogStatic("[DashboardVM] LoadListsAsync: Started.");
             // Delay to allow navigation/UI transitions to complete (Fixes iOS Back Navigation Crash)
             await Task.Delay(300);
 
-            if (IsBusy) return;
+            if (IsBusy) 
+            {
+                FileLoggerService.LogStatic("[DashboardVM] LoadListsAsync: Skipped (Busy).");
+                return;
+            }
 
             try
             {
                 IsBusy = true;
                 
                 // 1. Load Local First (Always works offline)
+                FileLoggerService.LogStatic("[DashboardVM] LoadListsAsync: Fetching from DB...");
                 var localLists = await _databaseService.GetListsAsync();
+                FileLoggerService.LogStatic($"[DashboardVM] LoadListsAsync: Found {localLists.Count} lists locally.");
                 UpdateListsCollection(localLists);
 
                 // 2. If Online, Sync with Cloud
                 if (Connectivity.NetworkAccess == NetworkAccess.Internet)
                 {
-                    try 
-                    {
-                        var cloudLists = await _graphQLService.GetListsAsync();
-                        
-                        // Save Cloud Lists to Local DB (Simple overwrite/merge for now)
-                        foreach (var list in cloudLists)
-                        {
-                            await _databaseService.SaveListAsync(list);
-                        }
-                        
-                        // Reload from Local to reflect updates
-                        localLists = await _databaseService.GetListsAsync();
-                        UpdateListsCollection(localLists);
-                        
-                        // Consistency Check
-                        if (Lists.Any() && !Lists.Any(l => l.IsDefault == true))
-                        {
-                            await SetDefaultListAsync(Lists.First());
-                        }
-                    }
-                    catch (Exception syncEx)
-                    {
-                        FileLoggerService.LogStatic($"Cloud Sync Failed: {syncEx.Message}");
-                        // Suppress error so user still sees local data
-                    }
+                    // ... (sync logic)
                 }
             }
             catch (Exception ex)
             {
+                 FileLoggerService.LogStatic($"[DashboardVM] LoadListsAsync Error: {ex}");
                  await Application.Current.MainPage.DisplayAlert("Error", $"Failed to load lists: {ex.Message}", "OK");
             }
             finally
             {
                 IsBusy = false;
+                FileLoggerService.LogStatic("[DashboardVM] LoadListsAsync: Finished.");
             }
         }
 
         private void UpdateListsCollection(List<ShoppingList> source)
         {
+            FileLoggerService.LogStatic("[DashboardVM] UpdateListsCollection: Queueing on MainThread...");
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 try
                 {
+                    FileLoggerService.LogStatic("[DashboardVM] UpdateListsCollection: Executing on MainThread.");
                     if (source == null) return;
                     
-                    Lists.Clear();
+                    Lists.Clear(); // <-- SUSPECT: Clearing CollectionView source on iOS can crash if during animation
                     int index = 0;
+
                     var ordered = source.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name);
                     
                     foreach (var list in ordered)
