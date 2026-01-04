@@ -166,7 +166,7 @@
                             <Border Grid.Column="0"
                                     HeightRequest="40" WidthRequest="40"
                                     StrokeShape="RoundRectangle 12"
-                                    BackgroundColor="{Binding Category, Converter={StaticResource CategoryToColor}, Opacity=0.2}"
+                                    BackgroundColor="{Binding Category, Converter={StaticResource CategoryToColor}, ConverterParameter='0.2'}"
                                     StrokeThickness="0"
                                     Margin="0,0,15,0"
                                     VerticalOptions="Center">
@@ -225,8 +225,11 @@
                     CornerRadius="30"
                     HeightRequest="60"
                     WidthRequest="60"
-                    FontSize="24"
-                    Shadow="{Shadow Brush=Black, Offset='0,4', Radius=8, Opacity=0.3}"/>
+                    FontSize="24">
+                <Button.Shadow>
+                    <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.3" />
+                </Button.Shadow>
+            </Button>
             
             <Button Text="🎤"
                     Command="{Binding ListenCommand}"
@@ -235,8 +238,10 @@
                     CornerRadius="30"
                     HeightRequest="60"
                     WidthRequest="60"
-                    FontSize="24"
-                    Shadow="{Shadow Brush=Black, Offset='0,4', Radius=8, Opacity=0.3}">
+                    FontSize="24">
+                <Button.Shadow>
+                    <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.3" />
+                </Button.Shadow>
                  <Button.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Color="#22D3EE" Offset="0.0" />

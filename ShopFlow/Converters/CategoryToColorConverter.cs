@@ -8,7 +8,7 @@ public class CategoryToColorConverter : IValueConverter
     {
         if (value is string category)
         {
-            return category.ToLower() switch
+            var color = category.ToLower() switch
             {
                 "produce" or "fruits" or "vegetables" or "hortifruti" => Color.FromArgb("#4ADE80"), // Green
                 "dairy" or "laticínios" => Color.FromArgb("#60A5FA"), // Blue
@@ -21,6 +21,12 @@ public class CategoryToColorConverter : IValueConverter
                 "personal care" or "higiene" => Color.FromArgb("#F472B6"), // Pink
                 _ => Color.FromArgb("#9CA3AF") // Default Gray
             };
+
+            if (parameter is string alphaString && float.TryParse(alphaString, NumberStyles.Any, CultureInfo.InvariantCulture, out float alpha))
+            {
+                return color.WithAlpha(alpha);
+            }
+            return color;
         }
         return Colors.Gray;
     }
