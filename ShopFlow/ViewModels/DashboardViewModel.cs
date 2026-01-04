@@ -90,53 +90,92 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     FileLoggerService.LogStatic("[DashboardVM] UpdateListsCollection: Executing on MainThread.");
                     if (source == null) return;
                     
-                    Lists.Clear(); // <-- SUSPECT: Clearing CollectionView source on iOS can crash if during animation
-                    int index = 0;
-
-                    var ordered = source.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name);
+                    // Differential Update to prevent CollectionView Crash on iOS (Avoid Clear())
+                    var ordered = source.OrderByDescending(l => l.IsDefault.GetValueOrDefault()).ThenBy(l => l.Name).ToList();
                     
-                    foreach (var list in ordered)
+                    // 1. Remove items not in source
+                    for (int i = Lists.Count - 1; i >= 0; i--)
                     {
-                        // Initials Logic
-                        string initials = "SF";
-                        if (!string.IsNullOrEmpty(list.Name))
+                        var item = Lists[i];
+                        if (!ordered.Any(l => l.Id == item.Id))
                         {
-                            var parts = list.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            Lists.RemoveAt(i);
+                        }
+                    }
+
+                    // 2. Add or Update items
+                    for (int i = 0; i < ordered.Count; i++)
+                    {
+                        var sourceItem = ordered[i];
+                        
+                        // Calculate Visuals
+                        string initials = "SF";
+                        if (!string.IsNullOrEmpty(sourceItem.Name))
+                        {
+                            var parts = sourceItem.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                             if (parts.Length >= 2)
                                 initials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
                             else if (parts.Length == 1)
                                 initials = $"{parts[0][0]}".ToUpper();
                         }
-                        list.Initials = initials;
+                        sourceItem.Initials = initials;
 
-                        // Color Logic
-                        int cycle = index % 4;
+                        // Color Logic (Cycle based on index)
+                        int cycle = i % 4;
                         switch (cycle)
                         {
                             case 0: // Green
-                                list.PrimaryColor = Color.FromArgb("#34D399");
-                                list.SecondaryColor = Color.FromArgb("#059669");
-                                list.TotalItemsCount = 32; list.BoughtItemsCount = 17; // Mock
+                                sourceItem.PrimaryColor = Color.FromArgb("#34D399");
+                                sourceItem.SecondaryColor = Color.FromArgb("#059669");
+                                sourceItem.TotalItemsCount = 32; sourceItem.BoughtItemsCount = 17; // Mock
                                 break;
                             case 1: // Orange
-                                list.PrimaryColor = Color.FromArgb("#FBBF24");
-                                list.SecondaryColor = Color.FromArgb("#D97706");
-                                list.TotalItemsCount = 10; list.BoughtItemsCount = 3; // Mock
+                                sourceItem.PrimaryColor = Color.FromArgb("#FBBF24");
+                                sourceItem.SecondaryColor = Color.FromArgb("#D97706");
+                                sourceItem.TotalItemsCount = 10; sourceItem.BoughtItemsCount = 3; // Mock
                                 break;
                             case 2: // Blue
-                                list.PrimaryColor = Color.FromArgb("#60A5FA");
-                                list.SecondaryColor = Color.FromArgb("#2563EB");
-                                list.TotalItemsCount = 24; list.BoughtItemsCount = 8; // Mock
+                                sourceItem.PrimaryColor = Color.FromArgb("#60A5FA");
+                                sourceItem.SecondaryColor = Color.FromArgb("#2563EB");
+                                sourceItem.TotalItemsCount = 24; sourceItem.BoughtItemsCount = 8; // Mock
                                 break;
                             case 3: // Pink
-                                list.PrimaryColor = Color.FromArgb("#F472B6");
-                                list.SecondaryColor = Color.FromArgb("#DB2777");
-                                list.TotalItemsCount = 5; list.BoughtItemsCount = 5; // Mock
+                                sourceItem.PrimaryColor = Color.FromArgb("#F472B6");
+                                sourceItem.SecondaryColor = Color.FromArgb("#DB2777");
+                                sourceItem.TotalItemsCount = 5; sourceItem.BoughtItemsCount = 5; // Mock
                                 break;
                         }
 
-                        Lists.Add(list);
-                        index++;
+                        // Sync with ObservableCollection
+                        var existing = Lists.FirstOrDefault(l => l.Id == sourceItem.Id);
+                        if (existing != null)
+                        {
+                            // Update properties if changed
+                            if (existing.Name != sourceItem.Name) existing.Name = sourceItem.Name;
+                            if (existing.IsDefault != sourceItem.IsDefault) existing.IsDefault = sourceItem.IsDefault;
+                            
+                            // Visuals (Always update to ensure consistency with cycle)
+                            existing.Initials = sourceItem.Initials;
+                            existing.PrimaryColor = sourceItem.PrimaryColor;
+                            existing.SecondaryColor = sourceItem.SecondaryColor;
+                            existing.TotalItemsCount = sourceItem.TotalItemsCount;
+                            existing.BoughtItemsCount = sourceItem.BoughtItemsCount;
+                            
+                            // Move if order is wrong
+                            int oldIndex = Lists.IndexOf(existing);
+                            if (oldIndex != i)
+                            {
+                                Lists.Move(oldIndex, i);
+                            }
+                        }
+                        else
+                        {
+                            // Insert at correct position
+                            if (i < Lists.Count)
+                                Lists.Insert(i, sourceItem);
+                            else
+                                Lists.Add(sourceItem);
+                        }
                     }
                 }
                 catch (Exception ex)
