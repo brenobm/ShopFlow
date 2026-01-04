@@ -130,7 +130,10 @@ namespace BrenoMachado.ShopFlow.ViewModels
             ShareCommand = new Command(async () => await ShareListAsync());
             ReadListCommand = new Command(async () => await ReadListAsync());
             OpenQuickTuneCommand = new Command<ShoppingItem>(async (item) => await OpenQuickTuneAsync(item));
+            BackCommand = new Command(async () => await Shell.Current.Navigation.PopAsync()); // Or GoToAsync("..")
         }
+
+        public ICommand BackCommand { get; }
 
         // ... 
 

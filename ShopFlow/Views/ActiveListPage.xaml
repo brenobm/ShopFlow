@@ -2,27 +2,53 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
              xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
+             xmlns:converters="clr-namespace:BrenoMachado.ShopFlow.Converters"
              x:Class="BrenoMachado.ShopFlow.Views.ActiveListPage"
              x:Name="ThisPage"
+             Shell.NavBarIsVisible="False"
              Title="{Binding Title}"
-             BackgroundColor="#F9FAFB">
+             BackgroundColor="#F3F4F6">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="{x:Static strings:AppResources.SortBy}" Command="{Binding SortCommand}" Order="Primary" />
-        <ToolbarItem Text="{x:Static strings:AppResources.ReadList}" Command="{Binding ReadListCommand}" Order="Secondary" />
-        <ToolbarItem Text="{Binding ShoppingModeText}" 
-                     Command="{Binding ToggleShoppingModeCommand}" />
-        <ToolbarItem Text="{x:Static strings:AppResources.Share}" Command="{Binding ShareCommand}" Order="Secondary" />
-    </ContentPage.ToolbarItems>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:CategoryToColorConverter x:Key="CategoryToColor" />
+            <converters:CategoryToIconConverter x:Key="CategoryToIcon" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto, *">
-        <!-- Shopping Mode Status -->
-        <Frame Grid.Row="0" BackgroundColor="#DCFCE7" Padding="10" IsVisible="{Binding IsShoppingMode}" Margin="10,5">
-            <Label Text="{x:Static strings:AppResources.ShoppingModeActive}" TextColor="#166534" HorizontalOptions="Center" FontAttributes="Bold"/>
-        </Frame>
+    <Grid RowDefinitions="Auto, Auto, *">
+        
+        <!-- Row 0: Custom Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Padding="20,10" BackgroundColor="White">
+             <ImageButton Grid.Column="0"
+                          Source="{FontImage Glyph='‹', Color='Black', Size=40}"
+                          Command="{Binding BackCommand}"
+                          BackgroundColor="Transparent"
+                          VerticalOptions="Center" 
+                          HeightRequest="40" WidthRequest="40"/>
+            
+            <Label Grid.Column="1"
+                   Text="{Binding Title, StringFormat='{0}'}"
+                   TextColor="#111827"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"
+                   Margin="10,0" />
+            
+            <Label Grid.Column="2"
+                   Text="+"
+                   FontSize="40"
+                   TextColor="#2563EB"
+                   VerticalOptions="Center"
+                   HorizontalOptions="End">
+                 <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding AddItemCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
 
-        <!-- Suggestions (Hide in Shopping Mode) -->
-        <CollectionView Grid.Row="0"
+        <!-- Row 1: Suggestions -->
+        <CollectionView Grid.Row="1"
                         ItemsSource="{Binding Suggestions}"
                         HeightRequest="50"
                         Margin="10,5"
@@ -50,31 +76,74 @@
             </CollectionView.Triggers>
         </CollectionView>
 
-        <CollectionView Grid.Row="1"
+        <!-- Row 2: Main List -->
+        <CollectionView Grid.Row="2"
                         ItemsSource="{Binding Items}"
                         SelectionMode="None"
                         IsGrouped="True"
-                        Margin="0,0,0,80">
+                        Margin="20,10,20,0">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+            </CollectionView.ItemsLayout>
+            
+            <!-- Group Header (Colored Card Top) -->
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate>
-                    <Label Text="{Binding Name}"
-                           BackgroundColor="#F3F4F6"
-                           TextColor="#111827"
-                           FontSize="18"
-                           FontAttributes="Bold"
-                           Padding="15,10"/>
+                    <Border StrokeThickness="0"
+                            StrokeShape="RoundRectangle 20,20,0,0"
+                            HeightRequest="60"
+                            Margin="0,15,0,0"> <!-- Top Margin for spacing between groups -->
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="{Binding Name, Converter={StaticResource CategoryToColor}}" Offset="0.0" />
+                                <GradientStop Color="{Binding Name, Converter={StaticResource CategoryToColor}}" Offset="1.0" /> <!-- Could add slight gradient -->
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        
+                        <Grid Padding="15,0" ColumnDefinitions="auto, *, Auto">
+                            <!-- Category Icon -->
+                             <Label Grid.Column="0" 
+                                   Text="{Binding Name, Converter={StaticResource CategoryToIcon}}" 
+                                   FontSize="24"
+                                   VerticalOptions="Center" 
+                                   Margin="0,0,10,0"/>
+
+                            <Label Grid.Column="1"
+                                   Text="{Binding Name}"
+                                   TextColor="White"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"/>
+                            
+                            <!-- Arrow -->
+                            <Label Grid.Column="2"
+                                   Text="›"
+                                   TextColor="White"
+                                   FontSize="24"
+                                   VerticalOptions="Center"
+                                   FontAttributes="Bold"
+                                   Opacity="0.8"/>
+                        </Grid>
+                    </Border>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
+            
+            <!-- Group Footer (White Card Bottom Cap) -->
+            <CollectionView.GroupFooterTemplate>
+                 <DataTemplate>
+                    <Border StrokeThickness="0"
+                            StrokeShape="RoundRectangle 0,0,20,20"
+                            BackgroundColor="White"
+                            HeightRequest="15"
+                            Margin="0,0,0,0" /> 
+                </DataTemplate>
+            </CollectionView.GroupFooterTemplate>
+
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <SwipeView>
-                        <SwipeView.Triggers>
-                            <DataTrigger TargetType="SwipeView" Binding="{Binding Source={x:Reference ThisPage}, Path=BindingContext.IsShoppingMode}" Value="True">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                        </SwipeView.Triggers>
                         <SwipeView.RightItems>
-                            <SwipeItems>
+                             <SwipeItems>
                                 <SwipeItem Text="{x:Static strings:AppResources.Edit}"
                                            BackgroundColor="#F59E0B"
                                            Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.EditItemCommand}"
@@ -86,26 +155,38 @@
                             </SwipeItems>
                         </SwipeView.RightItems>
                         
-                        <Grid Padding="15" BackgroundColor="White">
+                        <!-- Item Row (White Background) -->
+                        <Grid Padding="15,12" BackgroundColor="White" ColumnDefinitions="Auto, *, Auto">
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.TogglePurchasedCommand}"
                                                       CommandParameter="{Binding .}"/>
                             </Grid.GestureRecognizers>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
                             
-                            <CheckBox IsChecked="{Binding IsPurchased}" 
-                                      VerticalOptions="Center"
-                                      IsEnabled="False" 
-                                      Color="#2563EB"/>
-                                      
-                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="10,0,0,0">
-                                <Label Text="{Binding Name}" 
-                                       FontSize="16"
-                                       TextColor="#1F2937">
+                            <!-- Icon Box -->
+                            <Border Grid.Column="0"
+                                    HeightRequest="40" WidthRequest="40"
+                                    StrokeShape="RoundRectangle 12"
+                                    BackgroundColor="{Binding Category, Converter={StaticResource CategoryToColor}, Opacity=0.2}"
+                                    StrokeThickness="0"
+                                    Margin="0,0,15,0"
+                                    VerticalOptions="Center">
+                                <Label Text="{Binding Category, Converter={StaticResource CategoryToIcon}}"
+                                       FontSize="20"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Border>
+                            
+                            <!-- Name + Quantity -->
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                <Label TextColor="#1F2937" FontSize="16" FontAttributes="Bold">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding Name}" />
+                                            <Span Text="  " />
+                                            <Span Text="{Binding Quantity}" TextColor="#6B7280" FontSize="14" />
+                                            <Span Text="{Binding Unit}" TextColor="#6B7280" FontSize="12" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label" Binding="{Binding IsPurchased}" Value="True">
                                             <Setter Property="TextDecorations" Value="Strikethrough"/>
@@ -113,79 +194,57 @@
                                         </DataTrigger>
                                     </Label.Triggers>
                                 </Label>
-                                <Label Text="{Binding Price, StringFormat='${0:F2}'}" 
-                                       FontSize="12" 
-                                       TextColor="#059669"
-                                       IsVisible="{Binding Price, Converter={StaticResource IsNotNullConverter}}"/>
                             </VerticalStackLayout>
                             
-                             <!-- Quantity Badge (Quick Tune) -->
-                            <Border Grid.Column="2" 
-                                    StrokeShape="RoundRectangle 15" 
-                                    BackgroundColor="#EFF6FF" 
-                                    Stroke="#BFDBFE"
-                                    StrokeThickness="1"
-                                    Padding="10,5" 
-                                    VerticalOptions="Center" 
-                                    Margin="5,0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.OpenQuickTuneCommand}"
-                                                          CommandParameter="{Binding .}"/>
-                                </Border.GestureRecognizers>
-                                <HorizontalStackLayout Spacing="3">
-                                    <Label Text="{Binding Quantity}" TextColor="#2563EB" FontSize="14" FontAttributes="Bold"/>
-                                    <Label Text="{Binding Unit}" TextColor="#2563EB" FontSize="12" VerticalTextAlignment="Center"/>
-                                </HorizontalStackLayout>
-                            </Border>
+                            <!-- Checkbox -->
+                             <CheckBox Grid.Column="2" 
+                                      IsChecked="{Binding IsPurchased}" 
+                                      Color="#2563EB"
+                                      IsEnabled="False" 
+                                      VerticalOptions="Center"/>
                         </Grid>
                     </SwipeView>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+             <CollectionView.Footer>
+                 <BoxView HeightRequest="100" Color="Transparent" />
+            </CollectionView.Footer>
         </CollectionView>
 
-        <Button Grid.Row="1"
-                Text="🎤"
-                Command="{Binding ListenCommand}"
-                BackgroundColor="#059669"
-                TextColor="White"
-                CornerRadius="30"
-                HeightRequest="60"
-                WidthRequest="60"
-                FontSize="24"
-                Margin="20,20,20,90"
-                HorizontalOptions="End"
-                VerticalOptions="End"
-                ZIndex="100"
-                Shadow="{Shadow Brush=Black, Offset='0,5', Radius=5, Opacity=0.3}"/>
+        <!-- Floating Action Buttons (Mic & Scan) -->
+        <VerticalStackLayout Grid.Row="2" 
+                             VerticalOptions="End" 
+                             HorizontalOptions="End" 
+                             Spacing="15" 
+                             Margin="20,20,20,40">
+            
+            <Button Text="📷"
+                    Command="{Binding ScanCommand}"
+                    BackgroundColor="#7C3AED"
+                    TextColor="White"
+                    CornerRadius="30"
+                    HeightRequest="60"
+                    WidthRequest="60"
+                    FontSize="24"
+                    Shadow="{Shadow Brush=Black, Offset='0,4', Radius=8, Opacity=0.3}"/>
+            
+            <Button Text="🎤"
+                    Command="{Binding ListenCommand}"
+                    BackgroundColor="#059669"
+                    TextColor="White"
+                    CornerRadius="30"
+                    HeightRequest="60"
+                    WidthRequest="60"
+                    FontSize="24"
+                    Shadow="{Shadow Brush=Black, Offset='0,4', Radius=8, Opacity=0.3}">
+                 <Button.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#22D3EE" Offset="0.0" />
+                        <GradientStop Color="#3B82F6" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Button.Background>
+            </Button>
+        </VerticalStackLayout>
 
-        <Button Grid.Row="1"
-                Text="📷"
-                Command="{Binding ScanCommand}"
-                BackgroundColor="#7C3AED"
-                TextColor="White"
-                CornerRadius="30"
-                HeightRequest="60"
-                WidthRequest="60"
-                FontSize="24"
-                Margin="20,20,20,160"
-                HorizontalOptions="End"
-                VerticalOptions="End"
-                ZIndex="100"
-                Shadow="{Shadow Brush=Black, Offset='0,5', Radius=5, Opacity=0.3}"/>
-                
-        <Button Grid.Row="1"
-                Text="+"
-                Command="{Binding AddItemCommand}"
-                BackgroundColor="#2563EB"
-                TextColor="White"
-                CornerRadius="30"
-                HeightRequest="60"
-                WidthRequest="60"
-                FontSize="30"
-                Margin="20"
-                HorizontalOptions="End"
-                VerticalOptions="End"
-                ZIndex="100"
-                Shadow="{Shadow Brush=Black, Offset='0,5', Radius=5, Opacity=0.3}"/>
     </Grid>
 </ContentPage>
