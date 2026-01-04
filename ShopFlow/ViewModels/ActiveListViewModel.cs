@@ -327,9 +327,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
             if(confirm)
             {
                 try {
+                   FileLoggerService.LogStatic($"[ActiveListVM] Deleting item: {item.Name} ({item.Id})");
                    await _shoppingRepository.DeleteItemAsync(item);
-                    await LoadItemsAsync();
+                   await LoadItemsAsync();
+                   FileLoggerService.LogStatic($"[ActiveListVM] Item deleted. Refreshing list.");
                 } catch(Exception ex) {
+                     FileLoggerService.LogStatic($"[ActiveListVM] Delete Failed: {ex}");
                      await Application.Current.MainPage.DisplayAlert(AppResources.Error, $"Failed to delete: {ex.Message}", "OK");
                 }
             }

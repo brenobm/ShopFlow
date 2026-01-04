@@ -58,66 +58,98 @@
                 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Border HeightRequest="130"
-                                StrokeShape="RoundRectangle 20"
-                                StrokeThickness="0"
-                                Margin="16,0">
-                            
-                            <Border.Shadow>
-                                <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.1" />
-                            </Border.Shadow>
-                            
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="{Binding PrimaryColor}" Offset="0.0" />
-                                    <GradientStop Color="{Binding SecondaryColor}" Offset="1.0" />
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=OpenListCommand}"
-                                                      CommandParameter="{Binding .}" />
-                            </Border.GestureRecognizers>
-    
-                            <Grid Padding="16" RowDefinitions="Auto,*,Auto">
-                                <!-- Top: Title and Icon -->
-                                <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
-                                    <Label Grid.Column="0"
-                                           Text="{Binding Name}"
-                                           TextColor="White"
-                                           FontSize="20"
-                                           FontAttributes="Bold"
-                                           LineBreakMode="TailTruncation" />
-                                    
-                                    <!-- Icon Placeholder -->
-                                    <Label Grid.Column="1"
-                                           Text="🛒" 
-                                           FontSize="24"
-                                           TextColor="White"
-                                           Opacity="0.8" />
-                                </Grid>
+                        <SwipeView Threshold="100">
+                             <SwipeView.RightItems>
+                                <SwipeItems Mode="Reveal">
+                                    <SwipeItem Text="Delete" 
+                                               BackgroundColor="#EF4444" 
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=DeleteListCommand}"
+                                               CommandParameter="{Binding .}" />
+                                    <SwipeItem Text="Edit" 
+                                               BackgroundColor="#3B82F6" 
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=EditListCommand}"
+                                                CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            <SwipeView.LeftItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItem Text="Default"
+                                               BackgroundColor="#FBBF24"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=SetDefaultListCommand}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.LeftItems>
+
+                            <Border HeightRequest="130"
+                                    StrokeShape="RoundRectangle 20"
+                                    StrokeThickness="0"
+                                    Margin="16,0">
                                 
-                                <!-- Middle: Stats -->
-                                <VerticalStackLayout Grid.Row="1" VerticalOptions="Center" Spacing="2">
-                                    <Label Text="{Binding TotalItemsCount, StringFormat='{0} items'}"
-                                           TextColor="White"
-                                           FontSize="14"
-                                           Opacity="0.9" />
-                                    <Label Text="{Binding BoughtItemsCount, StringFormat='{0} items'}"
-                                           TextColor="White"
-                                           FontSize="12"
-                                           Opacity="0.7" />
-                                </VerticalStackLayout>
-    
-                                <!-- Bottom: Progress Bar -->
-                                 <Grid Grid.Row="2" VerticalOptions="End" Margin="0,10,0,0">
-                                    <ProgressBar Progress="{Binding Progress}" 
-                                                 ProgressColor="White" 
-                                                 ScaleY="2.0"
-                                                 BackgroundColor="#4CFFFFFF" /> 
+                                <Border.Shadow>
+                                    <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.1" />
+                                </Border.Shadow>
+                                
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="{Binding PrimaryColor}" Offset="0.0" />
+                                        <GradientStop Color="{Binding SecondaryColor}" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=OpenListCommand}"
+                                                          CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+        
+                                <Grid Padding="16" RowDefinitions="Auto,*,Auto">
+                                    <!-- Top: Title and Icons -->
+                                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto">
+                                        <!-- Title -->
+                                        <Label Grid.Column="0"
+                                               Text="{Binding Name}"
+                                               TextColor="White"
+                                               FontSize="20"
+                                               FontAttributes="Bold"
+                                               LineBreakMode="TailTruncation" />
+
+                                        <!-- Default Star Indicator -->
+                                        <Label Grid.Column="1"
+                                               Text="★"
+                                               FontSize="20"
+                                               TextColor="Yellow"
+                                               Margin="0,0,8,0"
+                                               IsVisible="{Binding IsDefault}" />
+                                        
+                                        <!-- Icon Placeholder -->
+                                        <Label Grid.Column="2"
+                                               Text="🛒" 
+                                               FontSize="24"
+                                               TextColor="White"
+                                               Opacity="0.8" />
+                                    </Grid>
+                                    
+                                    <!-- Middle: Stats -->
+                                    <VerticalStackLayout Grid.Row="1" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding TotalItemsCount, StringFormat='{0} items'}"
+                                               TextColor="White"
+                                               FontSize="14"
+                                               Opacity="0.9" />
+                                        <Label Text="{Binding BoughtItemsCount, StringFormat='{0} items'}"
+                                               TextColor="White"
+                                               FontSize="12"
+                                               Opacity="0.7" />
+                                    </VerticalStackLayout>
+        
+                                    <!-- Bottom: Progress Bar -->
+                                     <Grid Grid.Row="2" VerticalOptions="End" Margin="0,10,0,0">
+                                        <ProgressBar Progress="{Binding Progress}" 
+                                                     ProgressColor="White" 
+                                                     ScaleY="2.0"
+                                                     BackgroundColor="#4CFFFFFF" /> 
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Border>
+                            </Border>
+                        </SwipeView>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
                 

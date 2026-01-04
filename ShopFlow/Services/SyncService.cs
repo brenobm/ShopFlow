@@ -150,6 +150,14 @@ namespace BrenoMachado.ShopFlow.Services
                         success = true;
                     }
                 }
+                catch (global::Amazon.DynamoDBv2.Model.ResourceNotFoundException rnfEx)
+                {
+                    FileLoggerService.LogStatic($"[SyncService] Resource Missing (Table/Item?): {rnfEx.Message}");
+                    // If the Table is missing, we can't push. Mark as not dirty? Or keep attempting?
+                    // To stop spamming, maybe we should back off. But marking success=true means data loss on server.
+                    // For now, let's just Log and NOT mark success.
+                    success = false; 
+                }
                 catch (Exception ex)
                 {
                     FileLoggerService.LogStatic($"Sync Push Error for {item.Name}: {ex.Message}");
