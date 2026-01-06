@@ -12,6 +12,10 @@ public class ShoppingList
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool? IsDefault { get; set; }
     
+    // New Fields for Customization
+    public string Color { get; set; } // Hex Code
+    public string Icon { get; set; } // Emoji Char
+    
     // Sync Flags
     public bool IsDirty { get; set; }
     public bool IsDeleted { get; set; }

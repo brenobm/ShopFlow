@@ -187,84 +187,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
         
         async Task AddListAsync()
         {
-             string name = await Shell.Current.DisplayPromptAsync("New List", "Enter list name");
-             if (string.IsNullOrWhiteSpace(name))
-                 return;
-
-             try 
-             {
-                 bool isFirst = !Lists.Any();
-                 var newList = new ShoppingList 
-                 { 
-                     Name = name.Trim(), 
-                     IsDefault = isFirst,
-                     // If offline, mark dirty (though we don't have full sync yet, this marks intent)
-                     IsDirty = Connectivity.NetworkAccess != NetworkAccess.Internet 
-                 };
-
-                 if (Connectivity.NetworkAccess == NetworkAccess.Internet)
-                 {
-                     try 
-                     {
-                         // Create Cloud
-                         var cloudList = await _graphQLService.CreateListAsync(name.Trim(), isFirst);
-                         // Use Cloud properties (ID, dates)
-                         newList.Id = cloudList.Id;
-                         newList.CreatedAt = cloudList.CreatedAt;
-                     }
-                     catch (Exception cloudEx)
-                     {
-                         FileLoggerService.LogStatic($"Cloud Create Failed: {cloudEx.Message}");
-                         // Fallback to offline creation if cloud fails
-                         newList.IsDirty = true;
-                     }
-                 }
-                 else
-                 {
-                      newList.IsDirty = true;
-                 }
-
-                 // Save Local (Critical for Offline)
-                 await _databaseService.SaveListAsync(newList);
-                 await LoadListsAsync();
-             }
-             catch (Exception ex)
-             {
-                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to create list: {ex.Message}", "OK");
-             }
+            await Shell.Current.Navigation.PushAsync(new ListFormPage(new ListFormViewModel()));
         }
 
         async Task EditListAsync(ShoppingList list)
         {
             if (list == null) return;
-            string name = await Shell.Current.DisplayPromptAsync("Edit List", "Enter new list name", initialValue: list.Name);
-            if (string.IsNullOrWhiteSpace(name) || name == list.Name) return;
-
-            try
-            {
-                list.Name = name.Trim();
-                list.IsDirty = true;
-
-                if (Connectivity.NetworkAccess == NetworkAccess.Internet)
-                {
-                    try
-                    {
-                        await _graphQLService.UpdateListAsync(list.Id, list.Name, list.IsDefault.GetValueOrDefault());
-                        list.IsDirty = false;
-                    }
-                    catch
-                    {
-                        // Keep dirty if cloud fails
-                    }
-                }
-
-                await _databaseService.SaveListAsync(list);
-                await LoadListsAsync();
-            }
-            catch (Exception ex)
-            {
-                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to update list: {ex.Message}", "OK");
-            }
+            await Shell.Current.Navigation.PushAsync(new ListFormPage(new ListFormViewModel(list)));
         }
 
         async Task DeleteListAsync(ShoppingList list)

@@ -12,6 +12,7 @@ public partial class App : Application
 		InitializeComponent();
         _authService = authService;
         _serviceProvider = serviceProvider;
+        ServiceHelper.Initialize(serviceProvider);
         
         // Ensure culture is set immediately
         localizationService.Initialize();

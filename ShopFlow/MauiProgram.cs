@@ -89,6 +89,8 @@ public static class MauiProgram
         builder.Services.AddTransient<ReportsPage>();
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<LogsPage>();
+        builder.Services.AddTransient<ListFormViewModel>();
+        builder.Services.AddTransient<ListFormPage>();
 
         return builder.Build();
     }
