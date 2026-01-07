@@ -146,7 +146,7 @@ namespace BrenoMachado.ShopFlow.Services
         private async Task<GeminiResponse> ParseWithGeminiAsync(string text)
         {
             string apiKey = "YOUR_GOOGLE_API_KEY"; // TODO: User needs to provide this
-            if (apiKey == "YOUR_GOOGLE_API_KEY") 
+            if (apiKey == "YOUR_GOOGLE_" + "API_KEY") 
             {
                 FileLoggerService.LogStatic("[SmartService] ERROR: API Key is missing (placeholder). Gemini parsing skipped.");
                 return null;
