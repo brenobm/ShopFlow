@@ -16,11 +16,13 @@ namespace BrenoMachado.ShopFlow.Repositories
     {
         private readonly IDatabaseService _databaseService;
         private readonly ISyncService _syncService;
+        private readonly ISmartService _smartService;
 
-        public ShoppingRepository(IDatabaseService databaseService, ISyncService syncService)
+        public ShoppingRepository(IDatabaseService databaseService, ISyncService syncService, ISmartService smartService)
         {
             _databaseService = databaseService;
             _syncService = syncService;
+            _smartService = smartService;
 
             // Auto-Sync when connectivity returns
             Connectivity.ConnectivityChanged += OnConnectivityChanged;
@@ -32,6 +34,19 @@ namespace BrenoMachado.ShopFlow.Repositories
             {
                 FileLoggerService.LogStatic("Connectivity Restored: Triggering Sync");
                 FireAndForgetSync();
+                
+                // Trigger Smart Parsing for unparsed items
+                 Task.Run(async () => {
+                     try {
+                        var lists = await _databaseService.GetListsAsync();
+                        foreach(var list in lists)
+                        {
+                            await _smartService.ProcessUnparsedItemsAsync(list.Id);
+                        }
+                     } catch(Exception ex) {
+                         System.Diagnostics.Debug.WriteLine($"Smart Sync Failed: {ex.Message}");
+                     }
+                 });
             }
         }
 

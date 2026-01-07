@@ -74,6 +74,114 @@ namespace BrenoMachado.ShopFlow.Services
             return (input.Trim(), 1, "qty");
         }
 
+        public async Task ProcessUnparsedItemsAsync(string listId)
+        {
+            // 1. Get Unparsed Items
+            var allItems = await _databaseService.GetItemsAsync(listId);
+            var unparsedItems = allItems.Where(i => !i.IsParsed).ToList();
+
+            if (!unparsedItems.Any()) return;
+
+            if (Connectivity.NetworkAccess != NetworkAccess.Internet) return;
+
+            // 2. Process each item (could be batched in future)
+            foreach (var item in unparsedItems)
+            {
+                try
+                {
+                    var result = await ParseWithGeminiAsync(item.OriginalText);
+                    if (result != null)
+                    {
+                        item.Name = result.Name;
+                        item.Quantity = result.Quantity;
+                        item.Unit = result.Unit;
+                        
+                        // Map Emoji/Icon or Category
+                        // Use existing Converters logic or map returned emoji
+                        if (!string.IsNullOrEmpty(result.Emoji))
+                        {
+                            // If emoji is returned, maybe prepend it? Or store it?
+                            // For now, let's prepend to Name if we don't have a separate Icon field on Item (we don't, we have Category)
+                            // But wait, the previous tasks added "Icon" to LIST, not ITEM.
+                            // Items use Category for icons.
+                            // So we should try to map the Category from Gemini or use the emoji as a hint.
+                            // Let's assume Gemini returns a Category too.
+                        }
+                        
+                        item.Category = result.Category; // Gemini should return a valid category
+                        item.IsParsed = true;
+                        
+                        await _databaseService.SaveItemAsync(item);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Gemini Parse Error: {ex.Message}");
+                    // Keep IsParsed = false to retry later
+                }
+            }
+        }
+
+        private class GeminiResponse
+        {
+            public string Name { get; set; }
+            public double Quantity { get; set; }
+            public string Unit { get; set; }
+            public string Category { get; set; }
+            public string Emoji { get; set; }
+        }
+
+        private async Task<GeminiResponse> ParseWithGeminiAsync(string text)
+        {
+            string apiKey = "YOUR_GOOGLE_API_KEY"; // TODO: User needs to provide this
+            if (apiKey == "YOUR_GOOGLE_API_KEY") return null;
+
+            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
+
+            var promptJSON = new
+            {
+                contents = new[]
+                {
+                    new {
+                        parts = new[] {
+                            new { text = $"Extract standardized data from this shopping list item: '{text}'. Return ONLY raw JSON with keys: 'Name' (string, capitalized), 'Quantity' (number), 'Unit' (string, short form like kg, l, un), 'Category' (one of: Produce, Dairy & Eggs, Meat & Poultry, Bakery, Frozen Foods, Pantry, Beverages, Household, Personal Care, Other), 'Emoji' (single char). Example input: 'milk 2l', Output: {{ \"Name\": \"Milk\", \"Quantity\": 2, \"Unit\": \"l\", \"Category\": \"Dairy & Eggs\", \"Emoji\": \"🥛\" }}." }
+                        }
+                    }
+                },
+                generationConfig = new
+                {
+                    response_mime_type = "application/json"
+                }
+            };
+
+            var jsonContent = System.Text.Json.JsonSerializer.Serialize(promptJSON);
+            var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+            using (var client = new HttpClient())
+            {
+                var response = await client.PostAsync(url, content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    // Parse Gemini Response Structure to get the JSON text
+                    using (var doc = System.Text.Json.JsonDocument.Parse(responseString))
+                    {
+                        var candidates = doc.RootElement.GetProperty("candidates");
+                        if (candidates.GetArrayLength() > 0)
+                        {
+                            var parts = candidates[0].GetProperty("content").GetProperty("parts");
+                            if (parts.GetArrayLength() > 0)
+                            {
+                                var textResult = parts[0].GetProperty("text").GetString();
+                                return System.Text.Json.JsonSerializer.Deserialize<GeminiResponse>(textResult);
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
         private string NormalizeUnit(string unit)
         {
             if (string.IsNullOrWhiteSpace(unit)) return "qty";

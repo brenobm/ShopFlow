@@ -45,6 +45,10 @@ public class ShoppingItem : System.ComponentModel.INotifyPropertyChanged
     public bool IsDeleted { get; set; }
     public DateTime? LastUpdated { get; set; }
 
+    // Smart Parsing Flags
+    public bool IsParsed { get; set; } = true;
+    public string OriginalText { get; set; }
+
     public static List<string> DefaultCategories = new List<string>
     {
         "Uncategorized",

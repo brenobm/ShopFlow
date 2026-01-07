@@ -54,6 +54,11 @@ jobs:
         sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
         xcodebuild -version
 
+    # Inject Secrets
+    - name: Inject Google API Key
+      run: |
+        sed -i '' 's/YOUR_GOOGLE_API_KEY/${{ secrets.GOOGLE_API_KEY }}/g' ShopFlow/Services/SmartService.cs
+
     # Build the App (Generates .ipa)
     - name: Build .NET MAUI iOS App
       run: |

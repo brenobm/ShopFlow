@@ -348,8 +348,18 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 var text = await voiceService.ListenAsync();
                 if (!string.IsNullOrWhiteSpace(text))
                 {
-                     var parsed = _smartService.ParseItemInput(text);
-                     var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = parsed.Name, Quantity = parsed.Quantity, Unit = parsed.Unit, Category = "Voice Added" };
+                     // Offline-First Smart Add: Save Raw Immediately
+                     var newItem = new ShoppingItem 
+                     { 
+                         ListId = CurrentList.Id, 
+                         Name = text, 
+                         OriginalText = text,
+                         IsParsed = false, // Trigger Gemini
+                         Quantity = 1, 
+                         Unit = "qty", 
+                         Category = "Uncategorized" // Will be updated by Gemini
+                     };
+                     
                      await _shoppingRepository.SaveItemAsync(newItem);
                      await LoadItemsAsync();
                      
@@ -358,7 +368,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                      var options = new Microsoft.Maui.Media.SpeechOptions { Locale = Microsoft.Maui.Media.TextToSpeech.GetLocalesAsync().Result.FirstOrDefault(l => l.Language == locale) };
                      await Microsoft.Maui.Media.TextToSpeech.SpeakAsync($"Added {text}", options);
                      
-                     await Shell.Current.DisplayAlert("Voice Input", $"Added '{text}'", "OK");
+                     // await Shell.Current.DisplayAlert("Voice Input", $"Added '{text}'", "OK");
                 }
             }
             catch (Exception ex)
@@ -587,9 +597,17 @@ namespace BrenoMachado.ShopFlow.ViewModels
                  }
              }
 
-             // await _graphQLService.AddItemAsync(targetList.Id, itemName, 1, "qty", "Siri");
-              var parsed = _smartService.ParseItemInput(itemName);
-              var newItem = new ShoppingItem { ListId = targetList.Id, Name = parsed.Name, Quantity = parsed.Quantity, Unit = parsed.Unit, Category = "Siri" };
+              // Offline-First Smart Add
+              var newItem = new ShoppingItem 
+              { 
+                  ListId = targetList.Id, 
+                  Name = itemName, 
+                  OriginalText = itemName,
+                  IsParsed = false, // Trigger Gemini
+                  Quantity = 1, 
+                  Unit = "qty", 
+                  Category = "Uncategorized" 
+              };
               await _shoppingRepository.SaveItemAsync(newItem);
              await LoadItemsAsync();
              // Maybe show a toast

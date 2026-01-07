@@ -8,5 +8,6 @@ namespace BrenoMachado.ShopFlow.Services
     {
         Task<List<string>> GetSuggestionsAsync();
         (string Name, double Quantity, string Unit) ParseItemInput(string input);
+        Task ProcessUnparsedItemsAsync(string listId);
     }
 }
