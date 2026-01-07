@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BrenoMachado.ShopFlow.ViewModels"
              xmlns:strings="clr-namespace:BrenoMachado.ShopFlow.Resources.Strings"
-             x:Class="BrenoMachado.ShopFlow.Views.Partials.DashboardView">
+             x:Class="BrenoMachado.ShopFlow.Views.Partials.DashboardView"
+             x:Name="ThisView">
     <!-- Global Gradient Background -->
     <ContentView.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
@@ -63,11 +64,11 @@
                                 <SwipeItems Mode="Reveal">
                                     <SwipeItem Text="Delete" 
                                                BackgroundColor="#EF4444" 
-                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=DeleteListCommand}"
+                                               Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.DeleteListCommand}"
                                                CommandParameter="{Binding .}" />
                                     <SwipeItem Text="Edit" 
                                                BackgroundColor="#3B82F6" 
-                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=EditListCommand}"
+                                               Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.EditListCommand}"
                                                 CommandParameter="{Binding .}" />
                                 </SwipeItems>
                             </SwipeView.RightItems>
@@ -75,7 +76,7 @@
                                 <SwipeItems Mode="Execute">
                                     <SwipeItem Text="Default"
                                                BackgroundColor="#FBBF24"
-                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=SetDefaultListCommand}"
+                                               Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.SetDefaultListCommand}"
                                                CommandParameter="{Binding .}" />
                                 </SwipeItems>
                             </SwipeView.LeftItems>

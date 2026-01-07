@@ -231,8 +231,8 @@
                 </Button.Shadow>
             </Button>
             
-            <Button Text="🎤"
-                    Command="{Binding ListenCommand}"
+            <Button x:Name="VoiceBtn"
+                    Text="🎤"
                     BackgroundColor="#059669"
                     TextColor="White"
                     CornerRadius="30"
@@ -248,6 +248,19 @@
                         <GradientStop Color="#3B82F6" Offset="1.0" />
                     </LinearGradientBrush>
                 </Button.Background>
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsListening}" Value="True">
+                         <Setter Property="BackgroundColor" Value="#EF4444"/> <!-- Red when listening -->
+                         <Setter Property="Scale" Value="1.2"/>
+                         <Setter Property="Text" Value="🔴"/>
+                         <!-- Override Gradient for solid red or change gradient -->
+                         <Setter Property="Background">
+                             <Setter.Value>
+                                 <SolidColorBrush Color="#EF4444"/>
+                             </Setter.Value>
+                         </Setter>
+                    </DataTrigger>
+                </Button.Triggers>
             </Button>
         </VerticalStackLayout>
 

@@ -16,7 +16,7 @@ namespace BrenoMachado.ShopFlow.Services
             _localizationService = localizationService;
         }
         
-        public async Task<string> ListenAsync()
+        public async Task<string> ListenAsync(CancellationToken cancellationToken)
         {
             FileLoggerService.LogStatic("VoiceService.ListenAsync Called");
             try
@@ -54,7 +54,7 @@ namespace BrenoMachado.ShopFlow.Services
                     var recognitionResult = await _speechToText.ListenAsync(
                         _localizationService.GetCurrentCulture(),
                         progress,
-                        CancellationToken.None);
+                        cancellationToken);
                     
                     FileLoggerService.LogStatic($"Recognition Result: {recognitionResult.IsSuccessful} - {recognitionResult.Text}");
                     return recognitionResult.IsSuccessful ? recognitionResult.Text : null;
@@ -64,6 +64,9 @@ namespace BrenoMachado.ShopFlow.Services
             }
             catch (Exception ex)
             {
+                // TaskCanceledException is expected here on "Stop"
+                if (ex is TaskCanceledException) return null;
+
                 await Shell.Current.DisplayAlert(AppResources.Error, string.Format(AppResources.Msg_VoiceError, ex.Message), "OK");
                 return null;
             }

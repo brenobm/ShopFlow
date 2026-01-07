@@ -8,6 +8,13 @@ namespace BrenoMachado.ShopFlow.Views
         {
             InitializeComponent();
             BindingContext = viewModel;
+            
+            // Push-to-Talk Logic
+            if (VoiceBtn != null)
+            {
+                VoiceBtn.Pressed += (s, e) => viewModel.StartListeningCommand.Execute(null);
+                VoiceBtn.Released += (s, e) => viewModel.StopListeningCommand.Execute(null);
+            }
         }
 
         protected override async void OnAppearing()

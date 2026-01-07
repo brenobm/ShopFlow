@@ -1,0 +1,11 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+C:\Projects\smart-shopping\ShopFlow\ViewModels\DashboardViewModel.cs(326,10): error CS1513: } expected [C:\Projects\smart-shopping\ShopFlow\ShopFlow.csproj::TargetFramework=net10.0-ios]
+
+Build FAILED.
+
+C:\Projects\smart-shopping\ShopFlow\ViewModels\DashboardViewModel.cs(326,10): error CS1513: } expected [C:\Projects\smart-shopping\ShopFlow\ShopFlow.csproj::TargetFramework=net10.0-ios]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:01.35

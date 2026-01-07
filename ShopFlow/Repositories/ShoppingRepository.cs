@@ -63,6 +63,12 @@ namespace BrenoMachado.ShopFlow.Repositories
 
             // 2. Trigger Sync (Fire and Forget)
             FireAndForgetSync();
+
+            // 3. Trigger Smart Parse (Fire and Forget)
+            if (!item.IsParsed && Connectivity.NetworkAccess == NetworkAccess.Internet)
+            {
+                Task.Run(() => _smartService.ProcessUnparsedItemsAsync(item.ListId));
+            }
         }
 
         public async Task DeleteItemAsync(ShoppingItem item)

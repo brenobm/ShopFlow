@@ -76,13 +76,25 @@ namespace BrenoMachado.ShopFlow.Services
 
         public async Task ProcessUnparsedItemsAsync(string listId)
         {
+            FileLoggerService.LogStatic($"[SmartService] ProcessUnparsedItemsAsync called for ListId: {listId}");
+
             // 1. Get Unparsed Items
             var allItems = await _databaseService.GetItemsAsync(listId);
             var unparsedItems = allItems.Where(i => !i.IsParsed).ToList();
 
-            if (!unparsedItems.Any()) return;
+            if (!unparsedItems.Any()) 
+            {
+                FileLoggerService.LogStatic("[SmartService] No unparsed items found.");
+                return;
+            }
 
-            if (Connectivity.NetworkAccess != NetworkAccess.Internet) return;
+            if (Connectivity.NetworkAccess != NetworkAccess.Internet) 
+            {
+                FileLoggerService.LogStatic("[SmartService] No internet connection. Skipping parsing.");
+                return;
+            }
+
+            FileLoggerService.LogStatic($"[SmartService] Found {unparsedItems.Count} unparsed items. Starting processing...");
 
             // 2. Process each item (could be batched in future)
             foreach (var item in unparsedItems)
@@ -134,9 +146,15 @@ namespace BrenoMachado.ShopFlow.Services
         private async Task<GeminiResponse> ParseWithGeminiAsync(string text)
         {
             string apiKey = "YOUR_GOOGLE_API_KEY"; // TODO: User needs to provide this
-            if (apiKey == "YOUR_GOOGLE_API_KEY") return null;
+            if (apiKey == "YOUR_GOOGLE_API_KEY") 
+            {
+                FileLoggerService.LogStatic("[SmartService] ERROR: API Key is missing (placeholder). Gemini parsing skipped.");
+                return null;
+            }
 
             string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
+            
+            FileLoggerService.LogStatic($"[SmartService] Sending request to Gemini for: '{text}'");
 
             var promptJSON = new
             {
@@ -173,10 +191,16 @@ namespace BrenoMachado.ShopFlow.Services
                             if (parts.GetArrayLength() > 0)
                             {
                                 var textResult = parts[0].GetProperty("text").GetString();
+                                FileLoggerService.LogStatic($"[SmartService] Gemini Response: {textResult}");
                                 return System.Text.Json.JsonSerializer.Deserialize<GeminiResponse>(textResult);
                             }
                         }
                     }
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    FileLoggerService.LogStatic($"[SmartService] HTTP Error: {response.StatusCode} - {error}");
                 }
             }
             return null;
