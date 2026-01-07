@@ -112,6 +112,19 @@
                             <Border StrokeShape="RoundRectangle 15"
                                     HeightRequest="70"
                                     StrokeThickness="0">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="Stroke" Value="Black" />
+                                                <Setter Property="StrokeThickness" Value="3" />
+                                                <Setter Property="Scale" Value="0.95" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
                                 <Border.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                         <GradientStop Color="{Binding ., Converter={StaticResource CategoryToColor}}" Offset="0.1" />
@@ -129,20 +142,6 @@
                                                FontSize="12"
                                                HorizontalOptions="Center"/>
                                     </VerticalStackLayout>
-
-                                    <!-- Selection Overlay -->
-                                    <VisualStateManager.VisualStateGroups>
-                                        <VisualStateGroup x:Name="CommonStates">
-                                            <VisualState x:Name="Normal" />
-                                            <VisualState x:Name="Selected">
-                                                <VisualState.Setters>
-                                                    <Setter Property="Stroke" Value="Black" />
-                                                    <Setter Property="StrokeThickness" Value="3" />
-                                                    <Setter Property="Scale" Value="0.95" />
-                                                </VisualState.Setters>
-                                            </VisualState>
-                                        </VisualStateGroup>
-                                    </VisualStateManager.VisualStateGroups>
                                 </Grid>
                             </Border>
                         </DataTemplate>
