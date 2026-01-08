@@ -124,11 +124,17 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     // 1. Remove items not in source
                     for (int i = Lists.Count - 1; i >= 0; i--)
                     {
-                        var item = Lists[i];
-                        if (!ordered.Any(l => l.Id == item.Id))
+                        try
                         {
-                            Lists.RemoveAt(i);
+                            var item = Lists[i];
+                            if (!ordered.Any(l => l.Id == item.Id))
+                            {
+                                var indexToRemove = Lists.IndexOf(item);
+                                if (indexToRemove >= 0)
+                                    Lists.RemoveAt(indexToRemove);
+                            }
                         }
+                        catch { } // Silently fail on removal race condition
                     }
 
                     // 2. Add or Update items
@@ -250,30 +256,43 @@ namespace BrenoMachado.ShopFlow.ViewModels
             {
                 try
                 {
-                    bool isOnline = false;
-                    try { isOnline = Connectivity.NetworkAccess == NetworkAccess.Internet; } catch {}
-                    
-                    if (isOnline)
+                    IsBusy = true; // Block other ops
+
+                    // 1. Cloud Delete (Best Effort)
+                    if (Connectivity.NetworkAccess == NetworkAccess.Internet)
                     {
                          try { await _graphQLService.DeleteListAsync(list.Id); } catch {}
                     }
                     
-                    // Logic: If verify default was deleted, promote another
+                    // 2. Handle Default Promotion (If deleting the default list)
                     if (list.IsDefault == true)
                     {
                         var remaining = Lists.Where(l => l.Id != list.Id).ToList();
                         if (remaining.Any())
                         {
-                            await SetDefaultListAsync(remaining.First());
+                            var newDefault = remaining.First();
+                            newDefault.IsDefault = true;
+                            newDefault.IsDirty = true;
+                            
+                            // Cloud Update New Default
+                            if (Connectivity.NetworkAccess == NetworkAccess.Internet)
+                            {
+                                try { await _graphQLService.UpdateListAsync(newDefault.Id, newDefault.Name, true); newDefault.IsDirty = false; } catch {}
+                            }
+                            await _databaseService.SaveListAsync(newDefault);
                         }
                     }
                     
-                    // Delete Local
+                    // 3. Local Delete
                     await _databaseService.DeleteListAsync(list);
+
+                    // 4. Single Reload
+                    IsBusy = false; // Reset busy so LoadLists works
                     await LoadListsAsync();
                 }
                 catch (Exception ex)
                 {
+                    IsBusy = false;
                     await Application.Current.MainPage.DisplayAlert("Error", $"Failed to delete list: {ex.Message}", "OK");
                 }
             }

@@ -61,20 +61,23 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <SwipeView Threshold="100">
+                             <!-- Swipe Left (Reveals Right Side) -->
                              <SwipeView.RightItems>
                                 <SwipeItems Mode="Reveal">
                                     <SwipeItem Text="Delete" 
                                                BackgroundColor="#EF4444" 
                                                Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.DeleteListCommand}"
                                                CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            
+                            <!-- Swipe Right (Reveals Left Side) -->
+                            <SwipeView.LeftItems>
+                                <SwipeItems Mode="Execute">
                                     <SwipeItem Text="Edit" 
                                                BackgroundColor="#3B82F6" 
                                                Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.EditListCommand}"
                                                 CommandParameter="{Binding .}" />
-                                </SwipeItems>
-                            </SwipeView.RightItems>
-                            <SwipeView.LeftItems>
-                                <SwipeItems Mode="Execute">
                                     <SwipeItem Text="Default"
                                                BackgroundColor="#FBBF24"
                                                Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.SetDefaultListCommand}"
