@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:helpers="clr-namespace:BrenoMachado.ShopFlow.Helpers"
+               x:Class="BrenoMachado.ShopFlow.Views.Popups.EmojiPickerPopup"
+               Color="Transparent"
+               CanBeDismissedByTappingOutsideOfPopup="True">
+
+    <Border StrokeShape="RoundRectangle 20"
+            StrokeThickness="0"
+            BackgroundColor="White"
+            WidthRequest="320"
+            HeightRequest="400"
+            Padding="20"
+            VerticalOptions="Center"
+            HorizontalOptions="Center">
+        
+        <Border.Shadow>
+            <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.2"/>
+        </Border.Shadow>
+
+        <Grid RowDefinitions="Auto, *, Auto" RowSpacing="15">
+            
+            <!-- Header -->
+            <Label Text="Pick an Icon" 
+                   FontSize="18" 
+                   FontAttributes="Bold" 
+                   TextColor="#1F2937" 
+                   HorizontalOptions="Center"/>
+
+            <!-- Emoji Grid -->
+            <CollectionView Grid.Row="1"
+                            ItemsSource="{x:Static helpers:EmojiConstants.ShopIcons}"
+                            SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="5" VerticalItemSpacing="10" HorizontalItemSpacing="10"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border StrokeShape="RoundRectangle 10"
+                                StrokeThickness="0"
+                                BackgroundColor="#F3F4F6"
+                                HeightRequest="45"
+                                WidthRequest="45">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnEmojiTapped" CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="{Binding .}" 
+                                   FontSize="24"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Cancel Button -->
+            <Button Grid.Row="2"
+                    Text="Cancel"
+                    BackgroundColor="Transparent"
+                    TextColor="#6B7280"
+                    FontAttributes="Bold"
+                    Clicked="OnCancelClicked"/>
+        </Grid>
+    </Border>
+
+</toolkit:Popup>

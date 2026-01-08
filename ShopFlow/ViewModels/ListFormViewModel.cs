@@ -1,6 +1,7 @@
 using System.Windows.Input;
 using BrenoMachado.ShopFlow.Models;
 using BrenoMachado.ShopFlow.Services;
+using CommunityToolkit.Maui.Views;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
@@ -91,12 +92,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task PickIconAsync()
         {
-            // Simple input for now, or a better picker if we have time
-             string result = await Shell.Current.DisplayPromptAsync("Pick Icon", "Enter an emoji:", initialValue: SelectedIcon, maxLength: 2);
-             if (!string.IsNullOrWhiteSpace(result))
-             {
-                 SelectedIcon = result.Trim();
-             }
+            var popup = new Views.Popups.EmojiPickerPopup();
+            var result = await Shell.Current.CurrentPage.ShowPopupAsync(popup);
+
+            if (result is string emoji && !string.IsNullOrWhiteSpace(emoji))
+            {
+                SelectedIcon = emoji;
+            }
         }
 
         async Task SaveAsync()
