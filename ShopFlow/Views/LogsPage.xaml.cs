@@ -10,6 +10,11 @@ namespace BrenoMachado.ShopFlow.Views
             BindingContext = viewModel;
         }
 
+        private async void OnCloseClicked(object sender, EventArgs e)
+        {
+            await Navigation.PopModalAsync();
+        }
+
         protected override void OnAppearing()
         {
             base.OnAppearing();

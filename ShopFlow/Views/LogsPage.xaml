@@ -6,26 +6,71 @@
              Title="{Binding Title}"
              BackgroundColor="#1e1e1e">
 
-    <Grid RowDefinitions="*,Auto" Padding="10">
-        <Editor Text="{Binding Logs}" 
-                IsReadOnly="True" 
-                AutoSize="TextChanges" 
-                VerticalOptions="FillAndExpand" 
-                FontSize="12"
-                TextColor="#dcdcdc"
-                BackgroundColor="#1e1e1e"
-                FontFamily="Monospace" />
+    <Grid RowDefinitions="Auto, *, Auto" Padding="0" BackgroundColor="#111827">
+        
+        <!-- Header -->
+        <Grid ColumnDefinitions="*, Auto" Padding="20,15" BackgroundColor="#1F2937">
+            <Label Text="Application Logs" 
+                   TextColor="White" 
+                   FontSize="18" 
+                   FontAttributes="Bold" 
+                   VerticalOptions="Center"/>
+            
+            <ImageButton Grid.Column="1"
+                         Source="close_white.png" 
+                         HeightRequest="30" 
+                         WidthRequest="30"
+                         BackgroundColor="Transparent"
+                         Clicked="OnCloseClicked">
+                <ImageButton.Source>
+                   <!-- Fallback if icon missing -->
+                   <FontImageSource Glyph="✕" Color="White" Size="20" />
+                </ImageButton.Source>
+            </ImageButton>
+        </Grid>
 
-        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10" Padding="0,10,0,0">
-            <Button Text="Refresh" Command="{Binding RefreshCommand}" />
-            <Button Text="Clear" Command="{Binding ClearCommand}" BackgroundColor="#DC2626" TextColor="White" />
-            <Button Text="Copy" Command="{Binding CopyCommand}" BackgroundColor="#4B5563" />
+        <!-- Logs Content -->
+        <Border Grid.Row="1" 
+                Margin="10" 
+                StrokeShape="RoundRectangle 10" 
+                StrokeThickness="0" 
+                BackgroundColor="#000000">
+            <Editor Text="{Binding Logs}" 
+                    IsReadOnly="True" 
+                    AutoSize="TextChanges" 
+                    FontSize="12"
+                    TextColor="#10B981"
+                    BackgroundColor="Transparent"
+                    FontFamily="Monospace" 
+                    Margin="10"/>
+        </Border>
+
+        <!-- Actions Footer -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="15" Padding="20,10,20,30">
+            <Button Text="Refresh" 
+                    Command="{Binding RefreshCommand}" 
+                    BackgroundColor="#374151" 
+                    TextColor="White" 
+                    CornerRadius="8"/>
+            
+            <Button Text="Clear" 
+                    Command="{Binding ClearCommand}" 
+                    BackgroundColor="#B91C1C" 
+                    TextColor="White" 
+                    CornerRadius="8"/>
+            
+            <Button Text="Copy" 
+                    Command="{Binding CopyCommand}" 
+                    BackgroundColor="#2563EB" 
+                    TextColor="White" 
+                    CornerRadius="8"/>
         </Grid>
         
-        <ActivityIndicator IsRunning="{Binding IsBusy}" 
+        <ActivityIndicator Grid.Row="1"
+                           IsRunning="{Binding IsBusy}" 
                            IsVisible="{Binding IsBusy}"
                            HorizontalOptions="Center" 
                            VerticalOptions="Center"
-                           Color="{StaticResource Primary}" />
+                           Color="#10B981" />
     </Grid>
 </ContentPage>

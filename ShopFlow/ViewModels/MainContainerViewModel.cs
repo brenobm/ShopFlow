@@ -47,8 +47,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         [RelayCommand]
         private async Task GoToSettings()
         {
-            // TEMPORARY: Open Logs Page as per user request
-            await Shell.Current.Navigation.PushModalAsync(new Views.LogsPage(new LogsViewModel(FileLoggerService.Instance)));
+            await Shell.Current.GoToAsync(nameof(Views.SettingsPage));
         }
     }
 }

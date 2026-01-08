@@ -7,51 +7,118 @@
              Title="{x:Static strings:AppResources.Settings}"
              BackgroundColor="#F9FAFB">
 
-    <StackLayout Padding="20" Spacing="20">
-    
-        <!-- Language Selection -->
-        <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
-            <StackLayout Spacing="10">
-                <Label Text="{x:Static strings:AppResources.Language}" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
-                <Picker ItemsSource="{Binding Languages}"
-                        SelectedItem="{Binding SelectedLanguage}"
-                        ItemDisplayBinding="{Binding DisplayName}"
-                        Title="Select Language"
-                        BackgroundColor="#F3F4F6"/>
-            </StackLayout>
-        </Frame>
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="25">
+            
+            <!-- Language Section -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{x:Static strings:AppResources.Language}" 
+                       FontAttributes="Bold" FontSize="16" TextColor="#1F2937"/>
+                
+                <Border StrokeShape="RoundRectangle 12" 
+                        StrokeThickness="0" 
+                        BackgroundColor="White"
+                        HeightRequest="60">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.05"/>
+                    </Border.Shadow>
+                    
+                    <Picker ItemsSource="{Binding Languages}"
+                            SelectedItem="{Binding SelectedLanguage}"
+                            ItemDisplayBinding="{Binding DisplayName}"
+                            Title="Select Language"
+                            TextColor="#111827"
+                            TitleColor="#9CA3AF"
+                            BackgroundColor="Transparent"
+                            Margin="15,0"/>
+                </Border>
+            </VerticalStackLayout>
 
-        <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
-            <StackLayout Spacing="10">
-                <Label Text="{x:Static strings:AppResources.Title_DataManagement}" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
-                <Label Text="{x:Static strings:AppResources.Text_ClearDataWarning}" TextColor="#6B7280" FontSize="14"/>
-                <Button Text="{x:Static strings:AppResources.Btn_ClearData}" 
-                        Command="{Binding ClearDataCommand}"
-                        BackgroundColor="#EF4444"
-                        TextColor="White"/>
-            </StackLayout>
-        </Frame>
+            <!-- Data Management Section -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{x:Static strings:AppResources.Title_DataManagement}" 
+                       FontAttributes="Bold" FontSize="16" TextColor="#1F2937"/>
+                
+                <Border StrokeShape="RoundRectangle 12" 
+                        StrokeThickness="0" 
+                        BackgroundColor="White"
+                        Padding="15">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.05"/>
+                    </Border.Shadow>
+                    
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="{x:Static strings:AppResources.Text_ClearDataWarning}" 
+                               TextColor="#6B7280" FontSize="13"/>
+                        
+                        <Button Text="{x:Static strings:AppResources.Btn_ClearData}" 
+                                Command="{Binding ClearDataCommand}"
+                                BackgroundColor="#EF4444"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CornerRadius="8"
+                                HeightRequest="45"/>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
 
-        <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
-            <StackLayout Spacing="10">
-                <Label Text="{x:Static strings:AppResources.Notifications}" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
-                <Button Text="{x:Static strings:AppResources.TestNotification}" 
-                        Command="{Binding TestPushCommand}"
-                        BackgroundColor="#3B82F6"
-                        TextColor="White"/>
-                <Button Text="View App Logs" 
-                        Command="{Binding GoToLogsCommand}"
-                        BackgroundColor="#6B7280"
-                        TextColor="White"/>
-            </StackLayout>
-        </Frame>
+            <!-- Notifications & Logs Section -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Advanced" 
+                       FontAttributes="Bold" FontSize="16" TextColor="#1F2937"/>
+                
+                <Border StrokeShape="RoundRectangle 12" 
+                        StrokeThickness="0" 
+                        BackgroundColor="White"
+                        Padding="15">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.05"/>
+                    </Border.Shadow>
+                    
+                    <VerticalStackLayout Spacing="12">
+                        <Button Text="{x:Static strings:AppResources.TestNotification}" 
+                                Command="{Binding TestPushCommand}"
+                                BackgroundColor="#3B82F6"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CornerRadius="8"
+                                HeightRequest="45"/>
+                                
+                        <Button Text="View App Logs" 
+                                Command="{Binding GoToLogsCommand}"
+                                BackgroundColor="#4B5563"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CornerRadius="8"
+                                HeightRequest="45"/>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
 
-        <Frame Padding="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
-            <StackLayout Spacing="5">
-                 <Label Text="{x:Static strings:AppResources.Title_About}" FontAttributes="Bold" FontSize="18" TextColor="#374151"/>
-                 <Label Text="{x:Static strings:AppResources.AppTitle}" FontSize="16" TextColor="#111827"/>
-                 <Label Text="{Binding Version, StringFormat='Version {0}'}" TextColor="#6B7280"/>
-            </StackLayout>
-        </Frame>
-    </StackLayout>
+            <!-- About Section -->
+            <VerticalStackLayout Spacing="10" Margin="0,10,0,30">
+                <Border StrokeShape="RoundRectangle 12" 
+                        StrokeThickness="0" 
+                        BackgroundColor="White"
+                        Padding="15">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.05"/>
+                    </Border.Shadow>
+                    
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="{x:Static strings:AppResources.AppTitle}" 
+                               FontSize="18" FontAttributes="Bold" TextColor="#111827" 
+                               HorizontalOptions="Center"/>
+                        <Label Text="{Binding Version, StringFormat='v{0}'}" 
+                               TextColor="#9CA3AF" FontSize="14"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Made with ❤️ by Breno" 
+                               TextColor="#D1D5DB" FontSize="12" Margin="0,5,0,0"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
