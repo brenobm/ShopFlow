@@ -152,7 +152,7 @@ namespace BrenoMachado.ShopFlow.Services
                 return null;
             }
 
-            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
+            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={apiKey}";
             
             FileLoggerService.LogStatic($"[SmartService] Sending request to Gemini for: '{text}'");
 
