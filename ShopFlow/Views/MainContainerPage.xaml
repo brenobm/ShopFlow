@@ -41,24 +41,26 @@
                         <TapGestureRecognizer Command="{Binding SwitchToListsCommand}" />
                     </Grid.GestureRecognizers>
                     <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="2">
-                        <!-- Icon (Home) -->
-                         <Image Source="home.png" HeightRequest="24" WidthRequest="24">
-                             <Image.Triggers>
-                                 <DataTrigger TargetType="Image" Binding="{Binding IsListsViewVisible}" Value="True">
-                                     <Setter Property="Source" Value="home_filled.png" />
-                                     <!-- Fallback color tint if using SVG/FontImageSource would be better, but assuming PNGs -->
+                        <!-- Icon (List) - Changed from Home PNG to Emoji for Consistency/Request -->
+                         <Label Text="📋" FontSize="24" HorizontalOptions="Center" TextColor="#6B7280">
+                             <Label.Triggers>
+                                 <DataTrigger TargetType="Label" Binding="{Binding IsListsViewVisible}" Value="True">
+                                     <Setter Property="TextColor" Value="#7C3AED" /> <!-- Active Purple -->
                                  </DataTrigger>
-                             </Image.Triggers>
-                         </Image>
-                         <!-- Fallback Label since we might not have 'home.png' -->
-                         <Label Text="🏠" FontSize="24" HorizontalOptions="Center" IsVisible="False" /> 
-                         
+                             </Label.Triggers>
+                         </Label>
+
                          <!-- Indicator/Label -->
                          <Label Text="{x:Static strings:AppResources.Lists}" 
                                 FontSize="10"
                                 HorizontalOptions="Center"
-                                TextColor="{Binding IsListsViewVisible, Converter={StaticResource BoolToColorConverter}}" /> 
-                                <!-- Note: reuse BoolToColorConverter (True -> Dark, False -> Transp? No, we need Gray) -->
+                                TextColor="#6B7280">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsListsViewVisible}" Value="True">
+                                        <Setter Property="TextColor" Value="#7C3AED" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                         </Label> 
                     </VerticalStackLayout>
                 </Grid>
 

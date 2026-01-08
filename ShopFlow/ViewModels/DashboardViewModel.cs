@@ -188,13 +188,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
                             }
                         }
                         
-                        // Mock Stats (remove if backend supports real stats later, for now keep mock or 0)
-                        if (sourceItem.TotalItemsCount == 0 && sourceItem.BoughtItemsCount == 0)
-                        {
-                             // Only mock if 0, preserving any real data if logic existed (it doesn't seem to)
-                             sourceItem.TotalItemsCount = new Random().Next(5, 20); 
-                             sourceItem.BoughtItemsCount = new Random().Next(0, sourceItem.TotalItemsCount);
-                        }
+                        // Real Stats are populated properties. 
+                        // If they are 0, they display as 0 or hidden depending on UI logic.
+                        // No logic needed here.
 
                         // Sync with ObservableCollection
                         var existing = Lists.FirstOrDefault(l => l.Id == sourceItem.Id);

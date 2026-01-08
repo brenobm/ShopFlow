@@ -40,12 +40,13 @@
         </Grid>
 
         <!-- Row 1: Content (White/Gray with Top Rounded Corners) -->
+        <!-- Changed BackgroundColor to Transparent to remove gray area if items don't fill it, or White if it needs to be a solid card -->
         <Border Grid.Row="1" 
-                BackgroundColor="#F0F2F5"
+                BackgroundColor="White" 
                 StrokeThickness="0"
                 StrokeShape="RoundRectangle 30,30,0,0"
-                Margin="0,0,0,0"> <!-- Touches the header -->
-                
+                Margin="0,0,0,0"> 
+            <!-- Added Padding bottom to handle safe area if needed -->   
             <CollectionView ItemsSource="{Binding Lists}"
                             SelectionMode="None"
                             BackgroundColor="Transparent"
@@ -121,12 +122,12 @@
                                                Margin="0,0,8,0"
                                                IsVisible="{Binding IsDefault}" />
                                         
-                                        <!-- Icon Placeholder -->
+                                        <!-- Icon - RESTORED BINDING -->
                                         <Label Grid.Column="2"
-                                               Text="🛒" 
+                                               Text="{Binding Icon}" 
                                                FontSize="24"
                                                TextColor="White"
-                                               Opacity="0.8" />
+                                               Opacity="0.9" />
                                     </Grid>
                                     
                                     <!-- Middle: Stats -->
@@ -155,7 +156,8 @@
                 </CollectionView.ItemTemplate>
                 
                 <CollectionView.Footer>
-                     <BoxView HeightRequest="100" Color="Transparent" />
+                     <!-- Reduced height to avoid massive gray space if not needed -->
+                     <BoxView HeightRequest="20" Color="Transparent" />
                 </CollectionView.Footer>
             </CollectionView>
         </Border>
