@@ -226,63 +226,54 @@
                              Margin="20,20,20,40">
             
             <!-- Scan Button -->
-            <Border StrokeShape="RoundRectangle 30"
-                    StrokeThickness="0"
+            <Button Command="{Binding ScanCommand}"
+                    CornerRadius="30"
                     HeightRequest="60"
                     WidthRequest="60"
-                    BackgroundColor="Transparent">
-                <Border.Shadow>
+                    BackgroundColor="Transparent"
+                    Text="">
+                <Button.Shadow>
                     <Shadow Brush="#6D28D9" Offset="0,4" Radius="10" Opacity="0.4"/>
-                </Border.Shadow>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding ScanCommand}" />
-                </Border.GestureRecognizers>
-                <Border.Background>
+                </Button.Shadow>
+                <Button.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Color="#A78BFA" Offset="0.0" />
                         <GradientStop Color="#7C3AED" Offset="1.0" />
                     </LinearGradientBrush>
-                </Border.Background>
-                <Image Source="camera_white.png" HeightRequest="28" WidthRequest="28" HorizontalOptions="Center" VerticalOptions="Center">
-                     <Image.Source>
-                         <FontImageSource Glyph="📷" Color="White" Size="28" />
-                     </Image.Source>
-                </Image>
-            </Border>
+                </Button.Background>
+                <Button.ImageSource>
+                    <FontImageSource Glyph="📷" Color="White" Size="28" />
+                </Button.ImageSource>
+            </Button>
 
             <!-- Voice Button (Larger & Glowing) -->
-            <Border StrokeShape="RoundRectangle 35"
-                    StrokeThickness="0"
+            <Button x:Name="VoiceBtn"
+                    CornerRadius="35"
                     HeightRequest="70"
                     WidthRequest="70"
-                    BackgroundColor="Transparent">
-                <Border.Shadow>
+                    BackgroundColor="Transparent"
+                    Text="">
+                <Button.Shadow>
                     <Shadow Brush="#2563EB" Offset="0,8" Radius="15" Opacity="0.5"/>
-                </Border.Shadow>
-                 <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding StartListeningCommand}" />
-                </Border.GestureRecognizers>
-                <Border.Background>
+                </Button.Shadow>
+                <Button.Background>
                     <!-- Siri-like Gradient -->
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Color="#06B6D4" Offset="0.0" />
                         <GradientStop Color="#3B82F6" Offset="0.5" />
                         <GradientStop Color="#8B5CF6" Offset="1.0" />
                     </LinearGradientBrush>
-                </Border.Background>
-                
-                <Image x:Name="MicIcon" Source="mic_white.png" HeightRequest="32" WidthRequest="32" HorizontalOptions="Center" VerticalOptions="Center">
-                     <Image.Source>
-                         <FontImageSource Glyph="🎤" Color="White" Size="32" />
-                     </Image.Source>
-                     <Image.Triggers>
-                        <DataTrigger TargetType="Image" Binding="{Binding IsListening}" Value="True">
-                             <!-- Example feedback -->
-                             <Setter Property="Opacity" Value="0.8"/> 
-                        </DataTrigger>
-                     </Image.Triggers>
-                </Image>
-            </Border>
+                </Button.Background>
+                <Button.ImageSource>
+                    <FontImageSource Glyph="🎤" Color="White" Size="32" />
+                </Button.ImageSource>
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsListening}" Value="True">
+                         <Setter Property="Opacity" Value="0.8"/>
+                         <!-- Optional: Change Gradient or Border to indicate active listening state visually -->
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
         </VerticalStackLayout>
 
     </Grid>
