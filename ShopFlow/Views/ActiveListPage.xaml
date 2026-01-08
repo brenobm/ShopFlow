@@ -19,26 +19,31 @@
     <Grid RowDefinitions="Auto, Auto, *">
         
         <!-- Row 0: Custom Header -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Padding="20,10" BackgroundColor="White">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Padding="20,10" BackgroundColor="{Binding CurrentList.Color}">
              <ImageButton Grid.Column="0"
-                          Source="{FontImage Glyph='‹', Color='Black', Size=40}"
+                          Source="back_arrow_white.png"
                           Command="{Binding BackCommand}"
                           BackgroundColor="Transparent"
                           VerticalOptions="Center" 
-                          HeightRequest="40" WidthRequest="40"/>
+                          HeightRequest="30" WidthRequest="30">
+                 <ImageButton.Source>
+                     <FontImageSource Glyph="‹" Color="White" Size="40" />
+                 </ImageButton.Source>
+             </ImageButton>
             
             <Label Grid.Column="1"
-                   Text="{Binding Title, StringFormat='{0}'}"
-                   TextColor="#111827"
-                   FontSize="28"
+                   Text="{Binding Title}"
+                   TextColor="White"
+                   FontSize="24"
                    FontAttributes="Bold"
                    VerticalOptions="Center"
+                   HorizontalOptions="Center"
                    Margin="10,0" />
             
             <Label Grid.Column="2"
                    Text="+"
                    FontSize="40"
-                   TextColor="#2563EB"
+                   TextColor="White"
                    VerticalOptions="Center"
                    HorizontalOptions="End">
                  <Label.GestureRecognizers>
@@ -51,7 +56,7 @@
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding Suggestions}"
                         HeightRequest="50"
-                        Margin="10,5"
+                        Margin="10,15,10,5"
                         SelectionMode="None"
                         IsVisible="{Binding IsShoppingMode, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView.ItemsLayout>
@@ -59,8 +64,8 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Padding="12,6" BackgroundColor="#DBEAFE" CornerRadius="20" BorderColor="Transparent" HasShadow="False">
-                        <Label Text="{Binding .}" TextColor="#1E40AF" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                    <Frame Padding="12,6" BackgroundColor="White" CornerRadius="20" BorderColor="#E5E7EB" HasShadow="False">
+                        <Label Text="{Binding .}" TextColor="#4B5563" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.AddSuggestionCommand}"
                                                   CommandParameter="{Binding .}"/>
@@ -81,7 +86,7 @@
                         ItemsSource="{Binding Items}"
                         SelectionMode="None"
                         IsGrouped="True"
-                        Margin="20,10,20,0">
+                        Margin="20,0,20,0">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
             </CollectionView.ItemsLayout>
@@ -91,12 +96,12 @@
                 <DataTemplate>
                     <Border StrokeThickness="0"
                             StrokeShape="RoundRectangle 20,20,0,0"
-                            HeightRequest="60"
-                            Margin="0,15,0,0"> <!-- Top Margin for spacing between groups -->
+                            HeightRequest="50"
+                            Margin="0,15,0,0">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                 <GradientStop Color="{Binding Name, Converter={StaticResource CategoryToColor}}" Offset="0.0" />
-                                <GradientStop Color="{Binding Name, Converter={StaticResource CategoryToColor}}" Offset="1.0" /> <!-- Could add slight gradient -->
+                                <GradientStop Color="{Binding Name, Converter={StaticResource CategoryToColor}}" Offset="1.0" />
                             </LinearGradientBrush>
                         </Border.Background>
                         
@@ -104,14 +109,14 @@
                             <!-- Category Icon -->
                              <Label Grid.Column="0" 
                                    Text="{Binding Name, Converter={StaticResource CategoryToIcon}}" 
-                                   FontSize="24"
+                                   FontSize="20"
                                    VerticalOptions="Center" 
                                    Margin="0,0,10,0"/>
 
                             <Label Grid.Column="1"
                                    Text="{Binding Name}"
                                    TextColor="White"
-                                   FontSize="18"
+                                   FontSize="16"
                                    FontAttributes="Bold"
                                    VerticalOptions="Center"/>
                             
@@ -129,12 +134,13 @@
             </CollectionView.GroupHeaderTemplate>
             
             <!-- Group Footer (White Card Bottom Cap) -->
+            <!-- Removing Visual Gap by ensuring it connects -->
             <CollectionView.GroupFooterTemplate>
                  <DataTemplate>
                     <Border StrokeThickness="0"
                             StrokeShape="RoundRectangle 0,0,20,20"
                             BackgroundColor="White"
-                            HeightRequest="15"
+                            HeightRequest="20"
                             Margin="0,0,0,0" /> 
                 </DataTemplate>
             </CollectionView.GroupFooterTemplate>
@@ -164,27 +170,27 @@
                             
                             <!-- Icon Box -->
                             <Border Grid.Column="0"
-                                    HeightRequest="40" WidthRequest="40"
-                                    StrokeShape="RoundRectangle 12"
-                                    BackgroundColor="{Binding Category, Converter={StaticResource CategoryToColor}, ConverterParameter='0.2'}"
+                                    HeightRequest="36" WidthRequest="36"
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="{Binding Category, Converter={StaticResource CategoryToColor}, ConverterParameter='0.1'}"
                                     StrokeThickness="0"
-                                    Margin="0,0,15,0"
+                                    Margin="0,0,12,0"
                                     VerticalOptions="Center">
                                 <Label Text="{Binding Category, Converter={StaticResource CategoryToIcon}}"
-                                       FontSize="20"
+                                       FontSize="18"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center"/>
                             </Border>
                             
                             <!-- Name + Quantity -->
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                <Label TextColor="#1F2937" FontSize="16" FontAttributes="Bold">
+                                <Label TextColor="#1F2937" FontSize="15" FontAttributes="Bold">
                                     <Label.FormattedText>
                                         <FormattedString>
                                             <Span Text="{Binding Name}" />
                                             <Span Text="  " />
-                                            <Span Text="{Binding Quantity}" TextColor="#6B7280" FontSize="14" />
-                                            <Span Text="{Binding Unit}" TextColor="#6B7280" FontSize="12" />
+                                            <Span Text="{Binding Quantity}" TextColor="#6B7280" FontSize="13" />
+                                            <Span Text="{Binding Unit}" TextColor="#6B7280" FontSize="11" />
                                         </FormattedString>
                                     </Label.FormattedText>
                                     <Label.Triggers>
@@ -199,7 +205,7 @@
                             <!-- Checkbox -->
                              <CheckBox Grid.Column="2" 
                                       IsChecked="{Binding IsPurchased}" 
-                                      Color="#2563EB"
+                                      Color="{Binding Source={x:Reference ThisPage}, Path=BindingContext.CurrentList.Color}"
                                       IsEnabled="False" 
                                       VerticalOptions="Center"/>
                         </Grid>
@@ -211,57 +217,72 @@
             </CollectionView.Footer>
         </CollectionView>
 
-        <!-- Floating Action Buttons (Mic & Scan) -->
+        <!-- Floating Action Buttons -->
+        <!-- Siri / Gradient Style -->
         <VerticalStackLayout Grid.Row="2" 
                              VerticalOptions="End" 
                              HorizontalOptions="End" 
                              Spacing="15" 
                              Margin="20,20,20,40">
             
-            <Button Text="📷"
-                    Command="{Binding ScanCommand}"
-                    BackgroundColor="#7C3AED"
-                    TextColor="White"
-                    CornerRadius="30"
+            <!-- Scan Button -->
+            <Border StrokeShape="RoundRectangle 30"
+                    StrokeThickness="0"
                     HeightRequest="60"
                     WidthRequest="60"
-                    FontSize="24">
-                <Button.Shadow>
-                    <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.3" />
-                </Button.Shadow>
-            </Button>
-            
-            <Button x:Name="VoiceBtn"
-                    Text="🎤"
-                    BackgroundColor="#059669"
-                    TextColor="White"
-                    CornerRadius="30"
-                    HeightRequest="60"
-                    WidthRequest="60"
-                    FontSize="24">
-                <Button.Shadow>
-                    <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.3" />
-                </Button.Shadow>
-                 <Button.Background>
+                    BackgroundColor="Transparent">
+                <Border.Shadow>
+                    <Shadow Brush="#6D28D9" Offset="0,4" Radius="10" Opacity="0.4"/>
+                </Border.Shadow>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ScanCommand}" />
+                </Border.GestureRecognizers>
+                <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#22D3EE" Offset="0.0" />
-                        <GradientStop Color="#3B82F6" Offset="1.0" />
+                        <GradientStop Color="#A78BFA" Offset="0.0" />
+                        <GradientStop Color="#7C3AED" Offset="1.0" />
                     </LinearGradientBrush>
-                </Button.Background>
-                <Button.Triggers>
-                    <DataTrigger TargetType="Button" Binding="{Binding IsListening}" Value="True">
-                         <Setter Property="BackgroundColor" Value="#EF4444"/> <!-- Red when listening -->
-                         <Setter Property="Scale" Value="1.2"/>
-                         <Setter Property="Text" Value="🔴"/>
-                         <!-- Override Gradient for solid red or change gradient -->
-                         <Setter Property="Background">
-                             <Setter.Value>
-                                 <SolidColorBrush Color="#EF4444"/>
-                             </Setter.Value>
-                         </Setter>
-                    </DataTrigger>
-                </Button.Triggers>
-            </Button>
+                </Border.Background>
+                <Image Source="camera_white.png" HeightRequest="28" WidthRequest="28" HorizontalOptions="Center" VerticalOptions="Center">
+                     <Image.Source>
+                         <FontImageSource Glyph="📷" Color="White" Size="28" />
+                     </Image.Source>
+                </Image>
+            </Border>
+
+            <!-- Voice Button (Larger & Glowing) -->
+            <Border StrokeShape="RoundRectangle 35"
+                    StrokeThickness="0"
+                    HeightRequest="70"
+                    WidthRequest="70"
+                    BackgroundColor="Transparent">
+                <Border.Shadow>
+                    <Shadow Brush="#2563EB" Offset="0,8" Radius="15" Opacity="0.5"/>
+                </Border.Shadow>
+                 <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding StartListeningCommand}" />
+                </Border.GestureRecognizers>
+                <Border.Background>
+                    <!-- Siri-like Gradient -->
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#06B6D4" Offset="0.0" />
+                        <GradientStop Color="#3B82F6" Offset="0.5" />
+                        <GradientStop Color="#8B5CF6" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                
+                <Image x:Name="MicIcon" Source="mic_white.png" HeightRequest="32" WidthRequest="32" HorizontalOptions="Center" VerticalOptions="Center">
+                     <Image.Source>
+                         <FontImageSource Glyph="🎤" Color="White" Size="32" />
+                     </Image.Source>
+                     <Image.Triggers>
+                        <DataTrigger TargetType="Image" Binding="{Binding IsListening}" Value="True">
+                             <!-- Example feedback -->
+                             <Setter Property="Opacity" Value="0.8"/> 
+                        </DataTrigger>
+                     </Image.Triggers>
+                </Image>
+            </Border>
         </VerticalStackLayout>
 
     </Grid>

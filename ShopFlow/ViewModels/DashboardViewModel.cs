@@ -148,30 +148,52 @@ namespace BrenoMachado.ShopFlow.ViewModels
                         }
                         sourceItem.Initials = initials;
 
-                        // Color Logic (Cycle based on index)
-                        int cycle = i % 4;
-                        switch (cycle)
+                        // Color Logic: Use Saved Color if available, else fallback
+                        if (!string.IsNullOrEmpty(sourceItem.Color))
                         {
-                            case 0: // Green
-                                sourceItem.PrimaryColor = Color.FromArgb("#34D399");
-                                sourceItem.SecondaryColor = Color.FromArgb("#059669");
-                                sourceItem.TotalItemsCount = 32; sourceItem.BoughtItemsCount = 17; // Mock
-                                break;
-                            case 1: // Orange
-                                sourceItem.PrimaryColor = Color.FromArgb("#FBBF24");
-                                sourceItem.SecondaryColor = Color.FromArgb("#D97706");
-                                sourceItem.TotalItemsCount = 10; sourceItem.BoughtItemsCount = 3; // Mock
-                                break;
-                            case 2: // Blue
-                                sourceItem.PrimaryColor = Color.FromArgb("#60A5FA");
+                            try 
+                            {
+                                sourceItem.PrimaryColor = Color.FromHex(sourceItem.Color);
+                                // Generate Secondary (Darker)
+                                sourceItem.SecondaryColor = sourceItem.PrimaryColor.WithLuminosity(sourceItem.PrimaryColor.GetLuminosity() * 0.8f);
+                            }
+                            catch
+                            {
+                                sourceItem.PrimaryColor = Color.FromArgb("#3B82F6"); // Default Blue
                                 sourceItem.SecondaryColor = Color.FromArgb("#2563EB");
-                                sourceItem.TotalItemsCount = 24; sourceItem.BoughtItemsCount = 8; // Mock
-                                break;
-                            case 3: // Pink
-                                sourceItem.PrimaryColor = Color.FromArgb("#F472B6");
-                                sourceItem.SecondaryColor = Color.FromArgb("#DB2777");
-                                sourceItem.TotalItemsCount = 5; sourceItem.BoughtItemsCount = 5; // Mock
-                                break;
+                            }
+                        }
+                        else
+                        {
+                            // Fallback to cycling if no color saved
+                            int cycle = i % 4;
+                            switch (cycle)
+                            {
+                                case 0: // Green
+                                    sourceItem.PrimaryColor = Color.FromArgb("#34D399");
+                                    sourceItem.SecondaryColor = Color.FromArgb("#059669");
+                                    break;
+                                case 1: // Orange
+                                    sourceItem.PrimaryColor = Color.FromArgb("#FBBF24");
+                                    sourceItem.SecondaryColor = Color.FromArgb("#D97706");
+                                    break;
+                                case 2: // Blue
+                                    sourceItem.PrimaryColor = Color.FromArgb("#60A5FA");
+                                    sourceItem.SecondaryColor = Color.FromArgb("#2563EB");
+                                    break;
+                                case 3: // Pink
+                                    sourceItem.PrimaryColor = Color.FromArgb("#F472B6");
+                                    sourceItem.SecondaryColor = Color.FromArgb("#DB2777");
+                                    break;
+                            }
+                        }
+                        
+                        // Mock Stats (remove if backend supports real stats later, for now keep mock or 0)
+                        if (sourceItem.TotalItemsCount == 0 && sourceItem.BoughtItemsCount == 0)
+                        {
+                             // Only mock if 0, preserving any real data if logic existed (it doesn't seem to)
+                             sourceItem.TotalItemsCount = new Random().Next(5, 20); 
+                             sourceItem.BoughtItemsCount = new Random().Next(0, sourceItem.TotalItemsCount);
                         }
 
                         // Sync with ObservableCollection
