@@ -16,6 +16,7 @@ namespace BrenoMachado.ShopFlow.Services
         Task<GlobalProduct> GetGlobalProductAsync(string barcode);
         Task<GlobalProduct> CreateGlobalProductAsync(string barcode, string name, string category);
         Task<ProductSearchDto> ProductSearchAsync(string barcode);
+        Task<SmartParseResult> ParseItemAsync(string text);
         Task RegisterDeviceAsync(string token, string platform);
     }
 }

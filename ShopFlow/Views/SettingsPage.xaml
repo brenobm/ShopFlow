@@ -34,41 +34,7 @@
                 </Border>
             </VerticalStackLayout>
 
-            <!-- API Configuration Section -->
-            <VerticalStackLayout Spacing="10">
-                <Label Text="Gemini API Configuration" 
-                       FontAttributes="Bold" FontSize="16" TextColor="#1F2937"/>
-                
-                <Border StrokeShape="RoundRectangle 12" 
-                        StrokeThickness="0" 
-                        BackgroundColor="White"
-                        Padding="15">
-                    <Border.Shadow>
-                        <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.05"/>
-                    </Border.Shadow>
-                    
-                    <VerticalStackLayout Spacing="15">
-                        <Label Text="Enter your Gemini API Key to enable smart parsing features." 
-                               TextColor="#6B7280" FontSize="13"/>
-                        
-                        <Entry Placeholder="Paste API Key here"
-                               Text="{Binding ApiKey}"
-                               IsPassword="True"
-                               BackgroundColor="#F3F4F6"
-                               TextColor="#111827"
-                               PlaceholderColor="#9CA3AF"
-                               HeightRequest="45" />
 
-                        <Button Text="Save API Key" 
-                                Command="{Binding SaveApiKeyCommand}"
-                                BackgroundColor="#10B981"
-                                TextColor="White"
-                                FontAttributes="Bold"
-                                CornerRadius="8"
-                                HeightRequest="45"/>
-                    </VerticalStackLayout>
-                </Border>
-            </VerticalStackLayout>
 
             <!-- Data Management Section -->
             <VerticalStackLayout Spacing="10">

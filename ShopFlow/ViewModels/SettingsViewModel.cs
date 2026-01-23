@@ -67,57 +67,21 @@ namespace BrenoMachado.ShopFlow.ViewModels
             ClearDataCommand = new Command(async () => await ClearDataAsync());
             TestPushCommand = new Command(async () => await TestPushAsync());
             GoToLogsCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(LogsPage)));
-            SaveApiKeyCommand = new Command(async () => await SaveApiKeyAsync());
-            
             // Auto-init on settings open (or app start ideally)
             _ = _notificationService.InitializeAsync();
-            _ = LoadApiKeyAsync();
-        }
-
-        private string _apiKey;
-        public string ApiKey
-        {
-            get => _apiKey;
-            set => SetProperty(ref _apiKey, value);
-        }
-
-        public ICommand SaveApiKeyCommand { get; }
-
-        private async Task LoadApiKeyAsync()
-        {
-            try
-            {
-                var key = await SecureStorage.Default.GetAsync("GeminiApiKey");
-                ApiKey = key;
-            }
-            catch (Exception ex)
-            {
-                FileLoggerService.LogStatic($"Error loading API Key: {ex.Message}");
-            }
-        }
-
-        private async Task SaveApiKeyAsync()
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(ApiKey))
-                {
-                    SecureStorage.Default.Remove("GeminiApiKey");
-                }
-                else
-                {
-                    await SecureStorage.Default.SetAsync("GeminiApiKey", ApiKey.Trim());
-                }
-                await Shell.Current.DisplayAlert(Resources.Strings.AppResources.Settings, "API Key Saved Successfully", "OK");
-            }
-            catch (Exception ex)
-            {
-                FileLoggerService.LogStatic($"Error saving API Key: {ex.Message}");
-                await Shell.Current.DisplayAlert("Error", "Could not save API Key", "OK");
-            }
         }
 
         private async void ChangeLanguage(LanguageModel language)
+        {
+            if (language == null) return;
+            
+            var current = _localizationService.GetCurrentCulture().Name;
+            if (current != language.Code)
+            {
+                _localizationService.SetCulture(language.Code);
+                await Shell.Current.DisplayAlert(Resources.Strings.AppResources.RestartRequired, Resources.Strings.AppResources.RestartMessage, "OK");
+            }
+        }
         {
             if (language == null) return;
             

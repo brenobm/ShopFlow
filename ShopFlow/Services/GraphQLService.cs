@@ -337,5 +337,35 @@ namespace BrenoMachado.ShopFlow.Services
 
             return response.Data.productSearch.ToObject<ProductSearchDto>();
         }
+
+        public async Task<SmartParseResult> ParseItemAsync(string text)
+        {
+             SetAuthorizationHeader();
+             var request = new GraphQLRequest
+            {
+                Query = @"
+                query ParseItem($text: String!) {
+                    parseItem(text: $text) {
+                        name
+                        quantity
+                        unit
+                        category
+                        emoji
+                    }
+                }",
+                Variables = new { text }
+            };
+
+            var response = await _client.SendQueryAsync<dynamic>(request);
+            if (response.Errors != null && response.Errors.Any()) 
+            {
+                // Log error but don't crash, return null so SmartService knows it failed
+                FileLoggerService.LogStatic($"[GraphQLService] ParseItem Error: {response.Errors[0].Message}");
+                return null;
+            }
+            if (response.Data.parseItem == null) return null;
+
+            return response.Data.parseItem.ToObject<SmartParseResult>();
+        }
     }
 }
