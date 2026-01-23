@@ -60,10 +60,26 @@
                 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <SwipeView Threshold="100">
-                             <!-- Swipe Left (Reveals Right Side) -->
+                        <SwipeView Threshold="200">
+                             <!-- Swipe Left (Reveals Right Side Actions) -->
                              <SwipeView.RightItems>
                                 <SwipeItems Mode="Reveal">
+                                    <SwipeItemView Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.EditListCommand}"
+                                                   CommandParameter="{Binding .}">
+                                        <Border HeightRequest="130"
+                                                WidthRequest="90"
+                                                StrokeShape="RoundRectangle 20"
+                                                StrokeThickness="0"
+                                                BackgroundColor="#3B82F6"
+                                                Margin="16,0,4,0">
+                                            <Label Text="{x:Static strings:AppResources.Edit}"
+                                                   TextColor="White" 
+                                                   HorizontalOptions="Center" 
+                                                   VerticalOptions="Center"
+                                                   FontAttributes="Bold" />
+                                        </Border>
+                                    </SwipeItemView>
+
                                     <SwipeItemView Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.DeleteListCommand}"
                                                    CommandParameter="{Binding .}">
                                         <Border HeightRequest="130"
@@ -71,7 +87,7 @@
                                                 StrokeShape="RoundRectangle 20"
                                                 StrokeThickness="0"
                                                 BackgroundColor="#EF4444"
-                                                Margin="8,0,16,0">
+                                                Margin="4,0,16,0">
                                             <Label Text="{x:Static strings:AppResources.Delete}"
                                                    TextColor="White" 
                                                    HorizontalOptions="Center" 
@@ -82,20 +98,6 @@
                                 </SwipeItems>
                             </SwipeView.RightItems>
                             
-                            <!-- Swipe Right (Reveals Left Side) -->
-                            <SwipeView.LeftItems>
-                                <SwipeItems Mode="Execute">
-                                    <SwipeItem Text="Edit" 
-                                               BackgroundColor="#3B82F6" 
-                                               Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.EditListCommand}"
-                                                CommandParameter="{Binding .}" />
-                                    <SwipeItem Text="Default"
-                                               BackgroundColor="#FBBF24"
-                                               Command="{Binding Source={x:Reference ThisView}, Path=BindingContext.SetDefaultListCommand}"
-                                               CommandParameter="{Binding .}" />
-                                </SwipeItems>
-                            </SwipeView.LeftItems>
-
                             <Border HeightRequest="130"
                                     StrokeShape="RoundRectangle 20"
                                     StrokeThickness="0"
