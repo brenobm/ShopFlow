@@ -13,6 +13,37 @@ namespace BrenoMachado.ShopFlow.Services
         public FileLoggerService()
         {
             if (Instance == null) Instance = this;
+            Task.Run(() => PerformAutoCleanup());
+        }
+
+        private void PerformAutoCleanup()
+        {
+            try
+            {
+                lock (_lock)
+                {
+                    if (!File.Exists(_logPath)) return;
+
+                    var info = new FileInfo(_logPath);
+                    const long MaxSizeBytes = 5 * 1024 * 1024; // 5 MB
+
+                    if (info.Length > MaxSizeBytes)
+                    {
+                        var lines = File.ReadAllLines(_logPath);
+                        if (lines.Length > 1000)
+                        {
+                            var newLines = lines.Skip(lines.Length - 1000).ToArray();
+                            File.WriteAllLines(_logPath, newLines);
+                            // Log that cleanup happened (in the new file)
+                            File.AppendAllText(_logPath, $"[{DateTime.Now}] [INFO] Log file was truncated due to size limit.{Environment.NewLine}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Log Cleanup Failed: {ex.Message}");
+            }
         }
 
         public void Log(string message)

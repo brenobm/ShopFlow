@@ -189,9 +189,11 @@ namespace BrenoMachado.ShopFlow.Services
         private async Task PushItemToCloudAsync(ShoppingItem item)
         {
              var userId = _authService.GetCurrentUserId();
+             if (string.IsNullOrEmpty(userId)) return;
+
              var attributeMap = new Dictionary<string, AttributeValue>
              {
-                 { "UserId", new AttributeValue { S = userId } },
+                 { "userId", new AttributeValue { S = userId } },
                  { "Id", new AttributeValue { S = item.Id } },
                  { "Name", new AttributeValue { S = item.Name } },
                  { "IsPurchased", new AttributeValue { BOOL = item.IsPurchased } },
@@ -215,7 +217,7 @@ namespace BrenoMachado.ShopFlow.Services
              {
                  TableName = AwsConfig.ItemsTableName,
                  Key = new Dictionary<string, AttributeValue> {
-                     { "UserId", new AttributeValue { S = userId } },
+                     { "userId", new AttributeValue { S = userId } },
                      { "Id", new AttributeValue { S = item.Id } }
                  }
              };
@@ -234,7 +236,7 @@ namespace BrenoMachado.ShopFlow.Services
                 {
                     TableName = AwsConfig.ItemsTableName,
                     Key = new Dictionary<string, AttributeValue> {
-                        { "UserId", new AttributeValue { S = userId } },
+                        { "userId", new AttributeValue { S = userId } },
                         { "Id", new AttributeValue { S = itemId } }
                     }
                 };
