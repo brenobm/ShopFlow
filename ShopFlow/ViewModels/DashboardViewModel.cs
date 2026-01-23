@@ -194,30 +194,31 @@ namespace BrenoMachado.ShopFlow.ViewModels
                             }
                         }
                         
-                        // Real Stats are populated properties. 
-                        // If they are 0, they display as 0 or hidden depending on UI logic.
-                        // No logic needed here.
-
                         // Sync with ObservableCollection
                         var existing = Lists.FirstOrDefault(l => l.Id == sourceItem.Id);
                         if (existing != null)
                         {
                             // Update properties if changed
-                            if (existing.Name != sourceItem.Name) existing.Name = sourceItem.Name;
-                            if (existing.IsDefault != sourceItem.IsDefault) existing.IsDefault = sourceItem.IsDefault;
+                            bool changed = false;
+                            if (existing.Name != sourceItem.Name) { existing.Name = sourceItem.Name; changed = true; }
+                            if (existing.IsDefault != sourceItem.IsDefault) { existing.IsDefault = sourceItem.IsDefault; changed = true; }
+                            if (existing.Icon != sourceItem.Icon) { existing.Icon = sourceItem.Icon; changed = true; }
+                            if (existing.Color != sourceItem.Color) { existing.Color = sourceItem.Color; changed = true; }
                             
-                            // Visuals (Always update to ensure consistency with cycle)
+                            // Always update visuals
                             existing.Initials = sourceItem.Initials;
                             existing.PrimaryColor = sourceItem.PrimaryColor;
                             existing.SecondaryColor = sourceItem.SecondaryColor;
-                            existing.TotalItemsCount = sourceItem.TotalItemsCount;
-                            existing.BoughtItemsCount = sourceItem.BoughtItemsCount;
+                            
+                            // FORCE REFRESH: Replace the item in the list if visuals changed
+                            // Or simpler: Just replace it at the index. This guarantees UI update for Non-Observable objects.
+                            int currentIndex = Lists.IndexOf(existing);
+                            Lists[currentIndex] = existing; 
                             
                             // Move if order is wrong
-                            int oldIndex = Lists.IndexOf(existing);
-                            if (oldIndex != i)
+                            if (currentIndex != i)
                             {
-                                Lists.Move(oldIndex, i);
+                                Lists.Move(currentIndex, i);
                             }
                         }
                         else
