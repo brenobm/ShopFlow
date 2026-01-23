@@ -11,7 +11,7 @@ namespace BrenoMachado.ShopFlow
         public static readonly RegionEndpoint Region = RegionEndpoint.USWest2;
         
         // DynamoDB Table Names
-        public const string ItemsTableName = "ShopFlow_Items";
+        public const string ItemsTableName = "ShopFlow_Items_v2";
         public const string ListsTableName = "ShopFlow_Lists";
         public const string GraphqlEndpoint = "https://msd5yv5s7fdevbcgwt56giiyy4.appsync-api.us-west-2.amazonaws.com/graphql";
     }

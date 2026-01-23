@@ -68,6 +68,10 @@ namespace BrenoMachado.ShopFlow.Services
                     await ProcessCloudItemAsync(item);
                 }
             }
+            catch (global::Amazon.DynamoDBv2.Model.ResourceNotFoundException)
+            {
+                 FileLoggerService.LogStatic($"[SyncService] CRITICAL: Table '{AwsConfig.ItemsTableName}' not found. Pull skipped.");
+            }
             catch (Exception ex)
             {
                 FileLoggerService.LogStatic($"Sync Pull Error: {ex.Message}");
@@ -78,6 +82,8 @@ namespace BrenoMachado.ShopFlow.Services
         {
              try 
              {
+                 if (!cloudItem.ContainsKey("Id")) return; // Skip invalid items
+
                  string id = cloudItem["Id"].S;
                  var localItem = await _databaseService.GetItemAsync(id);
                  
@@ -152,11 +158,9 @@ namespace BrenoMachado.ShopFlow.Services
                 }
                 catch (global::Amazon.DynamoDBv2.Model.ResourceNotFoundException rnfEx)
                 {
-                    FileLoggerService.LogStatic($"[SyncService] Resource Missing (Table/Item?): {rnfEx.Message}");
-                    // If the Table is missing, we can't push. Mark as not dirty? Or keep attempting?
-                    // To stop spamming, maybe we should back off. But marking success=true means data loss on server.
-                    // For now, let's just Log and NOT mark success.
+                    FileLoggerService.LogStatic($"[SyncService] CRITICAL: Table '{AwsConfig.ItemsTableName}' not found in {AwsConfig.Region.SystemName}. Please create it in AWS Console.");
                     success = false; 
+                    return; // Stop processing to avoid spam
                 }
                 catch (Exception ex)
                 {

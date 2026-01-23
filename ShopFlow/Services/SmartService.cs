@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using BrenoMachado.ShopFlow.Models;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Messaging;
+using BrenoMachado.ShopFlow.Messages;
 
 namespace BrenoMachado.ShopFlow.Services
 {
@@ -124,6 +126,9 @@ namespace BrenoMachado.ShopFlow.Services
                         item.IsParsed = true;
                         
                         await _databaseService.SaveItemAsync(item);
+                        
+                        // Notify UI to Refresh
+                        WeakReferenceMessenger.Default.Send(new ItemParsedMessage(listId));
                     }
                 }
                 catch (Exception ex)
@@ -152,7 +157,7 @@ namespace BrenoMachado.ShopFlow.Services
                 return null;
             }
 
-            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={apiKey}";
+            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
             
             FileLoggerService.LogStatic($"[SmartService] Sending request to Gemini for: '{text}'");
 

@@ -97,7 +97,8 @@
                     <Border StrokeThickness="0"
                             StrokeShape="RoundRectangle 20,20,0,0"
                             HeightRequest="50"
-                            Margin="0,15,0,0">
+                            Margin="0,15,0,0"
+                            Padding="0">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                 <GradientStop Color="{Binding Name, Converter={StaticResource CategoryToColor}}" Offset="0.0" />
@@ -147,7 +148,7 @@
 
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <SwipeView>
+                    <SwipeView Margin="0,0,0,0" Padding="0">
                         <SwipeView.RightItems>
                              <SwipeItems>
                                 <SwipeItem Text="{x:Static strings:AppResources.Edit}"
@@ -162,7 +163,7 @@
                         </SwipeView.RightItems>
                         
                         <!-- Item Row (White Background) -->
-                        <Grid Padding="15,12" BackgroundColor="White" ColumnDefinitions="Auto, *, Auto">
+                        <Grid Padding="15,12" BackgroundColor="White" ColumnDefinitions="Auto, *, Auto" Margin="0">
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.TogglePurchasedCommand}"
                                                       CommandParameter="{Binding .}"/>
@@ -212,10 +213,10 @@
                     </SwipeView>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
-             <CollectionView.Footer>
-                 <BoxView HeightRequest="100" Color="Transparent" />
-            </CollectionView.Footer>
-        </CollectionView>
+                <CollectionView.Footer>
+                     <BoxView HeightRequest="80" Color="Transparent" />
+                </CollectionView.Footer>
+            </CollectionView>
 
         <!-- Floating Action Buttons -->
         <!-- Siri / Gradient Style -->
@@ -231,7 +232,9 @@
                     HeightRequest="60"
                     WidthRequest="60"
                     BackgroundColor="Transparent"
-                    Text="">
+                    Text="📷"
+                    TextColor="White"
+                    FontSize="28">
                 <Button.Shadow>
                     <Shadow Brush="#6D28D9" Offset="0,4" Radius="10" Opacity="0.4"/>
                 </Button.Shadow>
@@ -241,9 +244,6 @@
                         <GradientStop Color="#7C3AED" Offset="1.0" />
                     </LinearGradientBrush>
                 </Button.Background>
-                <Button.ImageSource>
-                    <FontImageSource Glyph="📷" Color="White" Size="28" />
-                </Button.ImageSource>
             </Button>
 
             <!-- Voice Button (Larger & Glowing) -->
@@ -252,7 +252,9 @@
                     HeightRequest="70"
                     WidthRequest="70"
                     BackgroundColor="Transparent"
-                    Text="">
+                    Text="🎤"
+                    TextColor="White"
+                    FontSize="32">
                 <Button.Shadow>
                     <Shadow Brush="#2563EB" Offset="0,8" Radius="15" Opacity="0.5"/>
                 </Button.Shadow>
@@ -264,9 +266,6 @@
                         <GradientStop Color="#8B5CF6" Offset="1.0" />
                     </LinearGradientBrush>
                 </Button.Background>
-                <Button.ImageSource>
-                    <FontImageSource Glyph="🎤" Color="White" Size="32" />
-                </Button.ImageSource>
                 <Button.Triggers>
                     <DataTrigger TargetType="Button" Binding="{Binding IsListening}" Value="True">
                          <Setter Property="Opacity" Value="0.8"/>

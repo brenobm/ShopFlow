@@ -6,6 +6,8 @@ using BrenoMachado.ShopFlow.Views;
 using BrenoMachado.ShopFlow.Repositories;
 using CommunityToolkit.Maui.Views;
 using BrenoMachado.ShopFlow.Views.Popups;
+using CommunityToolkit.Mvvm.Messaging;
+using BrenoMachado.ShopFlow.Messages;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
@@ -137,6 +139,17 @@ namespace BrenoMachado.ShopFlow.ViewModels
             _databaseService = databaseService;
             _shoppingRepository = shoppingRepository;
             _localizationService = localizationService;
+
+            _localizationService = localizationService;
+
+            // Subscribe to ItemParsedMessage
+            WeakReferenceMessenger.Default.Register<ItemParsedMessage>(this, async (r, m) =>
+            {
+                if (m.Value == ListId)
+                {
+                    await LoadItemsAsync();
+                }
+            });
 
             StartListeningCommand = new Command(async () => await StartListeningAsync());
             StopListeningCommand = new Command(async () => await StopListeningAsync());

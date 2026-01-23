@@ -35,7 +35,7 @@ namespace BrenoMachado.ShopFlow.Services
                 }
                 catch (Exception ex)
                 {
-                     FileLoggerService.LogStatic($"[PushService] Firebase Token Error: {ex.Message}");
+                     FileLoggerService.LogStatic($"[PushService] Firebase Token Error: {ex.Message}. Hint: Check google-services.json matches your package name, and SHA-1 fingerprint is added in Firebase Console.");
                 }
 #endif
             }
