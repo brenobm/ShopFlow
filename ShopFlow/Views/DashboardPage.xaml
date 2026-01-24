@@ -32,10 +32,6 @@
                                            BackgroundColor="#EF4444"
                                            Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.DeleteListCommand}"
                                            CommandParameter="{Binding .}"/>
-                                <SwipeItem Text="{x:Static strings:AppResources.Share}"
-                                           BackgroundColor="#3B82F6"
-                                           Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.ShareListCommand}"
-                                           CommandParameter="{Binding .}"/>
                             </SwipeItems>
                         </SwipeView.RightItems>
                         <Frame CornerRadius="10" HasShadow="True" BorderColor="Transparent" Padding="0">

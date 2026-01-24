@@ -6,31 +6,10 @@
              Title="{Binding Title}"
              BackgroundColor="#1e1e1e">
 
-    <Grid RowDefinitions="Auto, *, Auto" Padding="0" BackgroundColor="#111827">
-        
-        <!-- Header -->
-        <Grid ColumnDefinitions="*, Auto" Padding="20,15" BackgroundColor="#1F2937">
-            <Label Text="Application Logs" 
-                   TextColor="White" 
-                   FontSize="18" 
-                   FontAttributes="Bold" 
-                   VerticalOptions="Center"/>
-            
-            <ImageButton Grid.Column="1"
-                         Source="close_white.png" 
-                         HeightRequest="30" 
-                         WidthRequest="30"
-                         BackgroundColor="Transparent"
-                         Clicked="OnCloseClicked">
-                <ImageButton.Source>
-                   <!-- Fallback if icon missing -->
-                   <FontImageSource Glyph="✕" Color="White" Size="20" />
-                </ImageButton.Source>
-            </ImageButton>
-        </Grid>
+    <Grid RowDefinitions="*, Auto" Padding="0" BackgroundColor="#111827">
 
         <!-- Logs Content -->
-        <Border Grid.Row="1" 
+        <Border Grid.Row="0" 
                 Margin="10" 
                 StrokeShape="RoundRectangle 10" 
                 StrokeThickness="0" 
@@ -46,24 +25,31 @@
         </Border>
 
         <!-- Actions Footer -->
-        <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="15" Padding="20,10,20,30">
-            <Button Text="Refresh" 
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10" Padding="15,10,15,30">
+            <Button Grid.Column="0"
+                    Text="Refresh" 
                     Command="{Binding RefreshCommand}" 
                     BackgroundColor="#374151" 
                     TextColor="White" 
-                    CornerRadius="8"/>
+                    CornerRadius="8"
+                    HeightRequest="50"/>
             
-            <Button Text="Clear" 
+            <Button Grid.Column="1"
+                    Text="Clean" 
                     Command="{Binding ClearCommand}" 
-                    BackgroundColor="#B91C1C" 
+                    BackgroundColor="#DC2626" 
                     TextColor="White" 
-                    CornerRadius="8"/>
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    FontAttributes="Bold"/>
             
-            <Button Text="Copy" 
+            <Button Grid.Column="2"
+                    Text="Copy" 
                     Command="{Binding CopyCommand}" 
                     BackgroundColor="#2563EB" 
                     TextColor="White" 
-                    CornerRadius="8"/>
+                    CornerRadius="8"
+                    HeightRequest="50"/>
         </Grid>
         
         <ActivityIndicator Grid.Row="1"

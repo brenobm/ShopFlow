@@ -15,7 +15,8 @@ public class AppDelegate : MauiUIApplicationDelegate
         try
         {
             var session = AVFoundation.AVAudioSession.SharedInstance();
-            session.SetCategory(AVFoundation.AVAudioSessionCategory.Playback);
+            session.SetCategory(AVFoundation.AVAudioSessionCategory.PlayAndRecord, 
+                                AVFoundation.AVAudioSessionCategoryOptions.DefaultToSpeaker | AVFoundation.AVAudioSessionCategoryOptions.MixWithOthers);
             session.SetActive(true);
         }
         catch (Exception ex)
