@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:BrenoMachado.ShopFlow"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:converter="clr-namespace:BrenoMachado.ShopFlow.Converters"
              x:Class="BrenoMachado.ShopFlow.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -13,6 +14,10 @@
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
             <toolkit:IsNotNullConverter x:Key="IsNotNullConverter" />
             <toolkit:BoolToObjectConverter x:Key="ShoppingModeTextConverter" TrueObject="Stop Shop" FalseObject="Start Shop" />
+            
+            <converter:BoolToStarConverter x:Key="BoolToStarConverter" />
+            <converter:CategoryToColorConverter x:Key="CategoryToColorConverter" />
+            <converter:CategoryToIconConverter x:Key="CategoryToIconConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -60,6 +60,15 @@ namespace BrenoMachado.ShopFlow.ViewModels
                     // 1. Load Local First (Always works offline)
                     FileLoggerService.LogStatic("[DashboardVM] LoadListsAsync: Fetching from DB...");
                     var localLists = await _databaseService.GetListsAsync();
+                    
+                    // Populate Stats
+                    foreach (var list in localLists)
+                    {
+                        var items = await _databaseService.GetItemsAsync(list.Id);
+                        list.TotalItemsCount = items.Count;
+                        list.BoughtItemsCount = items.Count(i => i.IsPurchased);
+                    }
+
                     FileLoggerService.LogStatic($"[DashboardVM] LoadListsAsync: Found {localLists.Count} lists locally.");
                     UpdateListsCollection(localLists);
 

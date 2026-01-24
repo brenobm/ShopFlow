@@ -39,30 +39,48 @@
                                 <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.OpenListCommand}"
                                                       CommandParameter="{Binding .}" />
                             </Frame.GestureRecognizers>
-                            <Grid Padding="15" BackgroundColor="White" ColumnDefinitions="*, Auto">
-                                <Label Grid.Column="0" 
+                            <Grid Padding="15" BackgroundColor="{Binding PrimaryColor}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Title -->
+                                <Label Grid.Row="0" Grid.Column="0"
                                        Text="{Binding Name}" 
-                                       FontSize="18" 
-                                       TextColor="#1F2937" 
-                                       FontAttributes="Bold"
-                                       VerticalOptions="Center"/>
-                                
-                                <Button Grid.Column="1"
-                                        Text="★"
-                                        TextColor="#9CA3AF"
-                                        BackgroundColor="Transparent"
-                                        FontSize="24"
-                                        Padding="0"
-                                        HeightRequest="40"
-                                        WidthRequest="40"
-                                        Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.SetDefaultListCommand}"
-                                        CommandParameter="{Binding .}">
-                                    <Button.Triggers>
-                                        <DataTrigger TargetType="Button" Binding="{Binding IsDefault}" Value="True">
-                                            <Setter Property="TextColor" Value="#F59E0B" />
-                                        </DataTrigger>
-                                    </Button.Triggers>
-                                </Button>
+                                       FontSize="20" 
+                                       TextColor="White" 
+                                       FontAttributes="Bold"/>
+
+                                <!-- Default Star / Icon -->
+                                <Label Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding IsDefault, Converter={StaticResource BoolToStarConverter}}"
+                                       TextColor="#F59E0B"
+                                       FontSize="24"/>
+
+                                <!-- Stats -->
+                                <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="2" Margin="0,15,0,15">
+                                    <Label Text="{Binding TotalItemsCount, StringFormat='{0} items'}"
+                                           TextColor="White"
+                                           FontSize="12"
+                                           Opacity="0.9"/>
+                                    <Label Text="{Binding BoughtItemsCount, StringFormat='{0} items'}"
+                                           TextColor="White"
+                                           FontSize="12"
+                                           Opacity="0.7"/>
+                                </VerticalStackLayout>
+
+                                <!-- Progress Bar -->
+                                <ProgressBar Grid.Row="2" Grid.ColumnSpan="2"
+                                             Progress="{Binding Progress}"
+                                             ProgressColor="White"
+                                             BackgroundColor="#33FFFFFF"
+                                             HeightRequest="6"/>
                             </Grid>
                         </Frame>
                     </SwipeView>
