@@ -10,6 +10,7 @@
             <key>IntentExamples</key>
             <array>
                 <string>Add milk in ShopFlow</string>
+                <string>Add milk on ShopFlow</string>
                 <string>Add items to my ShopFlow list</string>
                 <string>Add bananas to ShopFlow</string>
             </array>

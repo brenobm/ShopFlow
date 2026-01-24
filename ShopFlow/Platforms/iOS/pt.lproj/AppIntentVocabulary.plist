@@ -10,6 +10,7 @@
             <key>IntentExamples</key>
             <array>
                 <string>Adicione leite no ShopFlow</string>
+                <string>Adicione leite na ShopFlow</string>
                 <string>Adicionar itens na lista do ShopFlow</string>
                 <string>Adicione bananas no ShopFlow</string>
                 <string>Colocar leite no ShopFlow</string>
