@@ -12,7 +12,7 @@ namespace BrenoMachado.ShopFlow.Views
 
         private async void OnCloseClicked(object sender, EventArgs e)
         {
-            await Navigation.PopModalAsync();
+            await Shell.Current.GoToAsync("..");
         }
 
         protected override void OnAppearing()

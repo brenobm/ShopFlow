@@ -82,16 +82,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 await Shell.Current.DisplayAlert(Resources.Strings.AppResources.RestartRequired, Resources.Strings.AppResources.RestartMessage, "OK");
             }
         }
-        {
-            if (language == null) return;
-            
-            var current = _localizationService.GetCurrentCulture().Name;
-            if (current != language.Code)
-            {
-                _localizationService.SetCulture(language.Code);
-                await Shell.Current.DisplayAlert(Resources.Strings.AppResources.RestartRequired, Resources.Strings.AppResources.RestartMessage, "OK");
-            }
-        }
+
 
         async Task TestPushAsync()
         {
