@@ -94,7 +94,7 @@ namespace BrenoMachado.ShopFlow.Services
                  {
                      Id = id,
                      Name = cloudItem["Name"].S,
-                     IsPurchased = cloudItem["IsPurchased"].BOOL,
+                     IsPurchased = cloudItem["IsPurchased"].BOOL ?? false,
                      Category = cloudItem.ContainsKey("Category") ? cloudItem["Category"].S : "Uncategorized",
                      ListId = cloudItem.ContainsKey("listId") ? cloudItem["listId"].S : "default",
                      IsDirty = false, // Clean from cloud
