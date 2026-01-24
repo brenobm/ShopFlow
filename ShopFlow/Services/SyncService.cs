@@ -82,9 +82,11 @@ namespace BrenoMachado.ShopFlow.Services
         {
              try 
              {
-                 if (!cloudItem.ContainsKey("Id")) return; // Skip invalid items
+                 // Check for "id" (lowercase) as per Schema, fallback to "Id" just in case legacy data exists
+                 string idKey = cloudItem.ContainsKey("id") ? "id" : (cloudItem.ContainsKey("Id") ? "Id" : null);
+                 if (idKey == null) return; 
 
-                 string id = cloudItem["Id"].S;
+                 string id = cloudItem[idKey].S;
                  var localItem = await _databaseService.GetItemAsync(id);
                  
                  // Map Cloud Item to Model
@@ -92,7 +94,7 @@ namespace BrenoMachado.ShopFlow.Services
                  {
                      Id = id,
                      Name = cloudItem["Name"].S,
-                     IsPurchased = cloudItem["IsPurchased"].BOOL ?? false,
+                     IsPurchased = cloudItem["IsPurchased"].BOOL,
                      Category = cloudItem.ContainsKey("Category") ? cloudItem["Category"].S : "Uncategorized",
                      ListId = cloudItem.ContainsKey("listId") ? cloudItem["listId"].S : "default",
                      IsDirty = false, // Clean from cloud
@@ -103,23 +105,14 @@ namespace BrenoMachado.ShopFlow.Services
                  {
                      newItem.LastUpdated = cloudDate;
                  }
-
+                 
+                 // ... (Conflict resolution logic remains same)
                  if (localItem != null)
                  {
-                     // Conflict Resolution: Last Write Wins
                      if (localItem.IsDirty)
                      {
-                         if(localItem.LastUpdated > newItem.LastUpdated)
-                         {
-                             return; // Keep local change
-                         }
+                         if(localItem.LastUpdated > newItem.LastUpdated) return; 
                      }
-                     // Else: Overwrite local with cloud
-                     // Copy over properties that might not be in cloud but are local? 
-                     // For now, assume cloud is truth for shared props.
-                     // Preserve local ID and other props? Model is simple enough.
-                     // We must ensure we don't accidentally wipe generic props if they aren't in cloud map.
-                     // But our map covers most.
                  }
 
                  await _databaseService.UpdateItemSyncStatusAsync(newItem);
@@ -146,8 +139,6 @@ namespace BrenoMachado.ShopFlow.Services
                     if (item.IsDeleted)
                     {
                         await DeleteItemOnCloudAsync(item);
-                        // If hard delete from cloud success, allow hard delete from local??
-                        // For now we keep soft delete in local to prevent zombie resurrection, but mark dirty=false
                         success = true;
                     }
                     else
@@ -156,11 +147,11 @@ namespace BrenoMachado.ShopFlow.Services
                         success = true;
                     }
                 }
-                catch (global::Amazon.DynamoDBv2.Model.ResourceNotFoundException rnfEx)
+                catch (global::Amazon.DynamoDBv2.Model.ResourceNotFoundException)
                 {
-                    FileLoggerService.LogStatic($"[SyncService] CRITICAL: Table '{AwsConfig.ItemsTableName}' not found in {AwsConfig.Region.SystemName}. Please create it in AWS Console.");
+                    FileLoggerService.LogStatic($"[SyncService] CRITICAL: Table '{AwsConfig.ItemsTableName}' not found.");
                     success = false; 
-                    return; // Stop processing to avoid spam
+                    return; 
                 }
                 catch (Exception ex)
                 {
@@ -169,19 +160,8 @@ namespace BrenoMachado.ShopFlow.Services
 
                 if (success)
                 {
-                    // Update Local
                     item.IsDirty = false;
-                    
-                    if (item.IsDeleted)
-                    {
-                        // If successfully deleted from cloud, we can remove from local to keep DB clean?
-                        // Or keep as "Tombstone"? Let's keep as tombstone for now but not dirty.
-                        await _databaseService.UpdateItemSyncStatusAsync(item);
-                    }
-                    else
-                    {
-                        await _databaseService.UpdateItemSyncStatusAsync(item);
-                    }
+                    await _databaseService.UpdateItemSyncStatusAsync(item);
                 }
             }
         }
@@ -194,14 +174,14 @@ namespace BrenoMachado.ShopFlow.Services
              var attributeMap = new Dictionary<string, AttributeValue>
              {
                  { "userId", new AttributeValue { S = userId } },
-                 { "Id", new AttributeValue { S = item.Id } },
+                 { "id", new AttributeValue { S = item.Id } }, // Lowercase id
                  { "Name", new AttributeValue { S = item.Name } },
                  { "IsPurchased", new AttributeValue { BOOL = item.IsPurchased } },
                  { "Category", new AttributeValue { S = item.Category ?? "" } },
                  { "listId", new AttributeValue { S = item.ListId ?? "default" } },
                  { "UpdatedAt", new AttributeValue { S = (item.LastUpdated ?? DateTime.UtcNow).ToString("O") } }
              };
-             // ... PutItemRequest
+             
              var request = new PutItemRequest
              {
                  TableName = AwsConfig.ItemsTableName,
@@ -218,7 +198,7 @@ namespace BrenoMachado.ShopFlow.Services
                  TableName = AwsConfig.ItemsTableName,
                  Key = new Dictionary<string, AttributeValue> {
                      { "userId", new AttributeValue { S = userId } },
-                     { "Id", new AttributeValue { S = item.Id } }
+                     { "id", new AttributeValue { S = item.Id } } // Lowercase id
                  }
              };
              await _dynamoClient.DeleteItemAsync(request);
@@ -237,7 +217,7 @@ namespace BrenoMachado.ShopFlow.Services
                     TableName = AwsConfig.ItemsTableName,
                     Key = new Dictionary<string, AttributeValue> {
                         { "userId", new AttributeValue { S = userId } },
-                        { "Id", new AttributeValue { S = itemId } }
+                        { "id", new AttributeValue { S = itemId } } // Lowercase id
                     }
                 };
 
