@@ -538,6 +538,33 @@ namespace Backend
         
         // Output endpoint
         new CfnOutput(this, "GraphQlUrl", new CfnOutputProps { Value = api.GraphqlUrl });
+        
+        var smartParserApiKey = System.Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+        if (string.IsNullOrEmpty(smartParserApiKey))
+        {
+            throw new System.Exception("GEMINI_API_KEY environment variable is not set. Please set it before deploying.");
+        }
+
+        // Smart Parser Lambda (Gemini)
+        var smartParserLambda = new Function(this, "SmartParserFunction", new FunctionProps
+        {
+            Runtime = Runtime.NODEJS_18_X,
+            Code = Amazon.CDK.AWS.Lambda.Code.FromAsset("src/Lambdas/SmartParser"),
+            Handler = "index.handler",
+            Timeout = Duration.Seconds(30),
+            Environment = new Dictionary<string, string>
+            {
+                { "GEMINI_API_KEY", smartParserApiKey }
+            }
+        });
+
+        var smartParserDs = api.AddLambdaDataSource("SmartParserDS", smartParserLambda);
+        smartParserDs.CreateResolver("ParseItemResolver", new ResolverProps
+        {
+            TypeName = "Query",
+            FieldName = "parseItem"
+        });
+
             // new CfnOutput(this, "PinpointAppId", new CfnOutputProps { Value = pinpointApp.Ref }); // Disabled
         }
     }
