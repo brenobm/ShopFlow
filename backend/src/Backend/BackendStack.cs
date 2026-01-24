@@ -248,6 +248,8 @@ namespace Backend
                         ""UserId"" : { ""S"" : ""${context.identity.username}"" },
                         ""members"" : { ""L"" : [] },
                         ""isDefault"" : { ""BOOL"" : ${context.arguments.isDefault} }
+                        #if($context.arguments.color), ""color"" : { ""S"" : ""${context.arguments.color}"" } #end
+                        #if($context.arguments.icon), ""icon"" : { ""S"" : ""${context.arguments.icon}"" } #end
                     }
                 }"),
                 ResponseMappingTemplate = MappingTemplate.DynamoDbResultItem() 
@@ -266,14 +268,18 @@ namespace Backend
                         ""id"" : { ""S"" : ""${context.arguments.id}"" }
                     },
                     ""update"" : {
-                        ""expression"" : ""SET #name = :name, #isDefault = :isDefault"",
+                        ""expression"" : ""SET #name = :name, #isDefault = :isDefault #if($context.arguments.color), #color = :color #end #if($context.arguments.icon), #icon = :icon #end"",
                          ""expressionNames"" : {
                             ""#name"" : ""name"",
                             ""#isDefault"" : ""isDefault""
+                            #if($context.arguments.color), ""#color"" : ""color"" #end
+                            #if($context.arguments.icon), ""#icon"" : ""icon"" #end
                         },
                         ""expressionValues"" : {
                             "":name"" : { ""S"" : ""${context.arguments.name}"" },
                             "":isDefault"" : { ""BOOL"" : ${context.arguments.isDefault} }
+                            #if($context.arguments.color), "":color"" : { ""S"" : ""${context.arguments.color}"" } #end
+                            #if($context.arguments.icon), "":icon"" : { ""S"" : ""${context.arguments.icon}"" } #end
                         }
                     },
                      ""condition"": {
