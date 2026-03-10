@@ -116,7 +116,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 }
                 
                 // Add New (or Re-Add)
-                await _graphQLService.AddItemAsync(ListId, Name.Trim(), 1, "qty", SelectedCategory, Price);
+                string newItemId = ItemId;
+                if (string.IsNullOrEmpty(newItemId))
+                {
+                    newItemId = Guid.NewGuid().ToString();
+                }
+
+                await _graphQLService.AddItemAsync(ListId, newItemId, Name.Trim(), 1, "qty", SelectedCategory, Price);
                 
                 await Shell.Current.GoToAsync("..");
             } 
