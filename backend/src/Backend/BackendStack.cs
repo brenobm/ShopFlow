@@ -354,7 +354,7 @@ namespace Backend
                     ""operation"" : ""PutItem"",
                     ""key"" : {
                         ""userId"" : { ""S"" : ""${context.identity.username}"" },
-                        ""id"" : { ""S"" : ""$util.autoId()"" }
+                        ""id"" : { ""S"" : ""#if($context.arguments.id)${context.arguments.id}#else$util.autoId()#end"" }
                     },
                     ""attributeValues"" : {
                         ""listId"" : { ""S"" : ""${context.arguments.listId}"" },

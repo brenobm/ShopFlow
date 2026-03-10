@@ -186,14 +186,14 @@ namespace BrenoMachado.ShopFlow.Services
             return items ?? new List<ShoppingItem>();
         }
 
-        public async Task<ShoppingItem> AddItemAsync(string listId, string name, double quantity, string unit, string category, double? price = null)
+        public async Task<ShoppingItem> AddItemAsync(string listId, string id, string name, double quantity, string unit, string category, double? price = null)
         {
              SetAuthorizationHeader();
              var request = new GraphQLRequest
             {
                 Query = @"
-                mutation AddItem($listId: ID!, $name: String!, $quantity: Float, $unit: String, $category: String, $price: Float) {
-                    addItem(listId: $listId, name: $name, quantity: $quantity, unit: $unit, category: $category, price: $price) {
+                mutation AddItem($id: ID, $listId: ID!, $name: String!, $quantity: Float, $unit: String, $category: String, $price: Float) {
+                    addItem(id: $id, listId: $listId, name: $name, quantity: $quantity, unit: $unit, category: $category, price: $price) {
                         id
                         listId
                         name
@@ -204,7 +204,7 @@ namespace BrenoMachado.ShopFlow.Services
                         isPurchased
                     }
                 }",
-                Variables = new { listId, name, quantity, unit, category, price }
+                Variables = new { id, listId, name, quantity, unit, category, price }
             };
 
             var response = await _client.SendMutationAsync<dynamic>(request);

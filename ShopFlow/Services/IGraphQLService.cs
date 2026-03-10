@@ -10,7 +10,7 @@ namespace BrenoMachado.ShopFlow.Services
         Task<ShoppingList> DeleteListAsync(string id);
         Task<ShoppingList> ShareListAsync(string id, string email);
         Task<List<ShoppingItem>> GetItemsAsync(string listId); // Though typically fetched via List
-        Task<ShoppingItem> AddItemAsync(string listId, string name, double quantity, string unit, string category, double? price = null);
+        Task<ShoppingItem> AddItemAsync(string listId, string id, string name, double quantity, string unit, string category, double? price = null);
         Task<ShoppingItem> UpdateItemAsync(ShoppingItem item);
         Task<ShoppingItem> DeleteItemAsync(string listId, string id);
         Task<GlobalProduct> GetGlobalProductAsync(string barcode);

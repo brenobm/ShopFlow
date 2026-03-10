@@ -48,6 +48,9 @@ public static class MauiProgram
         builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
         builder.Services.AddSingleton<ILoggerService, FileLoggerService>();
         builder.Services.AddSingleton<IOfflineSyncService, OfflineSyncService>();
+        builder.Services.AddSingleton<IDialogService, DialogService>();
+        builder.Services.AddSingleton<IBarcodeWorkflowService, BarcodeWorkflowService>();
+        builder.Services.AddSingleton<ICrashReporterService, CrashReporterService>();
         
         // Plugin.LocalNotification
         builder.UseLocalNotification();

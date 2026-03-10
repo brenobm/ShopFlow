@@ -89,6 +89,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
         private readonly ITranslationService _translationService;
         private readonly IDatabaseService _databaseService;
         private readonly ILocalizationService _localizationService;
+        private readonly IDialogService _dialogService;
+        private readonly IBarcodeWorkflowService _barcodeWorkflowService;
 
         bool _isShoppingMode;
         public bool IsShoppingMode
@@ -129,7 +131,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
             ITranslationService translationService, 
             IDatabaseService databaseService, 
             IShoppingRepository shoppingRepository, 
-            ILocalizationService localizationService)
+            ILocalizationService localizationService,
+            IDialogService dialogService,
+            IBarcodeWorkflowService barcodeWorkflowService)
         {
             _graphQLService = graphQLService;
             _voiceService = voiceService;
@@ -139,8 +143,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
             _databaseService = databaseService;
             _shoppingRepository = shoppingRepository;
             _localizationService = localizationService;
-
-            _localizationService = localizationService;
+            _dialogService = dialogService;
+            _barcodeWorkflowService = barcodeWorkflowService;
 
             // Subscribe to ItemParsedMessage
             WeakReferenceMessenger.Default.Register<ItemParsedMessage>(this, async (r, m) =>
@@ -201,7 +205,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task AddItemAsync()
         {
-            string name = await Shell.Current.DisplayPromptAsync("Add Item", "Name:");
+            string name = await _dialogService.DisplayPromptAsync("Add Item", "Name:");
             if (string.IsNullOrWhiteSpace(name)) return;
              
              // Smart Parse (Simple fallback if Gemini not used directly here)
@@ -232,7 +236,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
              if (item == null) return;
              // Quick Edit Name
-             string newName = await Shell.Current.DisplayPromptAsync("Edit Item", "Update name:", initialValue: item.Name);
+             string newName = await _dialogService.DisplayPromptAsync("Edit Item", "Update name:", initialValue: item.Name);
              if (!string.IsNullOrWhiteSpace(newName))
              {
                  item.Name = newName;
@@ -244,7 +248,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         async Task DeleteItemAsync(ShoppingItem item)
         {
             if (item == null) return;
-            bool confirm = await Shell.Current.DisplayAlert("Delete", $"Remove '{item.Name}'?", "Yes", "No");
+            bool confirm = await _dialogService.DisplayAlertAsync("Delete", $"Remove '{item.Name}'?", "Yes", "No");
             if (!confirm) return;
             
             try 
@@ -268,7 +272,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task ShowSortOptionsAsync()
         {
-             string action = await Shell.Current.DisplayActionSheet("Sort By", "Cancel", null, "Category", "Name", "Date Added", "Status");
+             string action = await _dialogService.DisplayActionSheetAsync("Sort By", "Cancel", null, "Category", "Name", "Date Added", "Status");
              if (action == "Category") CurrentSort = SortOption.Category;
              else if (action == "Name") CurrentSort = SortOption.Name;
              else if (action == "Date Added") CurrentSort = SortOption.DateAdded;
@@ -287,68 +291,65 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
              if (CurrentList == null) return;
              
-             // Wrap in Task.Run to prevent UI Freeze
-             await Task.Run(() => 
+             try 
              {
-                 MainThread.BeginInvokeOnMainThread(async () => 
+                 // Fetch data asynchronously (non-blocking)
+                 var items = await _shoppingRepository.GetItemsAsync(CurrentList.Id); 
+                 
+                 // Filter out bought items if in Shopping Mode
+                 if (IsShoppingMode)
                  {
-                     try 
-                     {
-                         // Use simple GetItemsAsync which is local DB (fast)
-                         var items = await _shoppingRepository.GetItemsAsync(CurrentList.Id); 
-                         
-                         // Filter out bought items if in Shopping Mode
-                         if (IsShoppingMode)
-                         {
-                             items = items.Where(i => !i.IsPurchased).ToList();
-                         }
+                     items = items.Where(i => !i.IsPurchased).ToList();
+                 }
 
-                         // Sorting Logic
-                         IEnumerable<ShoppingItem> sortedItems = items;
-                         switch(CurrentSort)
-                         {
-                            case SortOption.Name: 
-                                sortedItems = items.OrderBy(i => i.Name); 
-                                break;
-                            case SortOption.DateAdded: 
-                                sortedItems = items.OrderByDescending(i => i.CreatedAt); 
-                                break;
-                            case SortOption.Status: 
-                                sortedItems = items.OrderBy(i => i.IsPurchased).ThenBy(i => i.Name); 
-                                break;
-                            default: 
-                                sortedItems = items.OrderBy(i => i.Name); 
-                                break; 
-                         }
-                         
-                         var groups = sortedItems.GroupBy(i => i.Category ?? "Uncategorized")
-                                           .Select(g => new ShoppingItemGroup(g.Key, g))
-                                           .ToList();
+                 // Sorting Logic
+                 IEnumerable<ShoppingItem> sortedItems = items;
+                 switch(CurrentSort)
+                 {
+                    case SortOption.Name: 
+                        sortedItems = items.OrderBy(i => i.Name); 
+                        break;
+                    case SortOption.DateAdded: 
+                        sortedItems = items.OrderByDescending(i => i.CreatedAt); 
+                        break;
+                    case SortOption.Status: 
+                        sortedItems = items.OrderBy(i => i.IsPurchased).ThenBy(i => i.Name); 
+                        break;
+                    default: 
+                        sortedItems = items.OrderBy(i => i.Name); 
+                        break; 
+                 }
+                 
+                 var groups = sortedItems.GroupBy(i => i.Category ?? "Uncategorized")
+                                   .Select(g => new ShoppingItemGroup(g.Key, g))
+                                   .ToList();
 
-                           // Sort Groups
-                         if (CurrentSort == SortOption.Category)
-                         {
-                             groups = groups.OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999).ToList();
-                         }
-                         else
-                         {
-                             groups = groups.OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999).ToList();
-                         }
-                         
-                         // Update Collection safely
-                         Items.Clear();
-                         foreach(var group in groups)
-                         {
-                             Items.Add(group);
-                         }
-                         await LoadSuggestionsAsync();
-                     } 
-                     catch(Exception ex)
+                   // Sort Groups
+                 if (CurrentSort == SortOption.Category)
+                 {
+                     groups = groups.OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999).ToList();
+                 }
+                 else
+                 {
+                     groups = groups.OrderBy(g => ShoppingItem.DefaultCategories.IndexOf(g.Name) >= 0 ? ShoppingItem.DefaultCategories.IndexOf(g.Name) : 999).ToList();
+                 }
+                 
+                 // Dispatch to Main Thread ONLY for UI updates
+                 MainThread.BeginInvokeOnMainThread(() =>
+                 {
+                     Items.Clear();
+                     foreach(var group in groups)
                      {
-                         FileLoggerService.LogStatic($"Error loading items: {ex.Message}");
+                         Items.Add(group);
                      }
                  });
-             });
+                 
+                 await LoadSuggestionsAsync();
+             } 
+             catch(Exception ex)
+             {
+                 FileLoggerService.LogStatic($"Error loading items: {ex.Message}");
+             }
         }
 
         async Task StartListeningAsync()
@@ -404,183 +405,24 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task ScanAsync()
         {
-            try
-            {
-                // 1. Scan Barcode
-                string barcode = await ScanPage.ScanAsync(Shell.Current.Navigation);
-                if (string.IsNullOrWhiteSpace(barcode)) return;
-
-                string? productName = null;
-                string category = "Scanned";
-
-                // 2. Lookup Local Database
-                var cached = await _databaseService.GetCachedProductAsync(barcode);
-                if (cached != null)
-                {
-                    productName = cached.Name;
-                    category = cached.Category ?? category;
-                    // Optional: Update LastUpdated or hit count if we tracked it
-                }
-                else
-                {
-                    // 3. Lookup Online (OpenFoodFacts)
-                    var offProduct = await _productService.LookupProductAsync(barcode);
-                    bool foundOnline = offProduct != null && !string.IsNullOrWhiteSpace(offProduct.Name);
-                    
-                    // Metric: Log result
-                    await _databaseService.LogBarcodeSearchAsync(barcode, foundOnline);
-
-                    if (foundOnline)
-                    {
-                        productName = offProduct.Name;
-                        category = offProduct.Category ?? category;
-                        
-                        // 3.1. Save to Local Database
-                        await _databaseService.SaveCachedProductAsync(new CachedProduct 
-                        {
-                            Barcode = barcode,
-                            Name = productName,
-                            Category = category,
-                            LastUpdated = DateTime.UtcNow
-                        });
-                    }
-                    else
-                    {
-                        // 4. Fallback: Manual (User said "If not found online, add manually")
-                        // Keeping GlobalProduct logic as a secondary online source or assuming Global IS the manual registry mainly
-                        // If we strictly follow prompt "If not found online, add manually", we go to registration.
-                        // I will preserve existing GlobalProduct check as 'Online' fallback if desired, but user focused on OFF.
-                        // For safety, let's proceed to Manual/Global check as "not found in OFF".
-                    }
-                }
-
-                // Global Product Fallback (Legacy/Extended Online)
-                if (string.IsNullOrWhiteSpace(productName))
-                {
-                     var globalProduct = await _graphQLService.GetGlobalProductAsync(barcode);
-                    if (globalProduct != null)
-                    {
-                        productName = globalProduct.Name;
-                        category = globalProduct.Category ?? category;
-                        // Cache this too?
-                         await _databaseService.SaveCachedProductAsync(new CachedProduct 
-                        {
-                            Barcode = barcode,
-                            Name = productName,
-                            Category = category,
-                            LastUpdated = DateTime.UtcNow
-                        });
-                    }
-                }
-
-                // 5. Not Found anywhere? -> Register
-                if (string.IsNullOrWhiteSpace(productName))
-                {
-                    bool register = await Shell.Current.DisplayAlert(AppResources.Warning, AppResources.Msg_ProductNotFoundRegister, AppResources.Yes, AppResources.No);
-                    if (!register) return;
-
-                    productName = await Shell.Current.DisplayPromptAsync("Register Product", "Enter product name:");
-                    if (string.IsNullOrWhiteSpace(productName)) return;
-
-                    // Manual Entry Logic
-                     // Save to Global Table
-                    try 
-                    {
-                        await _graphQLService.CreateGlobalProductAsync(barcode, productName, category);
-                        // Also Save to Local Cache so next time it's instant
-                        await _databaseService.SaveCachedProductAsync(new CachedProduct 
-                        {
-                            Barcode = barcode,
-                            Name = productName,
-                            Category = category,
-                            LastUpdated = DateTime.UtcNow
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        FileLoggerService.LogStatic($"Failed to save global product: {ex.Message}");
-                    }
-                }
-                
-                // 6. Smart Matching (Common Flow)
-                bool matchFound = await SmartMatchAndMarkAsync(productName);
-
-                if (matchFound)
-                {
-                     await Shell.Current.DisplayAlert("Match!", string.Format(AppResources.Msg_MarkedBought, productName), "OK");
-                }
-                else
-                {
-                    // 7. Add if new
-                    bool add = await Shell.Current.DisplayAlert(AppResources.AddItem, string.Format(AppResources.Msg_AddProductToList, productName), AppResources.Yes, AppResources.No);
-                    if (add)
-                    {
-                        var parsed = _smartService.ParseItemInput(productName);
-                        var newItem = new ShoppingItem { ListId = CurrentList.Id, Name = parsed.Name, Quantity = parsed.Quantity, Unit = parsed.Unit, Category = category };
-                        await _shoppingRepository.SaveItemAsync(newItem);
-                        await LoadItemsAsync();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                await Shell.Current.DisplayAlert(AppResources.Error, string.Format(AppResources.Msg_ScanError, ex.Message), "OK");
-            }
-        }
-
-        async Task<bool> SmartMatchAndMarkAsync(string scannedName)
-        {
-            // Prepare Candidates: [Original, PT, EN]
-            var candidates = new List<string> { scannedName };
-            
-            // Translate to PT-BR
-            var pt = await _translationService.TranslateTextAsync(scannedName, "auto", "pt");
-            if (!string.IsNullOrWhiteSpace(pt) && !candidates.Contains(pt)) candidates.Add(pt);
-            
-            // Translate to EN
-            var en = await _translationService.TranslateTextAsync(scannedName, "auto", "en");
-            if (!string.IsNullOrWhiteSpace(en) && !candidates.Contains(en)) candidates.Add(en);
-
-            // Fetch latest items (just to be sure)
-             var items = await _graphQLService.GetItemsAsync(CurrentList.Id);
-             var unboughtItems = items.Where(i => !i.IsPurchased).ToList();
-
-            foreach (var candidate in candidates)
-            {
-                 // Logic: Does the Candidate (e.g. "Neilson Milk") contain the List Item (e.g. "Milk")?
-                 var match = unboughtItems.FirstOrDefault(i => candidate.Contains(i.Name, StringComparison.OrdinalIgnoreCase));
-                 
-                 if (match != null)
-                 {
-                     await TogglePurchasedAsync(match);
-                     return true;
-                 }
-                 
-                 // Reverse Logic: Does List Item (e.g. "Leite Integral") contain Candidate (e.g. "Leite")?
-                 var matchReverse = unboughtItems.FirstOrDefault(i => i.Name.Contains(candidate, StringComparison.OrdinalIgnoreCase));
-                  if (matchReverse != null)
-                 {
-                     await TogglePurchasedAsync(matchReverse);
-                     return true;
-                 }
-            }
-
-            return false;
+            if (CurrentList == null) return;
+            await _barcodeWorkflowService.ExecuteScanWorkflowAsync(CurrentList.Id);
+            await LoadItemsAsync();
         }
         async Task ShareListAsync()
         {
             if (CurrentList == null) return;
-            string email = await Shell.Current.DisplayPromptAsync("Share List", $"Enter email to share '{CurrentList.Name}' with:");
+            string email = await _dialogService.DisplayPromptAsync("Share List", $"Enter email to share '{CurrentList.Name}' with:");
             if (string.IsNullOrWhiteSpace(email)) return;
 
             try
             {
                 await _graphQLService.ShareListAsync(CurrentList.Id, email.Trim());
-                await Application.Current.MainPage.DisplayAlert(AppResources.Success, string.Format(AppResources.Msg_InviteSuccess, email), "OK");
+                await _dialogService.DisplayAlertAsync(AppResources.Success, string.Format(AppResources.Msg_InviteSuccess, email), "OK");
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert(AppResources.Error, string.Format(AppResources.Msg_ShareFailed, ex.Message), "OK");
+                await _dialogService.DisplayAlertAsync(AppResources.Error, string.Format(AppResources.Msg_ShareFailed, ex.Message), "OK");
             }
         }
 
@@ -678,7 +520,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
              }
              catch(Exception ex)
              {
-                await Shell.Current.DisplayAlert("Read Error", ex.Message, "OK");
+                await _dialogService.DisplayAlertAsync("Read Error", ex.Message, "OK");
              }
         }
 

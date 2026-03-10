@@ -9,11 +9,13 @@ namespace BrenoMachado.ShopFlow.Services
     {
         private ISpeechToText _speechToText => SpeechToText.Default;
         private readonly ILocalizationService _localizationService;
+        private readonly ICrashReporterService _crashReporter;
 
         // Add Constructor for DI
-        public VoiceService(ILocalizationService localizationService)
+        public VoiceService(ILocalizationService localizationService, ICrashReporterService crashReporter)
         {
             _localizationService = localizationService;
+            _crashReporter = crashReporter;
         }
         
         public async Task<string> ListenAsync(CancellationToken cancellationToken)
@@ -102,6 +104,7 @@ namespace BrenoMachado.ShopFlow.Services
                 // TaskCanceledException is expected here on "Stop"
                 if (ex is TaskCanceledException) return null;
 
+                _crashReporter.ReportExceptionAsync(ex, "VoiceService ListenAsync");
                 await Shell.Current.DisplayAlert(AppResources.Error, string.Format(AppResources.Msg_VoiceError, ex.Message), "OK");
                 return null;
             }

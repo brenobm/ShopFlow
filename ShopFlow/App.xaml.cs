@@ -7,20 +7,20 @@ public partial class App : Application
 {
     private readonly IAuthService _authService;
 
-	public App(IAuthService authService, IServiceProvider serviceProvider, ILocalizationService localizationService, IOfflineSyncService offlineSyncService)
+	public App(IAuthService authService, IServiceProvider serviceProvider, ILocalizationService localizationService, IOfflineSyncService offlineSyncService, ICrashReporterService crashReporter)
 	{
 		InitializeComponent();
 
         // Global Exception Handling
-        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        AppDomain.CurrentDomain.UnhandledException += async (s, e) =>
         {
             var ex = e.ExceptionObject as Exception;
-            FileLoggerService.LogStatic($"[CRITICAL] Unhandled Exception: {ex?.Message} | {ex?.StackTrace}");
+            await crashReporter.ReportExceptionAsync(ex, "AppDomain Unhandled");
         };
 
-        TaskScheduler.UnobservedTaskException += (s, e) =>
+        TaskScheduler.UnobservedTaskException += async (s, e) =>
         {
-            FileLoggerService.LogStatic($"[CRITICAL] Unobserved Task Exception: {e.Exception?.Message} | {e.Exception?.StackTrace}");
+            await crashReporter.ReportExceptionAsync(e.Exception, "Unobserved Task");
             e.SetObserved();
         };
 
