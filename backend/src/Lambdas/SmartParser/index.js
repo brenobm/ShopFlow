@@ -8,12 +8,10 @@ exports.handler = async (event) => {
         throw new Error("Gemini API Key is not configured in Lambda environment variables.");
     }
 
-    const safeText = text ? text.replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
-
     const data = JSON.stringify({
         contents: [{
             parts: [{
-                text: `Extract standardized data from this shopping list item: '${safeText}'. Return ONLY raw JSON with keys: 'Name' (string, capitalized), 'Quantity' (number), 'Unit' (string, short form like kg, l, un), 'Category' (one of: Produce, Dairy & Eggs, Meat & Poultry, Bakery, Frozen Foods, Pantry, Beverages, Household, Personal Care, Other), 'Emoji' (single char). Example input: 'milk 2l', Output: { "Name": "Milk", "Quantity": 2, "Unit": "l", "Category": "Dairy & Eggs", "Emoji": "🥛" }.`
+                text: `Extract standardized data from this shopping list item: '${text}'. Return ONLY raw JSON with keys: 'Name' (string, capitalized), 'Quantity' (number), 'Unit' (string, short form like kg, l, un), 'Category' (one of: Produce, Dairy & Eggs, Meat & Poultry, Bakery, Frozen Foods, Pantry, Beverages, Household, Personal Care, Other), 'Emoji' (single char). Example input: 'milk 2l', Output: { "Name": "Milk", "Quantity": 2, "Unit": "l", "Category": "Dairy & Eggs", "Emoji": "🥛" }.`
             }]
         }],
         generationConfig: {
@@ -27,7 +25,7 @@ exports.handler = async (event) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Content-Length': data.length
+            'Content-Length': Buffer.byteLength(data)
         }
     };
 
