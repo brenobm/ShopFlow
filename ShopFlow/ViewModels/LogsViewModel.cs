@@ -6,6 +6,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
     public class LogsViewModel : BaseViewModel
     {
         private readonly ILoggerService _loggerService;
+        private readonly IDialogService _dialogService;
         private string _logs;
 
         public string Logs
@@ -25,10 +26,11 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand ClearCommand { get; }
         public ICommand CopyCommand { get; }
 
-        public LogsViewModel(ILoggerService loggerService)
+        public LogsViewModel(ILoggerService loggerService, IDialogService dialogService)
         {
             Title = "App Logs";
             _loggerService = loggerService;
+            _dialogService = dialogService;
 
             RefreshCommand = new Command(async () => await LoadLogsAsync());
             ClearCommand = new Command(async () => await ClearLogsAsync());
@@ -58,7 +60,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Logs)) return;
             await Clipboard.SetTextAsync(Logs);
-            await Application.Current.MainPage.DisplayAlert("Success", "Logs copied to clipboard.", "OK");
+            await _dialogService.DisplayAlertAsync("Success", "Logs copied to clipboard.", "OK");
         }
 
         public void OnAppearing()

@@ -1,13 +1,14 @@
 using System.Collections.ObjectModel;
 using BrenoMachado.ShopFlow.Models;
 using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.Repositories;
 using System.Windows.Input;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
     public class ReportsViewModel : BaseViewModel
     {
-        private readonly IDatabaseService _databaseService;
+        private readonly IShoppingRepository _shoppingRepository;
 
         public ObservableCollection<TopItemStat> TopItems { get; } = new();
         
@@ -24,9 +25,9 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         public ICommand RefreshCommand { get; }
 
-        public ReportsViewModel(IDatabaseService databaseService)
+        public ReportsViewModel(IShoppingRepository shoppingRepository)
         {
-            _databaseService = databaseService;
+            _shoppingRepository = shoppingRepository;
             Title = "Reports & History";
             RefreshCommand = new Command(async () => await LoadStatsAsync());
         }
@@ -41,7 +42,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             IsBusy = true;
             try
             {
-                var history = await _databaseService.GetPurchaseHistoryAsync();
+                var history = await _shoppingRepository.GetPurchaseHistoryAsync();
 
                 // 1. Weekly Stats
                 var last7Days = DateTime.Now.AddDays(-7);

@@ -9,6 +9,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
     {
         private readonly IAuthService _authService;
         private readonly IPushService _pushService;
+        private readonly IDialogService _dialogService;
 
         public string Username { get; set; }
         public string Password { get; set; }
@@ -50,10 +51,11 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         public bool IsLogin => !IsSignUp && !IsVerification;
 
-        public LoginViewModel(IAuthService authService, IPushService pushService)
+        public LoginViewModel(IAuthService authService, IPushService pushService, IDialogService dialogService)
         {
             _authService = authService;
             _pushService = pushService;
+            _dialogService = dialogService;
             Title = "Login";
             LoginCommand = new Command(async () => await LoginAsync());
             SignUpCommand = new Command(async () => await SignUpAsync());
@@ -74,7 +76,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                await Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.Msg_EnterCredentials, "OK");
+                await _dialogService.DisplayAlertAsync(AppResources.Error, AppResources.Msg_EnterCredentials, "OK");
                 IsBusy = false;
                 return;
             }
@@ -94,19 +96,19 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 else
                 {
                     Console.WriteLine("[LoginViewModel] Login failed (success=false). Showing alert.");
-                    await Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.Msg_LoginFailed, "OK");
+                    await _dialogService.DisplayAlertAsync(AppResources.Error, AppResources.Msg_LoginFailed, "OK");
                 }
             }
             catch (Amazon.CognitoIdentityProvider.Model.UserNotConfirmedException)
             {
                 FileLoggerService.LogStatic("[LoginViewModel] UserNotConfirmedException caught.");
-                await Application.Current.MainPage.DisplayAlert(AppResources.Btn_Verify, AppResources.Msg_AccountUnconfirmed, "OK");
+                await _dialogService.DisplayAlertAsync(AppResources.Btn_Verify, AppResources.Msg_AccountUnconfirmed, "OK");
                 IsVerification = true;
             }
             catch (Exception ex)
             {
                 FileLoggerService.LogStatic($"[LoginViewModel] Exception caught: {ex.Message}");
-                await Application.Current.MainPage.DisplayAlert(AppResources.Error, ex.Message, "OK");
+                await _dialogService.DisplayAlertAsync(AppResources.Error, ex.Message, "OK");
             }
             finally
             {
@@ -122,7 +124,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(Email))
             {
-                await Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.Msg_FieldsRequired, "OK");
+                await _dialogService.DisplayAlertAsync(AppResources.Error, AppResources.Msg_FieldsRequired, "OK");
                 IsBusy = false;
                 return;
             }
@@ -133,14 +135,14 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 if (success)
                 {
 
-                    await Application.Current.MainPage.DisplayAlert(AppResources.Success, AppResources.Msg_AccountCreated, "OK");
+                    await _dialogService.DisplayAlertAsync(AppResources.Success, AppResources.Msg_AccountCreated, "OK");
                     IsVerification = true; 
                     IsSignUp = false;
                 }
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert(AppResources.Error, ex.Message, "OK");
+                await _dialogService.DisplayAlertAsync(AppResources.Error, ex.Message, "OK");
             }
             finally
             {
@@ -154,7 +156,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(VerificationCode))
             {
-                await Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.Msg_UsernameCodeRequired, "OK");
+                await _dialogService.DisplayAlertAsync(AppResources.Error, AppResources.Msg_UsernameCodeRequired, "OK");
                 IsBusy = false;
                 return;
             }
@@ -164,14 +166,14 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 bool success = await _authService.ConfirmSignUpAsync(Username, VerificationCode);
                 if (success)
                 {
-                    await Application.Current.MainPage.DisplayAlert(AppResources.Success, AppResources.Msg_AccountVerified, "OK");
+                    await _dialogService.DisplayAlertAsync(AppResources.Success, AppResources.Msg_AccountVerified, "OK");
                     IsVerification = false;
                     IsSignUp = false; // Go to Login
                 }
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert(AppResources.Error, ex.Message, "OK");
+                await _dialogService.DisplayAlertAsync(AppResources.Error, ex.Message, "OK");
             }
             finally
             {

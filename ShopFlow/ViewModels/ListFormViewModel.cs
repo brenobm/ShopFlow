@@ -7,8 +7,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
 {
     public class ListFormViewModel : BaseViewModel
     {
-        private readonly IGraphQLService _graphQLService;
-        private readonly IDatabaseService _databaseService;
+        private readonly IShoppingRepository _shoppingRepository;
+        private readonly IDialogService _dialogService;
         private ShoppingList _existingList;
 
         private string _name;
@@ -59,8 +59,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ListFormViewModel(ShoppingList list = null)
         {
             // Manual DI for simplicity in this detail view, or resolved via shell navigation passing ID
-            _graphQLService = ServiceHelper.GetService<IGraphQLService>();
-            _databaseService = ServiceHelper.GetService<IDatabaseService>();
+            _shoppingRepository = ServiceHelper.GetService<IShoppingRepository>();
+            _dialogService = ServiceHelper.GetService<IDialogService>();
             
             _existingList = list;
 
@@ -105,7 +105,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Name))
             {
-                await Application.Current.MainPage.DisplayAlert("Error", "Name is required.", "OK");
+                await _dialogService.DisplayAlertAsync("Error", "Name is required.", "OK");
                 return;
             }
 
@@ -123,52 +123,23 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 if (IsDefault)
                 {
                     // If this is becoming default, unset others locally
-                     var otherLists = await _databaseService.GetListsAsync();
+                     var otherLists = await _shoppingRepository.GetListsAsync();
                      foreach(var l in otherLists.Where(x => x.IsDefault == true && x.Id != listToSave.Id))
                      {
                          l.IsDefault = false;
                          l.IsDirty = true;
-                         await _databaseService.SaveListAsync(l);
+                         await _shoppingRepository.SaveListAsync(l);
                      }
                 }
                 listToSave.IsDefault = IsDefault;
-                listToSave.IsDirty = true;
-                listToSave.IsDeleted = false; // Just in case
 
-                // Cloud Sync Best Effort
-                if (Connectivity.NetworkAccess == NetworkAccess.Internet)
-                {
-                    try
-                    {
-                        if (isNew)
-                        {
-                            var cloudList = await _graphQLService.CreateListAsync(listToSave.Name, IsDefault); 
-                            // TODO: Update Cloud with Color/Icon (Need backend update or custom attributes)
-                            // For now, assume backend only supports Name/Default, so we rely on local-first or separate update
-                            // Or we update our GraphQL Service to support these fields if Schema allows.
-                            listToSave.Id = cloudList.Id; // Use Cloud ID
-                            listToSave.CreatedAt = cloudList.CreatedAt;
-                        }
-                        else
-                        {
-                            await _graphQLService.UpdateListAsync(listToSave.Id, listToSave.Name, IsDefault);
-                        }
-                        listToSave.IsDirty = false; 
-                    }
-                    catch (Exception ex)
-                    {
-                         FileLoggerService.LogStatic($"[ListForm] Cloud Sync Failed: {ex.Message}");
-                         // Keep IsDirty = true
-                    }
-                }
-
-                await _databaseService.SaveListAsync(listToSave);
+                await _shoppingRepository.SaveListAsync(listToSave);
                 
                 await Shell.Current.Navigation.PopAsync();
             }
             catch (Exception ex)
             {
-                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to save: {ex.Message}", "OK");
+                 await _dialogService.DisplayAlertAsync("Error", $"Failed to save: {ex.Message}", "OK");
             }
             finally
             {

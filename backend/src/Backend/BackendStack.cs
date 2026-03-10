@@ -3,7 +3,7 @@ using Amazon.CDK;
 using Amazon.CDK.AWS.Cognito;
 using Amazon.CDK.AWS.DynamoDB;
 using Constructs;
-using Amazon.CDK.AWS.Cognito.IdentityPool.Alpha;
+using Amazon.CDK.AWS.IAM;
 using System.Collections.Generic;
 using Amazon.CDK.AWS.AppSync;
 using Amazon.CDK.AWS.Lambda;
@@ -17,6 +17,14 @@ namespace Backend
     {
         internal BackendStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
         {
+            // Parameters
+            var senderEmail = new CfnParameter(this, "SenderEmail", new CfnParameterProps
+            {
+                Type = "String",
+                Description = "The email address to send invitations from. Must be verified in SES.",
+                Default = "breno.machado@example.com"
+            });
+
             // 1. User Pool
             var userPool = new UserPool(this, "ShopFlowUserPool", new UserPoolProps
             {
@@ -34,21 +42,36 @@ namespace Backend
                 AuthFlows = new AuthFlow { UserSrp = true }
             });
 
-            // 3. Identity Pool (Alpha L2)
-            var identityPool = new IdentityPool(this, "ShopFlowIdentityPool", new IdentityPoolProps
+            // 3. Identity Pool (L1 Construct)
+            var identityPool = new CfnIdentityPool(this, "ShopFlowIdentityPool", new CfnIdentityPoolProps
             {
                 IdentityPoolName = "ShopFlowIdentityPool",
-                AllowUnauthenticatedIdentities = false, 
-                AuthenticationProviders = new IdentityPoolAuthenticationProviders
+                AllowUnauthenticatedIdentities = false,
+                CognitoIdentityProviders = new[]
                 {
-                    UserPools = new IUserPoolAuthenticationProvider[] 
-                    { 
-                        new UserPoolAuthenticationProvider(new UserPoolAuthenticationProviderProps
-                        {
-                            UserPool = userPool,
-                            UserPoolClient = userPoolClient
-                        }) 
+                    new CfnIdentityPool.CognitoIdentityProviderProperty
+                    {
+                        ClientId = userPoolClient.UserPoolClientId,
+                        ProviderName = userPool.UserPoolProviderName
                     }
+                }
+            });
+
+            var authenticatedRole = new Role(this, "CognitoDefaultAuthenticatedRole", new RoleProps
+            {
+                AssumedBy = new FederatedPrincipal("cognito-identity.amazonaws.com", new Dictionary<string, object>
+                {
+                    { "StringEquals", new Dictionary<string, string> { { "cognito-identity.amazonaws.com:aud", identityPool.Ref } } },
+                    { "ForAnyValue:StringLike", new Dictionary<string, string> { { "cognito-identity.amazonaws.com:amr", "authenticated" } } }
+                }, "sts:AssumeRoleWithWebIdentity")
+            });
+
+            new CfnIdentityPoolRoleAttachment(this, "IdentityPoolRoleAttachment", new CfnIdentityPoolRoleAttachmentProps
+            {
+                IdentityPoolId = identityPool.Ref,
+                Roles = new Dictionary<string, string>
+                {
+                    { "authenticated", authenticatedRole.RoleArn }
                 }
             });
 
@@ -436,7 +459,7 @@ namespace Backend
             // Note: This sends a verification email to the user.
             var emailIdentity = new EmailIdentity(this, "Identity", new EmailIdentityProps
             {
-                Identity = Identity.Email("breno.machado@example.com") // TODO: Replace with user email or ask input
+                Identity = Identity.Email(senderEmail.ValueAsString)
             });
 
             /* TEMPORARILY DISABLED PINPOINT TO FIX DEPLOYMENT
@@ -456,7 +479,7 @@ namespace Backend
                 Timeout = Duration.Seconds(30),
                  Environment = new Dictionary<string, string>
                 {
-                    { "fEMAIL_SOURCE", "breno.machado@example.com" },
+                    { "fEMAIL_SOURCE", senderEmail.ValueAsString },
                     { "fDEVICE_TOKENS_TABLE_NAME", deviceTokensTable.TableName }
                     // { "PINPOINT_APP_ID", pinpointApp.Ref } // Disabled
                 }
@@ -480,16 +503,16 @@ namespace Backend
             // Allow Lambda to read Device Tokens
             deviceTokensTable.GrantReadData(inviteUserLambda);
 
-            // 10. Grant Access to Identity Pool
-            itemsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
-            listsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
-            globalProductsTable.GrantReadWriteData(identityPool.AuthenticatedRole);
-            deviceTokensTable.GrantWriteData(identityPool.AuthenticatedRole); // AppSync writes via Resolver, but Role needs access potentially if configured in AppSync UserPoolConfig default
+            // 10. Grant Access to Identity Pool Role
+            itemsTable.GrantReadWriteData(authenticatedRole);
+            listsTable.GrantReadWriteData(authenticatedRole);
+            globalProductsTable.GrantReadWriteData(authenticatedRole);
+            deviceTokensTable.GrantWriteData(authenticatedRole); // AppSync writes via Resolver, but Role needs access potentially if configured in AppSync UserPoolConfig default
 
             // Fix: Grant access to legacy table "ShopFlow_Items" used by the App
             var legacyItemsTable = Table.FromTableName(this, "ShopFlowItemsLegacy", "ShopFlow_Items");
-            legacyItemsTable.GrantReadData(identityPool.AuthenticatedRole);
-            legacyItemsTable.GrantWriteData(identityPool.AuthenticatedRole);
+            legacyItemsTable.GrantReadData(authenticatedRole);
+            legacyItemsTable.GrantWriteData(authenticatedRole);
 
            
             /*
@@ -504,7 +527,7 @@ namespace Backend
             // 10. Outputs
             new CfnOutput(this, "UserPoolId", new CfnOutputProps { Value = userPool.UserPoolId });
             new CfnOutput(this, "UserPoolClientId", new CfnOutputProps { Value = userPoolClient.UserPoolClientId });
-            new CfnOutput(this, "IdentityPoolId", new CfnOutputProps { Value = identityPool.IdentityPoolId });
+            new CfnOutput(this, "IdentityPoolId", new CfnOutputProps { Value = identityPool.Ref });
             new CfnOutput(this, "Region", new CfnOutputProps { Value = this.Region });
             new CfnOutput(this, "ItemsTableName", new CfnOutputProps { Value = itemsTable.TableName });
             new CfnOutput(this, "ListsTableName", new CfnOutputProps { Value = listsTable.TableName });

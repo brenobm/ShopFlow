@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using BrenoMachado.ShopFlow.Models;
 using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.Repositories;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
@@ -12,11 +13,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
     [QueryProperty(nameof(Price), "Price")]
     public class ItemDetailViewModel : BaseViewModel
     {
-        private readonly IGraphQLService _graphQLService;
+        private readonly IShoppingRepository _shoppingRepository;
+        private readonly IDialogService _dialogService;
 
-        public ItemDetailViewModel(IGraphQLService graphQLService)
+        public ItemDetailViewModel(IShoppingRepository shoppingRepository, IDialogService dialogService)
         {
-            _graphQLService = graphQLService;
+            _shoppingRepository = shoppingRepository;
+            _dialogService = dialogService;
 
             SaveCommand = new Command(async () => await SaveAsync());
             CancelCommand = new Command(async () => await CancelAsync());
@@ -30,7 +33,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task AddCategoryAsync()
         {
-            string newCategory = await Shell.Current.DisplayPromptAsync("New Category", "Enter category name:");
+            string newCategory = await _dialogService.ShowPromptAsync("New Category", "Enter category name:");
             if (!string.IsNullOrWhiteSpace(newCategory))
             {
                 newCategory = newCategory.Trim();
@@ -103,32 +106,46 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Name))
             {
-                await Shell.Current.DisplayAlert("Error", "Name is required", "OK");
+                await _dialogService.ShowAlertAsync("Error", "Name is required", "OK");
                 return;
             }
 
+            if (IsBusy) return;
+            IsBusy = true;
+
             try 
             {
+                ShoppingItem item;
                 if (!string.IsNullOrEmpty(ItemId))
                 {
-                    // Workaround: Delete existing to update details (incl. Category/Price)
-                     await _graphQLService.DeleteItemAsync(ListId, ItemId);
+                    item = await _shoppingRepository.GetItemAsync(ItemId);
+                    if (item == null)
+                    {
+                         item = new ShoppingItem { Id = ItemId, ListId = ListId };
+                    }
                 }
-                
-                // Add New (or Re-Add)
-                string newItemId = ItemId;
-                if (string.IsNullOrEmpty(newItemId))
+                else
                 {
-                    newItemId = Guid.NewGuid().ToString();
+                    item = new ShoppingItem { ListId = ListId };
                 }
 
-                await _graphQLService.AddItemAsync(ListId, newItemId, Name.Trim(), 1, "qty", SelectedCategory, Price);
+                item.Name = Name.Trim();
+                item.Category = SelectedCategory;
+                item.Price = Price;
+                item.Quantity = item.Quantity > 0 ? item.Quantity : 1;
+                item.Unit = string.IsNullOrEmpty(item.Unit) ? "qty" : item.Unit;
+
+                await _shoppingRepository.SaveItemAsync(item);
                 
                 await Shell.Current.GoToAsync("..");
             } 
             catch(Exception ex)
             {
-                await Shell.Current.DisplayAlert("Error", $"Save failed: {ex.Message}", "OK");
+                await _dialogService.ShowAlertAsync("Error", $"Save failed: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 

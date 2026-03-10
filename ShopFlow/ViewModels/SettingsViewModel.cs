@@ -1,13 +1,15 @@
 using System.Windows.Input;
 using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.Repositories;
 using BrenoMachado.ShopFlow.Views;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
     public class SettingsViewModel : BaseViewModel
     {
-        private readonly IDatabaseService _databaseService;
+        private readonly IShoppingRepository _shoppingRepository;
         private readonly IAppNotificationService _notificationService;
+        private readonly IDialogService _dialogService;
 
         public ICommand ClearDataCommand { get; }
         public ICommand TestPushCommand { get; }
@@ -49,11 +51,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         // ...
 
-        public SettingsViewModel(IDatabaseService databaseService, IAppNotificationService notificationService, ILocalizationService localizationService)
+        public SettingsViewModel(IShoppingRepository shoppingRepository, IAppNotificationService notificationService, ILocalizationService localizationService, IDialogService dialogService)
         {
-            _databaseService = databaseService;
+            _shoppingRepository = shoppingRepository;
             _notificationService = notificationService;
             _localizationService = localizationService;
+            _dialogService = dialogService;
             
             Title = Resources.Strings.AppResources.Settings;
             
@@ -79,7 +82,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             if (current != language.Code)
             {
                 _localizationService.SetCulture(language.Code);
-                await Shell.Current.DisplayAlert(Resources.Strings.AppResources.RestartRequired, Resources.Strings.AppResources.RestartMessage, "OK");
+                await _dialogService.DisplayAlertAsync(Resources.Strings.AppResources.RestartRequired, Resources.Strings.AppResources.RestartMessage, "OK");
             }
         }
 
@@ -96,7 +99,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task ClearDataAsync()
         {
-            bool confirm = await Shell.Current.DisplayAlert("Warning", "This will delete ALL your lists and items. This action cannot be undone.", "Delete All", "Cancel");
+            bool confirm = await _dialogService.DisplayAlertAsync("Warning", "This will delete ALL your lists and items. This action cannot be undone.", "Delete All", "Cancel");
             if (confirm)
             {
                 // We need a method to clear everything. 
@@ -106,13 +109,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 // For now let's just delete lists which cascades?
                 // Our DeleteListAsync cascades items.
                 
-                var lists = await _databaseService.GetListsAsync();
+                var lists = await _shoppingRepository.GetListsAsync();
                 foreach(var list in lists)
                 {
-                    await _databaseService.DeleteListAsync(list);
+                    await _shoppingRepository.DeleteListAsync(list);
                 }
 
-                await Shell.Current.DisplayAlert("Success", "All data cleared.", "OK");
+                await _dialogService.DisplayAlertAsync("Success", "All data cleared.", "OK");
             }
         }
     }

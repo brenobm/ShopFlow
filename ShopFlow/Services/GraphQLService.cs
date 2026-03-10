@@ -49,15 +49,13 @@ namespace BrenoMachado.ShopFlow.Services
                 }"
             };
 
-            var response = await _client.SendQueryAsync<dynamic>(request);
+            var response = await _client.SendQueryAsync<GetListsResponse>(request);
             if (response.Errors != null && response.Errors.Any())
             {
                 throw new Exception($"GraphQL Error: {response.Errors[0].Message}");
             }
 
-            // Map dynamic response to List<ShoppingList>
-            var lists = response.Data.getLists.ToObject<List<ShoppingList>>();
-            return lists;
+            return response.Data.GetLists ?? new List<ShoppingList>();
         }
 
         public async Task<ShoppingList> CreateListAsync(string name, bool isDefault = false)
@@ -77,13 +75,13 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { name, isDefault }
             };
 
-            var response = await _client.SendMutationAsync<dynamic>(request);
+            var response = await _client.SendMutationAsync<CreateListResponse>(request);
             if (response.Errors != null && response.Errors.Any())
             {
                 throw new Exception($"GraphQL Error: {response.Errors[0].Message}");
             }
             
-            return response.Data.createList.ToObject<ShoppingList>();
+            return response.Data.CreateList;
         }
 
         public async Task<ShoppingList> UpdateListAsync(string id, string name, bool isDefault)
@@ -103,10 +101,10 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { id, name, isDefault }
             };
 
-            var response = await _client.SendMutationAsync<dynamic>(request);
+            var response = await _client.SendMutationAsync<UpdateListResponse>(request);
             if (response.Errors != null && response.Errors.Any()) throw new Exception(response.Errors[0].Message);
             
-            return response.Data.updateList.ToObject<ShoppingList>();
+            return response.Data.UpdateList;
         }
 
         public async Task<ShoppingList> DeleteListAsync(string id)
@@ -123,7 +121,7 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { id }
             };
 
-            var response = await _client.SendMutationAsync<dynamic>(request);
+            var response = await _client.SendMutationAsync<DeleteListResponse>(request);
              if (response.Errors != null && response.Errors.Any())
             {
                 throw new Exception($"GraphQL Error: {response.Errors[0].Message}");
@@ -148,11 +146,11 @@ namespace BrenoMachado.ShopFlow.Services
                  Variables = new { id, email }
              };
 
-             var response = await _client.SendMutationAsync<dynamic>(request);
+             var response = await _client.SendMutationAsync<ShareListResponse>(request);
              if (response.Errors != null && response.Errors.Any())
                 throw new Exception(response.Errors[0].Message);
              
-             return response.Data.shareList.ToObject<ShoppingList>();
+             return response.Data.ShareList;
         }
 
         public async Task<List<ShoppingItem>> GetItemsAsync(string listId)
@@ -176,14 +174,13 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { listId }
             };
 
-            var response = await _client.SendQueryAsync<dynamic>(request);
+            var response = await _client.SendQueryAsync<GetItemsResponse>(request);
             if (response.Errors != null && response.Errors.Any())
             {
                  throw new Exception($"GraphQL Error: {response.Errors[0].Message}");
             }
             
-            var items = response.Data.getItems.ToObject<List<ShoppingItem>>();
-            return items ?? new List<ShoppingItem>();
+            return response.Data.GetItems ?? new List<ShoppingItem>();
         }
 
         public async Task<ShoppingItem> AddItemAsync(string listId, string id, string name, double quantity, string unit, string category, double? price = null)
@@ -207,9 +204,9 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { id, listId, name, quantity, unit, category, price }
             };
 
-            var response = await _client.SendMutationAsync<dynamic>(request);
+            var response = await _client.SendMutationAsync<AddItemResponse>(request);
             if (response.Errors != null && response.Errors.Any()) throw new Exception(response.Errors[0].Message);
-            return response.Data.addItem.ToObject<ShoppingItem>();
+            return response.Data.AddItem;
         }
 
         public async Task<ShoppingItem> UpdateItemAsync(ShoppingItem item)
@@ -229,7 +226,7 @@ namespace BrenoMachado.ShopFlow.Services
                 }",
                 Variables = new { listId = item.ListId, id = item.Id, name = item.Name, quantity = item.Quantity, unit = item.Unit, category = item.Category, price = item.Price, isPurchased = item.IsPurchased }
             };
-             var response = await _client.SendMutationAsync<dynamic>(request);
+             var response = await _client.SendMutationAsync<UpdateItemResponse>(request);
              if (response.Errors != null && response.Errors.Any()) throw new Exception(response.Errors[0].Message);
              return item;
         }
@@ -247,7 +244,7 @@ namespace BrenoMachado.ShopFlow.Services
                 }",
                 Variables = new { listId, id }
             };
-            await _client.SendMutationAsync<dynamic>(request);
+            await _client.SendMutationAsync<DeleteItemResponse>(request);
             return new ShoppingItem { Id = id };
         }
         public async Task<GlobalProduct> GetGlobalProductAsync(string barcode)
@@ -266,12 +263,12 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { barcode }
             };
 
-            var response = await _client.SendQueryAsync<dynamic>(request);
+            var response = await _client.SendQueryAsync<GetGlobalProductResponse>(request);
             // Return null if not found or errors (common for lookup)
             if (response.Errors != null && response.Errors.Any()) return null;
-            if (response.Data.getGlobalProduct == null) return null;
+            if (response.Data.GetGlobalProduct == null) return null;
 
-            return response.Data.getGlobalProduct.ToObject<GlobalProduct>();
+            return response.Data.GetGlobalProduct;
         }
 
         public async Task<GlobalProduct> CreateGlobalProductAsync(string barcode, string name, string category)
@@ -290,10 +287,10 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { barcode, name, category }
             };
 
-            var response = await _client.SendMutationAsync<dynamic>(request);
+            var response = await _client.SendMutationAsync<CreateGlobalProductResponse>(request);
             if (response.Errors != null && response.Errors.Any()) throw new Exception(response.Errors[0].Message);
             
-            return response.Data.createGlobalProduct.ToObject<GlobalProduct>();
+            return response.Data.CreateGlobalProduct;
         }
 
         public async Task RegisterDeviceAsync(string token, string platform)
@@ -311,7 +308,7 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { token, platform }
             };
 
-            var response = await _client.SendMutationAsync<dynamic>(request);
+            var response = await _client.SendMutationAsync<RegisterDeviceResponse>(request);
             if (response.Errors != null && response.Errors.Any()) throw new Exception(response.Errors[0].Message);
         }
 
@@ -331,11 +328,11 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { barcode }
             };
 
-            var response = await _client.SendQueryAsync<dynamic>(request);
+            var response = await _client.SendQueryAsync<ProductSearchResponse>(request);
             if (response.Errors != null && response.Errors.Any()) return null; // Log?
-            if (response.Data.productSearch == null) return null;
+            if (response.Data.ProductSearch == null) return null;
 
-            return response.Data.productSearch.ToObject<ProductSearchDto>();
+            return response.Data.ProductSearch;
         }
 
         public async Task<SmartParseResult> ParseItemAsync(string text)
@@ -356,16 +353,32 @@ namespace BrenoMachado.ShopFlow.Services
                 Variables = new { text }
             };
 
-            var response = await _client.SendQueryAsync<dynamic>(request);
+            var response = await _client.SendQueryAsync<ParseItemResponse>(request);
             if (response.Errors != null && response.Errors.Any()) 
             {
                 // Log error but don't crash, return null so SmartService knows it failed
                 FileLoggerService.LogStatic($"[GraphQLService] ParseItem Error: {response.Errors[0].Message}");
                 return null;
             }
-            if (response.Data.parseItem == null) return null;
+            if (response.Data.ParseItem == null) return null;
 
-            return response.Data.parseItem.ToObject<SmartParseResult>();
+            return response.Data.ParseItem;
         }
     }
+
+    // DTOs for GraphQL Responses
+    public class GetListsResponse { [JsonProperty("getLists")] public List<ShoppingList> GetLists { get; set; } }
+    public class CreateListResponse { [JsonProperty("createList")] public ShoppingList CreateList { get; set; } }
+    public class UpdateListResponse { [JsonProperty("updateList")] public ShoppingList UpdateList { get; set; } }
+    public class DeleteListResponse { [JsonProperty("deleteList")] public ShoppingList DeleteList { get; set; } }
+    public class ShareListResponse { [JsonProperty("shareList")] public ShoppingList ShareList { get; set; } }
+    public class GetItemsResponse { [JsonProperty("getItems")] public List<ShoppingItem> GetItems { get; set; } }
+    public class AddItemResponse { [JsonProperty("addItem")] public ShoppingItem AddItem { get; set; } }
+    public class UpdateItemResponse { [JsonProperty("updateItem")] public ShoppingItem UpdateItem { get; set; } }
+    public class DeleteItemResponse { [JsonProperty("deleteItem")] public ShoppingItem DeleteItem { get; set; } }
+    public class GetGlobalProductResponse { [JsonProperty("getGlobalProduct")] public GlobalProduct GetGlobalProduct { get; set; } }
+    public class CreateGlobalProductResponse { [JsonProperty("createGlobalProduct")] public GlobalProduct CreateGlobalProduct { get; set; } }
+    public class RegisterDeviceResponse { [JsonProperty("registerDevice")] public object RegisterDevice { get; set; } }
+    public class ProductSearchResponse { [JsonProperty("productSearch")] public ProductSearchDto ProductSearch { get; set; } }
+    public class ParseItemResponse { [JsonProperty("parseItem")] public SmartParseResult ParseItem { get; set; } }
 }

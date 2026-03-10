@@ -24,6 +24,11 @@ namespace BrenoMachado.ShopFlow.Services
 
         public async Task PullChangesAsync()
         {
+            if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+            {
+                FileLoggerService.LogStatic("[SyncService] Pull skipped: No Internet Connection.");
+                return;
+            }
             if (!await _authService.IsAuthenticatedAsync()) return;
 
             try
@@ -78,12 +83,19 @@ namespace BrenoMachado.ShopFlow.Services
 
         public async Task PushChangesAsync()
         {
+            if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+            {
+                FileLoggerService.LogStatic("[SyncService] Push skipped: No Internet Connection.");
+                return;
+            }
             if (!await _authService.IsAuthenticatedAsync()) return;
             
-            var dirtyItems = await _databaseService.GetDirtyItemsAsync();
-            if (!dirtyItems.Any()) return;
+            try
+            {
+                var dirtyItems = await _databaseService.GetDirtyItemsAsync();
+                if (!dirtyItems.Any()) return;
 
-            foreach (var item in dirtyItems)
+                foreach (var item in dirtyItems)
             {
                 bool success = false;
                  try
@@ -104,11 +116,16 @@ namespace BrenoMachado.ShopFlow.Services
                     FileLoggerService.LogStatic($"Sync Push Error for {item.Name}: {ex.Message}");
                 }
 
-                if (success)
-                {
-                    item.IsDirty = false;
-                    await _databaseService.UpdateItemSyncStatusAsync(item);
+                    if (success)
+                    {
+                        item.IsDirty = false;
+                        await _databaseService.UpdateItemSyncStatusAsync(item);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                FileLoggerService.LogStatic($"[SyncService] PushChanges Error: {ex.Message}");
             }
         }
 
@@ -141,6 +158,11 @@ namespace BrenoMachado.ShopFlow.Services
                   {
                       await _graphQLService.UpdateItemAsync(item);
                   }
+             }
+             catch (Exception innerEx)
+             {
+                 FileLoggerService.LogStatic($"[SyncService] AddItemAsync failed after UpdateItemAsync failed: {innerEx.Message}");
+                 throw; // Rethrow to mark as failed
              }
         }
 

@@ -25,7 +25,7 @@
                           Command="{Binding BackCommand}"
                           BackgroundColor="Transparent"
                           VerticalOptions="Center" 
-                          HeightRequest="30" WidthRequest="30">
+                          HeightRequest="44" WidthRequest="44" Padding="7">
                  <ImageButton.Source>
                      <FontImageSource Glyph="‹" Color="White" Size="40" />
                  </ImageButton.Source>
@@ -86,7 +86,7 @@
                         ItemsSource="{Binding Items}"
                         SelectionMode="None"
                         IsGrouped="True"
-                        Margin="20,0,20,0">
+                        Margin="20,0,20,80">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
             </CollectionView.ItemsLayout>
@@ -94,43 +94,32 @@
             <!-- Group Header (Colored Card Top) -->
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate>
-                    <Border StrokeThickness="0"
-                            StrokeShape="RoundRectangle 20,20,0,0"
-                            HeightRequest="50"
-                            Margin="0,5,0,0"
-                            Padding="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="{Binding Name, Converter={StaticResource CategoryToColor}}" Offset="0.0" />
-                                <GradientStop Color="{Binding Name, Converter={StaticResource CategoryToColor}}" Offset="1.0" />
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        
-                        <Grid Padding="15,0" ColumnDefinitions="auto, *, Auto">
-                            <!-- Category Icon -->
-                             <Label Grid.Column="0" 
-                                   Text="{Binding Name, Converter={StaticResource CategoryToIcon}}" 
-                                   FontSize="20"
-                                   VerticalOptions="Center" 
-                                   Margin="0,0,10,0"/>
+                    <Grid HeightRequest="50" Margin="0,5,0,0" Padding="15,0"
+                          BackgroundColor="{Binding Name, Converter={StaticResource CategoryToColor}}"
+                          ColumnDefinitions="auto, *, Auto">
+                        <!-- Category Icon -->
+                         <Label Grid.Column="0" 
+                               Text="{Binding Name, Converter={StaticResource CategoryToIcon}}" 
+                               FontSize="20"
+                               VerticalOptions="Center" 
+                               Margin="0,0,10,0"/>
 
-                            <Label Grid.Column="1"
-                                   Text="{Binding Name}"
-                                   TextColor="White"
-                                   FontSize="16"
-                                   FontAttributes="Bold"
-                                   VerticalOptions="Center"/>
-                            
-                            <!-- Arrow -->
-                            <Label Grid.Column="2"
-                                   Text="›"
-                                   TextColor="White"
-                                   FontSize="24"
-                                   VerticalOptions="Center"
-                                   FontAttributes="Bold"
-                                   Opacity="0.8"/>
-                        </Grid>
-                    </Border>
+                        <Label Grid.Column="1"
+                               Text="{Binding Name}"
+                               TextColor="White"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"/>
+                        
+                        <!-- Arrow -->
+                        <Label Grid.Column="2"
+                               Text="›"
+                               TextColor="White"
+                               FontSize="24"
+                               VerticalOptions="Center"
+                               FontAttributes="Bold"
+                               Opacity="0.8"/>
+                    </Grid>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
             
@@ -138,11 +127,7 @@
             <!-- Removing Visual Gap by ensuring it connects -->
             <CollectionView.GroupFooterTemplate>
                  <DataTemplate>
-                    <Border StrokeThickness="0"
-                            StrokeShape="RoundRectangle 0,0,20,20"
-                            BackgroundColor="White"
-                            HeightRequest="20"
-                            Margin="0,0,0,0" /> 
+                    <Grid BackgroundColor="White" HeightRequest="10" Margin="0,0,0,10" /> 
                 </DataTemplate>
             </CollectionView.GroupFooterTemplate>
 
@@ -213,9 +198,6 @@
                     </SwipeView>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
-                <CollectionView.Footer>
-                     <BoxView HeightRequest="80" Color="Transparent" />
-                </CollectionView.Footer>
             </CollectionView>
 
         <!-- Floating Action Buttons -->

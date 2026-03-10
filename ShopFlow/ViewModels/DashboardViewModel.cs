@@ -2,14 +2,15 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using BrenoMachado.ShopFlow.Models;
 using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.Repositories;
 using BrenoMachado.ShopFlow.Views;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
     public class DashboardViewModel : BaseViewModel
     {
-        private readonly IGraphQLService _graphQLService;
-        private readonly IDatabaseService _databaseService;
+        private readonly IShoppingRepository _shoppingRepository;
+        private readonly IDialogService _dialogService;
 
         public ObservableCollection<ShoppingList> Lists { get; } = new();
 
@@ -23,11 +24,11 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand GoToLogsCommand { get; } // New Command
         public ICommand SetDefaultListCommand { get; }
 
-        public DashboardViewModel(IGraphQLService graphQLService, IDatabaseService databaseService)
+        public DashboardViewModel(IShoppingRepository shoppingRepository, IDialogService dialogService)
         {
             Title = "My Lists";
-            _graphQLService = graphQLService;
-            _databaseService = databaseService;
+            _shoppingRepository = shoppingRepository;
+            _dialogService = dialogService;
 
             LoadListsCommand = new Command(async () => await LoadListsAsync());
             AddListCommand = new Command(async () => await AddListAsync());
@@ -59,12 +60,12 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 {
                     // 1. Load Local First (Always works offline)
                     FileLoggerService.LogStatic("[DashboardVM] LoadListsAsync: Fetching from DB...");
-                    var localLists = await _databaseService.GetListsAsync();
+                    var localLists = await _shoppingRepository.GetListsAsync();
                     
                     // Populate Stats
                     foreach (var list in localLists)
                     {
-                        var items = await _databaseService.GetItemsAsync(list.Id);
+                        var items = await _shoppingRepository.GetItemsAsync(list.Id);
                         list.TotalItemsCount = items.Count;
                         list.BoughtItemsCount = items.Count(i => i.IsPurchased);
                     }
@@ -106,7 +107,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 {
                      FileLoggerService.LogStatic($"[DashboardVM] LoadListsAsync Error: {ex}");
                      MainThread.BeginInvokeOnMainThread(async () => 
-                        await Application.Current.MainPage.DisplayAlert("Error", $"Failed to load lists: {ex.Message}", "OK")
+                        await _dialogService.DisplayAlertAsync("Error", $"Failed to load lists: {ex.Message}", "OK")
                      );
                 }
                 finally
@@ -261,20 +262,14 @@ namespace BrenoMachado.ShopFlow.ViewModels
         async Task DeleteListAsync(ShoppingList list)
         {
             if (list == null) return;
-            bool confirm = await Shell.Current.DisplayAlert("Delete", $"Delete list '{list.Name}'?", "Yes", "No");
+            bool confirm = await _dialogService.DisplayAlertAsync("Delete", $"Delete list '{list.Name}'?", "Yes", "No");
             if (confirm)
             {
                 try
                 {
                     IsBusy = true; // Block other ops
 
-                    // 1. Cloud Delete (Best Effort)
-                    if (Connectivity.NetworkAccess == NetworkAccess.Internet)
-                    {
-                         try { await _graphQLService.DeleteListAsync(list.Id); } catch {}
-                    }
-                    
-                    // 2. Handle Default Promotion (If deleting the default list)
+                    // 1. Handle Default Promotion (If deleting the default list)
                     if (list.IsDefault == true)
                     {
                         var remaining = Lists.Where(l => l.Id != list.Id).ToList();
@@ -282,19 +277,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
                         {
                             var newDefault = remaining.First();
                             newDefault.IsDefault = true;
-                            newDefault.IsDirty = true;
                             
-                            // Cloud Update New Default
-                            if (Connectivity.NetworkAccess == NetworkAccess.Internet)
-                            {
-                                try { await _graphQLService.UpdateListAsync(newDefault.Id, newDefault.Name, true); newDefault.IsDirty = false; } catch {}
-                            }
-                            await _databaseService.SaveListAsync(newDefault);
+                            await _shoppingRepository.SaveListAsync(newDefault);
                         }
                     }
                     
-                    // 3. Local Delete
-                    await _databaseService.DeleteListAsync(list);
+                    // 2. Local Delete 
+                    await _shoppingRepository.DeleteListAsync(list);
 
                     // 4. Single Reload
                     IsBusy = false; // Reset busy so LoadLists works
@@ -303,7 +292,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 catch (Exception ex)
                 {
                     IsBusy = false;
-                    await Application.Current.MainPage.DisplayAlert("Error", $"Failed to delete list: {ex.Message}", "OK");
+                    await _dialogService.DisplayAlertAsync("Error", $"Failed to delete list: {ex.Message}", "OK");
                 }
             }
         }
@@ -320,31 +309,19 @@ namespace BrenoMachado.ShopFlow.ViewModels
                 foreach (var old in oldDefaults)
                 {
                     old.IsDefault = false;
-                    old.IsDirty = true;
-                    // Attempt Cloud Update (Best Effort)
-                    if (Connectivity.NetworkAccess == NetworkAccess.Internet)
-                    {
-                        try { await _graphQLService.UpdateListAsync(old.Id, old.Name, false); old.IsDirty = false; } catch {}
-                    }
-                    await _databaseService.SaveListAsync(old);
+                    await _shoppingRepository.SaveListAsync(old);
                 }
 
                 // 2. Set new default in Local
                 newDefault.IsDefault = true;
-                newDefault.IsDirty = true;
                 
-                if (Connectivity.NetworkAccess == NetworkAccess.Internet)
-                {
-                     try { await _graphQLService.UpdateListAsync(newDefault.Id, newDefault.Name, true); newDefault.IsDirty = false; } catch {}
-                }
-                
-                await _databaseService.SaveListAsync(newDefault);
+                await _shoppingRepository.SaveListAsync(newDefault);
 
                 await LoadListsAsync();
             }
             catch (Exception ex)
             {
-                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to set default: {ex.Message}", "OK");
+                 await _dialogService.DisplayAlertAsync("Error", $"Failed to set default: {ex.Message}", "OK");
             }
         }
 
@@ -359,17 +336,17 @@ namespace BrenoMachado.ShopFlow.ViewModels
         async Task ShareListAsync(ShoppingList list)
         {
             if (list == null) return;
-            string email = await Shell.Current.DisplayPromptAsync("Share List", $"Enter email to share '{list.Name}' with:");
+            string email = await _dialogService.DisplayPromptAsync("Share List", $"Enter email to share '{list.Name}' with:");
             if (string.IsNullOrWhiteSpace(email)) return;
 
             try
             {
-                await _graphQLService.ShareListAsync(list.Id, email.Trim());
-                await Application.Current.MainPage.DisplayAlert("Success", $"Invited {email} to list.", "OK");
+                await _shoppingRepository.ShareListAsync(list.Id, email.Trim());
+                await _dialogService.DisplayAlertAsync("Success", $"Invited {email} to list.", "OK");
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", $"Failed to share list: {ex.Message}", "OK");
+                await _dialogService.DisplayAlertAsync("Error", $"Failed to share list: {ex.Message}", "OK");
             }
         }
         

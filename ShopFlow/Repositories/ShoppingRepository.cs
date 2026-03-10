@@ -1,112 +1,69 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using BrenoMachado.ShopFlow.Models;
 using BrenoMachado.ShopFlow.Services;
-using System.Diagnostics;
 
 namespace BrenoMachado.ShopFlow.Repositories
 {
-    public interface IShoppingRepository
-    {
-        Task<List<ShoppingItem>> GetItemsAsync(string listId);
-        Task SaveItemAsync(ShoppingItem item);
-        Task DeleteItemAsync(ShoppingItem item);
-        Task SyncAsync();
-    }
-
     public class ShoppingRepository : IShoppingRepository
     {
         private readonly IDatabaseService _databaseService;
-        private readonly ISyncService _syncService;
-        private readonly ISmartService _smartService;
+        private readonly IGraphQLService _graphQLService;
 
-        public ShoppingRepository(IDatabaseService databaseService, ISyncService syncService, ISmartService smartService)
+        public ShoppingRepository(IDatabaseService databaseService, IGraphQLService graphQLService)
         {
             _databaseService = databaseService;
-            _syncService = syncService;
-            _smartService = smartService;
-
-            // Auto-Sync when connectivity returns
-            Connectivity.ConnectivityChanged += OnConnectivityChanged;
+            _graphQLService = graphQLService;
         }
 
-        private void OnConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
+        public Task<List<ShoppingList>> GetListsAsync()
         {
-            if (e.NetworkAccess == NetworkAccess.Internet)
-            {
-                FileLoggerService.LogStatic("Connectivity Restored: Triggering Sync");
-                FireAndForgetSync();
-                
-                // Trigger Smart Parsing for unparsed items
-                 Task.Run(async () => {
-                     try {
-                        var lists = await _databaseService.GetListsAsync();
-                        foreach(var list in lists)
-                        {
-                            await _smartService.ProcessUnparsedItemsAsync(list.Id);
-                        }
-                     } catch(Exception ex) {
-                         System.Diagnostics.Debug.WriteLine($"Smart Sync Failed: {ex.Message}");
-                     }
-                 });
-            }
+            return _databaseService.GetListsAsync();
         }
 
-        public async Task<List<ShoppingItem>> GetItemsAsync(string listId)
+        public Task<ShoppingList> GetListAsync(string id)
         {
-            // Always read from local DB for speed and offline handling
-            return await _databaseService.GetItemsAsync(listId);
+            return _databaseService.GetListAsync(id);
         }
 
-        public async Task SaveItemAsync(ShoppingItem item)
+        public Task SaveListAsync(ShoppingList list)
         {
-            // 1. Save Local (Immediate UI update capability)
-            await _databaseService.SaveItemAsync(item);
-
-            // 2. Trigger Sync (Fire and Forget)
-            FireAndForgetSync();
-
-            // 3. Trigger Smart Parse (Fire and Forget)
-            if (!item.IsParsed && Connectivity.NetworkAccess == NetworkAccess.Internet)
-            {
-                Task.Run(() => _smartService.ProcessUnparsedItemsAsync(item.ListId));
-            }
+            return _databaseService.SaveListAsync(list);
         }
 
-        public async Task DeleteItemAsync(ShoppingItem item)
+        public Task DeleteListAsync(ShoppingList list)
         {
-            // 1. Soft Delete Local
-            await _databaseService.DeleteItemAsync(item);
-
-            // 2. Trigger Sync
-            FireAndForgetSync();
+            return _databaseService.DeleteListAsync(list);
         }
 
-        public async Task SyncAsync()
+        public Task<ShoppingList> ShareListAsync(string listId, string email)
         {
-            // Manual full sync logic
-            try
-            {
-               await _syncService.SyncAsync();
-            } 
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Manual Sync Failed: {ex.Message}");
-            }
+            return _graphQLService.ShareListAsync(listId, email);
         }
 
-        private void FireAndForgetSync()
+        public Task<List<ShoppingItem>> GetItemsAsync(string listId)
         {
-            // Run on background thread to not block UI
-            Task.Run(async () => 
-            {
-                try
-                {
-                    await _syncService.PushChangesAsync();
-                }
-                catch(Exception ex)
-                {
-                    Debug.WriteLine($"Background Sync Failed: {ex.Message}");
-                }
-            });
+            return _databaseService.GetItemsAsync(listId);
+        }
+
+        public Task<ShoppingItem> GetItemAsync(string itemId)
+        {
+            return _databaseService.GetItemAsync(itemId);
+        }
+
+        public Task SaveItemAsync(ShoppingItem item)
+        {
+            return _databaseService.SaveItemAsync(item);
+        }
+
+        public Task DeleteItemAsync(ShoppingItem item)
+        {
+            return _databaseService.DeleteItemAsync(item);
+        }
+
+        public Task<List<ShoppingItem>> GetPurchaseHistoryAsync()
+        {
+            return _databaseService.GetPurchaseHistoryAsync();
         }
     }
 }

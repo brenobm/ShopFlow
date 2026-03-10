@@ -27,7 +27,6 @@ namespace BrenoMachado.ShopFlow.ViewModels
                  }
             }
         }
-        private readonly IGraphQLService _graphQLService;
         private readonly IShoppingRepository _shoppingRepository;
         
         string _listId;
@@ -87,7 +86,6 @@ namespace BrenoMachado.ShopFlow.ViewModels
         private readonly IVoiceService _voiceService;
         private readonly IProductService _productService;
         private readonly ITranslationService _translationService;
-        private readonly IDatabaseService _databaseService;
         private readonly ILocalizationService _localizationService;
         private readonly IDialogService _dialogService;
         private readonly IBarcodeWorkflowService _barcodeWorkflowService;
@@ -124,23 +122,19 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand StopListeningCommand { get; }
 
         public ActiveListViewModel(
-            IGraphQLService graphQLService, 
             IVoiceService voiceService, 
             ISmartService smartService, 
             IProductService productService, 
             ITranslationService translationService, 
-            IDatabaseService databaseService, 
             IShoppingRepository shoppingRepository, 
             ILocalizationService localizationService,
             IDialogService dialogService,
             IBarcodeWorkflowService barcodeWorkflowService)
         {
-            _graphQLService = graphQLService;
             _voiceService = voiceService;
             _smartService = smartService;
             _productService = productService;
             _translationService = translationService;
-            _databaseService = databaseService;
             _shoppingRepository = shoppingRepository;
             _localizationService = localizationService;
             _dialogService = dialogService;
@@ -181,7 +175,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         async Task LoadListDetailsAsync(string listId)
         {
              // Fallback to local DB lists
-             var lists = await _databaseService.GetListsAsync();
+             var lists = await _shoppingRepository.GetListsAsync();
              var list = lists.FirstOrDefault(l => l.Id == listId);
              
              if (list != null)
@@ -417,7 +411,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             try
             {
-                await _graphQLService.ShareListAsync(CurrentList.Id, email.Trim());
+                await _shoppingRepository.ShareListAsync(CurrentList.Id, email.Trim());
                 await _dialogService.DisplayAlertAsync(AppResources.Success, string.Format(AppResources.Msg_InviteSuccess, email), "OK");
             }
             catch (Exception ex)
@@ -444,7 +438,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
              
              if (targetList == null)
              {
-                 var lists = await _graphQLService.GetListsAsync();
+                 var lists = await _shoppingRepository.GetListsAsync();
                  targetList = lists.FirstOrDefault(l => l.IsDefault == true) ?? lists.FirstOrDefault();
                  if(targetList == null) return;
                  CurrentList = targetList; // Set it so the UI loads it
@@ -455,7 +449,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
                  // "when doing command voice, it will add to the default list."
                  // This sounds like a strict rule.
                  // Let's check if we should switch.
-                 var lists = await _graphQLService.GetListsAsync();
+                 var lists = await _shoppingRepository.GetListsAsync();
                  var defaultList = lists.FirstOrDefault(l => l.IsDefault == true);
                  if (defaultList != null && defaultList.Id != CurrentList.Id)
                  {
