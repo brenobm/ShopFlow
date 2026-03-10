@@ -85,7 +85,8 @@ public partial class LoadingPage : ContentPage
         try 
         {
             var logger = FileLoggerService.Instance;
-            var vm = new BrenoMachado.ShopFlow.ViewModels.LogsViewModel(logger);
+            var dialogService = _serviceProvider.GetService<IDialogService>();
+            var vm = new BrenoMachado.ShopFlow.ViewModels.LogsViewModel(logger, dialogService);
             var page = new LogsPage(vm);
             await Navigation.PushModalAsync(page);
         }

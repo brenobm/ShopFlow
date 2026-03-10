@@ -17,6 +17,6 @@ namespace BrenoMachado.ShopFlow.Repositories
         Task SaveItemAsync(ShoppingItem item);
         Task DeleteItemAsync(ShoppingItem item);
         
-        Task<List<ShoppingItem>> GetPurchaseHistoryAsync();
+        Task<List<PurchaseHistory>> GetPurchaseHistoryAsync();
     }
 }

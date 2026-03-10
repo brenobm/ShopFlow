@@ -33,7 +33,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task AddCategoryAsync()
         {
-            string newCategory = await _dialogService.ShowPromptAsync("New Category", "Enter category name:");
+            string newCategory = await _dialogService.DisplayPromptAsync("New Category", "Enter category name:");
             if (!string.IsNullOrWhiteSpace(newCategory))
             {
                 newCategory = newCategory.Trim();
@@ -106,7 +106,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Name))
             {
-                await _dialogService.ShowAlertAsync("Error", "Name is required", "OK");
+                await _dialogService.DisplayAlertAsync("Error", "Name is required", "OK");
                 return;
             }
 
@@ -141,7 +141,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             } 
             catch(Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error", $"Save failed: {ex.Message}", "OK");
+                await _dialogService.DisplayAlertAsync("Error", $"Save failed: {ex.Message}", "OK");
             }
             finally
             {

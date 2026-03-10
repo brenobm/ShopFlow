@@ -139,25 +139,28 @@ namespace BrenoMachado.ShopFlow.Services
              // Try Update, catch -> Try Add. 
              try 
              {
-                  await _graphQLService.UpdateItemAsync(item);
-             }
-             catch
-             {
-                  // Provide item.Id to AddItem to preserve correlation
-                  await _graphQLService.AddItemAsync(
-                      item.ListId, 
-                      item.Id, 
-                      item.Name, 
-                      item.Quantity, 
-                      item.Unit, 
-                      item.Category, 
-                      item.Price
-                  );
-                  // Push secondary fields like IsPurchased via subsequent update if needed, but AddItem sets to false initially.
-                  if (item.IsPurchased)
-                  {
+                 try 
+                 {
                       await _graphQLService.UpdateItemAsync(item);
-                  }
+                 }
+                 catch
+                 {
+                      // Provide item.Id to AddItem to preserve correlation
+                      await _graphQLService.AddItemAsync(
+                          item.ListId, 
+                          item.Id, 
+                          item.Name, 
+                          item.Quantity, 
+                          item.Unit, 
+                          item.Category, 
+                          item.Price
+                      );
+                      // Push secondary fields like IsPurchased via subsequent update if needed, but AddItem sets to false initially.
+                      if (item.IsPurchased)
+                      {
+                          await _graphQLService.UpdateItemAsync(item);
+                      }
+                 }
              }
              catch (Exception innerEx)
              {

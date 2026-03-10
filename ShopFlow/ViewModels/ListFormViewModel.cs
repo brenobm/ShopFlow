@@ -1,6 +1,7 @@
 using System.Windows.Input;
 using BrenoMachado.ShopFlow.Models;
 using BrenoMachado.ShopFlow.Services;
+using BrenoMachado.ShopFlow.Repositories;
 using CommunityToolkit.Maui.Views;
 
 namespace BrenoMachado.ShopFlow.ViewModels

@@ -37,7 +37,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
             DeleteListCommand = new Command<ShoppingList>(async (list) => await DeleteListAsync(list));
             ShareListCommand = new Command<ShoppingList>(async (list) => await ShareListAsync(list));
             GoToSettingsCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(Views.SettingsPage)));
-            GoToLogsCommand = new Command(async () => await Shell.Current.Navigation.PushModalAsync(new LogsPage(new LogsViewModel(Services.FileLoggerService.Instance))));
+            GoToLogsCommand = new Command(async () => await Shell.Current.Navigation.PushModalAsync(new LogsPage(new LogsViewModel(Services.FileLoggerService.Instance, _dialogService))));
             SetDefaultListCommand = new Command<ShoppingList>(async (list) => await SetDefaultListAsync(list));
         }
 

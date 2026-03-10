@@ -1,6 +1,7 @@
 using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.Newtonsoft;
+using Newtonsoft.Json;
 using BrenoMachado.ShopFlow.Models;
 using System.Net.Http.Headers;
 

@@ -113,7 +113,7 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
                     {
                         FileLoggerService.LogStatic("[Siri] MainThread started. Fetching lists...");
                         var lists = await repo.GetListsAsync(); // Fetch from repo, not graphQL to support offline/local fast sync
-                        var defaultList = lists.FirstOrDefault(l => l.IsDefault) ?? lists.FirstOrDefault();
+                        var defaultList = lists.FirstOrDefault(l => l.IsDefault == true) ?? lists.FirstOrDefault();
                         
                         if (defaultList == null)
                         {

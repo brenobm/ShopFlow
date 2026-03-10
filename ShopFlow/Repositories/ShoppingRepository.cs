@@ -61,7 +61,7 @@ namespace BrenoMachado.ShopFlow.Repositories
             return _databaseService.DeleteItemAsync(item);
         }
 
-        public Task<List<ShoppingItem>> GetPurchaseHistoryAsync()
+        public Task<List<PurchaseHistory>> GetPurchaseHistoryAsync()
         {
             return _databaseService.GetPurchaseHistoryAsync();
         }
