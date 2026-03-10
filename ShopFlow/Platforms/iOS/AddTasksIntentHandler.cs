@@ -32,12 +32,7 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
                 return;
             }
 
-            // If user said "Add to Groceries list", we can validate if "Groceries" exists.
-            // Accessing dependencies from background/handler context:
-            var services = IPlatformApplication.Current.Services;
-            // Note: Accessing DB from here might be risky if Main Thread is required or context is weird, 
-            // but In-App handling usually runs in app process.
-            
+            FileLoggerService.LogStatic("Siri ResolveTargetTaskList invoked.");
             completion(INTaskListResolutionResult.GetSuccess(targetList));
         }
 
@@ -81,9 +76,11 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
 
         public void HandleAddTasks(INAddTasksIntent intent, Action<INAddTasksIntentResponse> completion)
         {
+            FileLoggerService.LogStatic("[Siri] HandleAddTasks invoked");
             var taskTitles = intent.TaskTitles;
             if (taskTitles == null || taskTitles.Length == 0)
             {
+                FileLoggerService.LogStatic("[Siri] No task titles provided.");
                 completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Failure, null));
                 return;
             }
@@ -91,29 +88,36 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
             try
             {
                 // Resolve Dependencies
-                var services = IPlatformApplication.Current.Services;
+                var app = IPlatformApplication.Current;
+                if (app == null) 
+                {
+                    FileLoggerService.LogStatic("[Siri] IPlatformApplication.Current is null. Cannot resolve dependencies.");
+                    completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Failure, null));
+                    return;
+                }
+
+                var services = app.Services;
                 var repo = services.GetService<IShoppingRepository>();
                 var smartService = services.GetService<ISmartService>();
                 var graphQLService = services.GetService<IGraphQLService>();
-                
-                // Get Default List
-                // Note: GetListsAsync might be async, but we need to block or run async.
-                // Since this method is void, we run Task.Run or async void?
-                // The interface usually allows async void, but let's be careful.
-                // Safest to fire and forget if needed, but we need to call completion.
-                // Re-wrapping in a Task to ensure async execution works safely?
-                // Actually, async void is acceptable for event handlers/callbacks in these mappings often.
-                // Let's keep it sync-like or simple logic for now, or just use .Result (dangerous) or async void.
-                // We will use 'async void' as previously, but with correct method name.
+
+                if (repo == null || smartService == null || graphQLService == null)
+                {
+                     FileLoggerService.LogStatic("[Siri] Failed to resolve required services.");
+                     completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Failure, null));
+                     return;
+                }
                 
                 MainThread.BeginInvokeOnMainThread(async () => {
                     try 
                     {
-                        var lists = await graphQLService.GetListsAsync();
-                        var defaultList = lists.FirstOrDefault(l => l.IsDefault == true) ?? lists.FirstOrDefault();
+                        FileLoggerService.LogStatic("[Siri] MainThread started. Fetching lists...");
+                        var lists = await repo.GetListsAsync(); // Fetch from repo, not graphQL to support offline/local fast sync
+                        var defaultList = lists.FirstOrDefault(l => l.IsDefault) ?? lists.FirstOrDefault();
                         
                         if (defaultList == null)
                         {
+                            FileLoggerService.LogStatic("[Siri] No default list found.");
                             completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Failure, null));
                             return;
                         }
@@ -123,6 +127,8 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
                         foreach (var title in taskTitles)
                         {
                             string rawText = title.SpokenPhrase;
+                            FileLoggerService.LogStatic($"[Siri] Processing item: {rawText}");
+                            
                             var parsed = smartService.ParseItemInput(rawText);
                             
                             var newItem = new ShoppingItem 
@@ -135,15 +141,7 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
                             };
                             
                             await repo.SaveItemAsync(newItem);
-                            
-                            // Correct INTask Constructor:
-                            // title, status, taskType, spatial, temporal, created, modified, identifier, priority (Verify specific overload or use basics)
-                            // Based on error "Arg 3 cannot convert null to INTaskType", inferred signature:
-                            // (title, status, taskType, ...)
-                            
-                            // Trying a safer constructor or filling correctly based on standard iOS bindings which might change.
-                            // Common signature: 
-                            // public INTask (INSpeakableString title, INTaskStatus status, INTaskType taskType, INSpatialEventTrigger spatialEventTrigger, INTemporalEventTrigger temporalEventTrigger, INDateComponentsRange createdDateComponents, INDateComponentsRange modifiedDateComponents, string identifier, INTaskPriority priority)
+                            FileLoggerService.LogStatic($"[Siri] Saved item: {newItem.Name}");
                             
                             addedTasks.Add(new INTask(
                                 title: new INSpeakableString(newItem.Name),
@@ -158,20 +156,23 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
                             ));
                         }
 
-                        var response = new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Success, null);
-                        response.AddedTasks = addedTasks.ToArray();
+                        var response = new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Success, null)
+                        {
+                            AddedTasks = addedTasks.ToArray()
+                        };
+                        FileLoggerService.LogStatic("[Siri] Returning Success response.");
                         completion(response);
                     }
                     catch(Exception ex)
                     {
-                         Console.WriteLine($"Siri Inner Handle Error: {ex}");
+                         FileLoggerService.LogStatic($"[Siri] Inner Handle Error: {ex}");
                          completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Failure, null));
                     }
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Siri Handle Error: {ex}");
+                FileLoggerService.LogStatic($"[Siri] Outer Handle Error: {ex}");
                 completion(new INAddTasksIntentResponse(INAddTasksIntentResponseCode.Failure, null));
             }
         }
