@@ -20,7 +20,7 @@ namespace BrenoMachado.ShopFlow.Services
         
         public async Task<string> ListenAsync(CancellationToken cancellationToken)
         {
-            FileLoggerService.LogStatic("VoiceService.ListenAsync Called");
+            FileLoggerService.LogStatic("[VoiceService] ListenAsync Called");
             try
             {
                 // Ensure we are on the Main Thread for iOS Speech Recognition
@@ -29,17 +29,25 @@ namespace BrenoMachado.ShopFlow.Services
                     FileLoggerService.LogStatic($"[VoiceService] Requesting Permissions... Platform: {DeviceInfo.Platform}");
 
                     // 1. Check Availability
-                    bool isAvailable = await _speechToText.RequestPermissions(); // Some Toolkit versions use this
-                    if (!isAvailable) 
+                    try 
                     {
-                         FileLoggerService.LogStatic("[VoiceService] SpeechToText Not Available or Permission Denied via internally.");
+                        bool isAvailable = await _speechToText.RequestPermissions();
+                        if (!isAvailable) 
+                        {
+                             FileLoggerService.LogStatic("[VoiceService] SpeechToText RequestPermissions returned false.");
+                        }
+                    }
+                    catch (Exception rpEx)
+                    {
+                        FileLoggerService.LogStatic($"[VoiceService] _speechToText.RequestPermissions() failed: {rpEx.Message}. Ignoring and proceeding to manual permissions.");
                     }
                     
                     var micStatus = await Permissions.RequestAsync<Permissions.Microphone>();
-                    FileLoggerService.LogStatic($"[VoiceService] Mic Status: {micStatus}");
+                    FileLoggerService.LogStatic($"[VoiceService] Core Mic Status: {micStatus}");
                     
                     if (micStatus != PermissionStatus.Granted)
                     {
+                         FileLoggerService.LogStatic("[VoiceService] Core Mic denied.");
                          await Shell.Current.DisplayAlert(AppResources.Msg_PermissionDenied, AppResources.Msg_MicRequired, "OK");
                          return null;
                     }
@@ -101,6 +109,7 @@ namespace BrenoMachado.ShopFlow.Services
             }
             catch (Exception ex)
             {
+                FileLoggerService.LogStatic($"[VoiceService] Outer Catch exception: {ex}");
                 // TaskCanceledException is expected here on "Stop"
                 if (ex is TaskCanceledException) return null;
 

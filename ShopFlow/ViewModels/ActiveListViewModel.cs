@@ -348,50 +348,70 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         async Task StartListeningAsync()
         {
-            if (IsListening) return;
+            FileLoggerService.LogStatic("[VoiceCmd] StartListeningAsync invoked");
+            if (IsListening) 
+            {
+                FileLoggerService.LogStatic("[VoiceCmd] Already listening, aborting.");
+                return;
+            }
             IsListening = true;
             _speechCts = new CancellationTokenSource();
 
             try 
             {
+                FileLoggerService.LogStatic("[VoiceCmd] Awaiting _voiceService.ListenAsync...");
                 var text = await _voiceService.ListenAsync(_speechCts.Token);
+                FileLoggerService.LogStatic($"[VoiceCmd] ListenAsync returned text: '{text}'");
+                
                 if (!string.IsNullOrWhiteSpace(text))
                 {
-                     // Offline-First Smart Add: Save Raw Immediately
+                     FileLoggerService.LogStatic($"[VoiceCmd] Executing Smart Parse on text: {text}");
+                     
+                     // Use the existing SmartService explicitly to parse the text immediately
+                     var parsed = _smartService.ParseItemInput(text);
+                     
                      var newItem = new ShoppingItem 
                      { 
                          ListId = CurrentList.Id, 
-                         Name = text, 
-                         OriginalText = text,
-                         IsParsed = false, // Trigger Gemini
-                         Quantity = 1, 
-                         Unit = "qty", 
-                         Category = "Uncategorized" // Will be updated by Gemini
+                         Name = parsed.Name, 
+                         Quantity = parsed.Quantity, 
+                         Unit = parsed.Unit, 
+                         Category = "Voice",
+                         IsParsed = false,
+                         OriginalText = text
                      };
-                     
+                     FileLoggerService.LogStatic($"[VoiceCmd] Saving parsed item: {newItem.Name}");
                      await _shoppingRepository.SaveItemAsync(newItem);
                      await LoadItemsAsync();
                      
                      // FR-2.5: Voice Confirm
                      var locale = _localizationService.GetCurrentCulture().Name;
                      var options = new Microsoft.Maui.Media.SpeechOptions { Locale = Microsoft.Maui.Media.TextToSpeech.GetLocalesAsync().Result.FirstOrDefault(l => l.Language == locale) };
-                     await Microsoft.Maui.Media.TextToSpeech.SpeakAsync($"Added {text}", options);
+                     await Microsoft.Maui.Media.TextToSpeech.SpeakAsync($"Added {parsed.Name}", options);
+                }
+                else
+                {
+                     FileLoggerService.LogStatic("[VoiceCmd] Returned text was empty or null.");
                 }
             }
             catch (Exception ex)
             {
+                 FileLoggerService.LogStatic($"[VoiceCmd] Exception in StartListeningAsync: {ex}");
                  // Ignore standard cancellations
             }
             finally
             {
                 IsListening = false;
+                FileLoggerService.LogStatic("[VoiceCmd] StartListeningAsync completed.");
             }
         }
 
         async Task StopListeningAsync()
         {
+            FileLoggerService.LogStatic("[VoiceCmd] StopListeningAsync invoked");
             if (_speechCts != null && !_speechCts.IsCancellationRequested)
             {
+                FileLoggerService.LogStatic("[VoiceCmd] Cancelling CTS...");
                 _speechCts.Cancel();
             }
             IsListening = false;
