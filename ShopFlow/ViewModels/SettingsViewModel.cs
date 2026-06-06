@@ -2,6 +2,7 @@ using System.Windows.Input;
 using BrenoMachado.ShopFlow.Services;
 using BrenoMachado.ShopFlow.Repositories;
 using BrenoMachado.ShopFlow.Views;
+using Microsoft.Maui.ApplicationModel;
 
 namespace BrenoMachado.ShopFlow.ViewModels
 {
@@ -10,9 +11,11 @@ namespace BrenoMachado.ShopFlow.ViewModels
         private readonly IShoppingRepository _shoppingRepository;
         private readonly IAppNotificationService _notificationService;
         private readonly IDialogService _dialogService;
+        private readonly ISiriService _siriService;
 
         public ICommand ClearDataCommand { get; }
         public ICommand TestPushCommand { get; }
+        public ICommand SetupSiriCommand { get; }
 
         public string Version => "1.0.0";
 
@@ -51,12 +54,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         // ...
 
-        public SettingsViewModel(IShoppingRepository shoppingRepository, IAppNotificationService notificationService, ILocalizationService localizationService, IDialogService dialogService)
+        public SettingsViewModel(IShoppingRepository shoppingRepository, IAppNotificationService notificationService, ILocalizationService localizationService, IDialogService dialogService, ISiriService siriService)
         {
             _shoppingRepository = shoppingRepository;
             _notificationService = notificationService;
             _localizationService = localizationService;
             _dialogService = dialogService;
+            _siriService = siriService;
             
             Title = Resources.Strings.AppResources.Settings;
             
@@ -69,6 +73,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             ClearDataCommand = new Command(async () => await ClearDataAsync());
             TestPushCommand = new Command(async () => await TestPushAsync());
+            SetupSiriCommand = new Command(async () => await _siriService.PresentAddVoiceShortcutAsync());
             GoToLogsCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(LogsPage)));
             // Auto-init on settings open (or app start ideally)
             _ = _notificationService.InitializeAsync();

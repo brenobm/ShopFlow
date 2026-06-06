@@ -1,4 +1,4 @@
-﻿using Foundation;
+using Foundation;
 using Intents;
 using UIKit;
 
@@ -11,11 +11,11 @@ public class AppDelegate : MauiUIApplicationDelegate
 {
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
-        // Enable Audio Playback even in Silent Mode
+        // Enable Audio Playback even in Silent Mode (required for voice recognition)
         try
         {
             var session = AVFoundation.AVAudioSession.SharedInstance();
-            session.SetCategory(AVFoundation.AVAudioSessionCategory.PlayAndRecord, 
+            session.SetCategory(AVFoundation.AVAudioSessionCategory.PlayAndRecord,
                                 AVFoundation.AVAudioSessionCategoryOptions.DefaultToSpeaker | AVFoundation.AVAudioSessionCategoryOptions.MixWithOthers);
             session.SetActive(true);
         }
@@ -24,23 +24,18 @@ public class AppDelegate : MauiUIApplicationDelegate
             Console.WriteLine($"Audio Session Error: {ex.Message}");
         }
 
-        // Request Siri Authorization
-        Intents.INPreferences.RequestSiriAuthorization((status) =>
+        // Request Siri Authorization, then donate our shortcut suggestion so Siri
+        // knows ShopFlow can handle add-item commands.
+        INPreferences.RequestSiriAuthorization((status) =>
         {
-            switch (status)
+            FileLoggerService.LogStatic($"[Siri] Authorization status: {status}");
+
+            if (status == INSiriAuthorizationStatus.Authorized)
             {
-                case Intents.INSiriAuthorizationStatus.Authorized:
-                    FileLoggerService.LogStatic("Siri Authorized");
-                    break;
-                case Intents.INSiriAuthorizationStatus.Denied:
-                    FileLoggerService.LogStatic("Siri Denied");
-                    break;
-                case Intents.INSiriAuthorizationStatus.NotDetermined:
-                    FileLoggerService.LogStatic("Siri Not Determined");
-                    break;
-                case Intents.INSiriAuthorizationStatus.Restricted:
-                    FileLoggerService.LogStatic("Siri Restricted");
-                    break;
+                // Donate the shortcut suggestion so it appears in
+                // Settings > Siri & Search > ShopFlow and Siri learns about us.
+                var siriService = IPlatformApplication.Current?.Services?.GetService<ISiriService>();
+                siriService?.DonateAddItemShortcut();
             }
         });
 
@@ -50,52 +45,32 @@ public class AppDelegate : MauiUIApplicationDelegate
         return base.FinishedLaunching(application, launchOptions);
     }
 
+    // Called when the app is launched/foregrounded to handle a Siri Shortcut
+    // (NSUserActivity-based shortcuts, e.g. com.brenomachado.shopflow.additem).
+    // NOTE: INAddTasksIntent is NOT handled here — it's routed via GetHandlerForIntent below.
     public override bool ContinueUserActivity(UIApplication application, NSUserActivity userActivity, UIApplicationRestorationHandler completionHandler)
     {
-        // Handle INAddTasksIntent (Siri "Add [milk]")
-        // Note: Direct access to .Interaction might fail in some .NET iOS bindings, using KVC as workaround
-        var interaction = userActivity.ValueForKey(new NSString("interaction")) as INInteraction;
-        
-        if (interaction?.Intent is INAddTasksIntent addIntent)
-        {
-             var items = addIntent.TaskTitles;
-             if (items != null)
-             {
-                 foreach (var item in items)
-                 {
-                     var itemName = item.SpokenPhrase;
-                     FileLoggerService.LogStatic($"Siri Request to Add: {itemName}");
-                     
-                     // Dispatch to main thread to navigate/add
-                     MainThread.BeginInvokeOnMainThread(async () => 
-                     {
-                         // Navigate to ActiveList and Add Item
-                         await Shell.Current.GoToAsync($"//ActiveListPage?action=add&item={itemName}");
-                     });
-                 }
-             }
-             return true;
-        }
-
         if (userActivity.ActivityType == "com.brenomachado.shopflow.additem")
         {
-            FileLoggerService.LogStatic("Opened via Siri Shortcut");
+            FileLoggerService.LogStatic("[Siri] Opened via NSUserActivity shortcut");
             return true;
         }
         return base.ContinueUserActivity(application, userActivity, completionHandler);
     }
 
-    // public override UIViewController? GetViewController(UIApplication application, string[] restorationIdentifierComponents, NSCoder coder) => base.GetViewController(application, restorationIdentifierComponents, coder);
-
+    // Called by iOS when Siri needs to handle an INAddTasksIntent.
+    // This is the correct entry point for SiriKit intent handling (not ContinueUserActivity).
+    // Requires: shortcut donation (done in FinishedLaunching) + user-recorded voice phrase.
     [Export("application:handlerForIntent:")]
     public NSObject GetHandlerForIntent(UIApplication application, INIntent intent)
     {
         if (intent is INAddTasksIntent)
         {
+            FileLoggerService.LogStatic("[Siri] GetHandlerForIntent: returning AddTasksIntentHandler");
             return new BrenoMachado.ShopFlow.Platforms.iOS.AddTasksIntentHandler();
         }
-        return null;
+        return null!;
     }
-    
-	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+
+    protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 }

@@ -160,6 +160,13 @@ namespace BrenoMachado.ShopFlow.Platforms.iOS
                         {
                             AddedTasks = addedTasks.ToArray()
                         };
+
+                        // Donate an interaction for each added item so Siri reinforces
+                        // the connection between this phrase and ShopFlow.
+                        var siriService = services.GetService<ISiriService>();
+                        foreach (var title in taskTitles)
+                            siriService?.DonateAddedItemInteraction(title.SpokenPhrase);
+
                         FileLoggerService.LogStatic("[Siri] Returning Success response.");
                         completion(response);
                     }

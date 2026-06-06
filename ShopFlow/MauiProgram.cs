@@ -51,6 +51,12 @@ public static class MauiProgram
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<IBarcodeWorkflowService, BarcodeWorkflowService>();
         builder.Services.AddSingleton<ICrashReporterService, CrashReporterService>();
+
+#if IOS
+        builder.Services.AddSingleton<ISiriService, ShopFlow.Platforms.iOS.SiriService>();
+#else
+        builder.Services.AddSingleton<ISiriService, NoopSiriService>();
+#endif
         
         // Plugin.LocalNotification
         builder.UseLocalNotification();
