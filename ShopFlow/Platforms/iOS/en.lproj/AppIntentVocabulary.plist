@@ -9,10 +9,10 @@
             <string>INAddTasksIntent</string>
             <key>IntentExamples</key>
             <array>
-                <string>Add milk in ShopFlow</string>
-                <string>Add milk on ShopFlow</string>
-                <string>Add items to my ShopFlow list</string>
+                <string>Add milk to ShopFlow</string>
                 <string>Add bananas to ShopFlow</string>
+                <string>Add items to my ShopFlow list</string>
+                <string>Add eggs to ShopFlow list</string>
             </array>
         </dict>
     </array>
@@ -31,12 +31,22 @@
                     <key>VocabularyItemSynonyms</key>
                     <array>
                         <dict>
+                            <key>VocabularyItemPhrase</key>
+                            <string>ShopFlow</string>
                             <key>VocabularyItemPronunciation</key>
                             <string>Shop Flow</string>
                         </dict>
                         <dict>
+                            <key>VocabularyItemPhrase</key>
+                            <string>Shop Flow</string>
                             <key>VocabularyItemPronunciation</key>
-                            <string>ShopFlow</string>
+                            <string>Shop Flow</string>
+                        </dict>
+                        <dict>
+                            <key>VocabularyItemPhrase</key>
+                            <string>my ShopFlow list</string>
+                            <key>VocabularyItemPronunciation</key>
+                            <string>my Shop Flow list</string>
                         </dict>
                     </array>
                 </dict>

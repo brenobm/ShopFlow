@@ -9,11 +9,10 @@
             <string>INAddTasksIntent</string>
             <key>IntentExamples</key>
             <array>
-                <string>Adicione leite no ShopFlow</string>
-                <string>Adicione leite na ShopFlow</string>
+                <string>Adicionar leite ao ShopFlow</string>
+                <string>Adicionar bananas ao ShopFlow</string>
                 <string>Adicionar itens na lista do ShopFlow</string>
-                <string>Adicione bananas no ShopFlow</string>
-                <string>Colocar leite no ShopFlow</string>
+                <string>Colocar ovos no ShopFlow</string>
             </array>
         </dict>
     </array>
@@ -32,16 +31,22 @@
                     <key>VocabularyItemSynonyms</key>
                     <array>
                         <dict>
-                            <key>VocabularyItemPronunciation</key>
-                            <string>Shop Flow</string>
-                        </dict>
-                        <dict>
-                            <key>VocabularyItemPronunciation</key>
+                            <key>VocabularyItemPhrase</key>
                             <string>ShopFlow</string>
-                        </dict>
-                        <dict>
                             <key>VocabularyItemPronunciation</key>
                             <string>Xópi Flou</string>
+                        </dict>
+                        <dict>
+                            <key>VocabularyItemPhrase</key>
+                            <string>Shop Flow</string>
+                            <key>VocabularyItemPronunciation</key>
+                            <string>Xópi Flou</string>
+                        </dict>
+                        <dict>
+                            <key>VocabularyItemPhrase</key>
+                            <string>minha lista do ShopFlow</string>
+                            <key>VocabularyItemPronunciation</key>
+                            <string>minha lista do Xópi Flou</string>
                         </dict>
                     </array>
                 </dict>
