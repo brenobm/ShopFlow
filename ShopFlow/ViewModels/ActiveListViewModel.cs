@@ -120,6 +120,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
         public ICommand StartListeningCommand { get; }
         public ICommand StopListeningCommand { get; }
+        public ICommand ToggleListeningCommand { get; }
 
         public ActiveListViewModel(
             IVoiceService voiceService, 
@@ -151,6 +152,13 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
             StartListeningCommand = new Command(async () => await StartListeningAsync());
             StopListeningCommand = new Command(async () => await StopListeningAsync());
+            ToggleListeningCommand = new Command(async () =>
+            {
+                if (IsListening)
+                    await StopListeningAsync();
+                else
+                    await StartListeningAsync();
+            });
             
             AddItemCommand = new Command(async () => await AddItemAsync());
             TogglePurchasedCommand = new Command<ShoppingItem>(async (item) => await TogglePurchasedAsync(item));

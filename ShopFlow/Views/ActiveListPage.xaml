@@ -230,6 +230,7 @@
 
             <!-- Voice Button (Larger & Glowing) -->
             <Button x:Name="VoiceBtn"
+                    Command="{Binding ToggleListeningCommand}"
                     CornerRadius="35"
                     HeightRequest="70"
                     WidthRequest="70"
