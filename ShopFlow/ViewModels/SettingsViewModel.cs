@@ -17,7 +17,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
         public ICommand TestPushCommand { get; }
         public ICommand SetupSiriCommand { get; }
 
-        public string Version => "1.0.0";
+        public string Version => "1.1.0";
 
         public class LanguageModel
         {
