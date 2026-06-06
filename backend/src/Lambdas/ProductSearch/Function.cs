@@ -51,11 +51,11 @@ public class Function
             {
                 status = "Hit";
                 productName = response.Product.ProductName;
-                
+
                 var result = new ProductResult
                 {
                     Name = response.Product.ProductName,
-                    Category = "Groceries", // Mapping logic could be improved here
+                    Category = MapCategory(response.Product.CategoriesTags),
                     ImageUrl = response.Product.ImageUrl
                 };
                 
@@ -76,6 +76,36 @@ public class Function
             return null;
         }
     }
+
+    private static string MapCategory(List<string>? tags)
+    {
+        if (tags == null || tags.Count == 0)
+            return "Pantry";
+
+        var joined = string.Join(" ", tags).ToLowerInvariant();
+
+        if (ContainsAny(joined, "dairy", "milk", "cheese", "yogurt", "egg", "butter", "cream"))
+            return "Dairy & Eggs";
+        if (ContainsAny(joined, "meat", "poultry", "beef", "pork", "chicken", "turkey", "fish", "seafood", "lamb"))
+            return "Meat & Poultry";
+        if (ContainsAny(joined, "beverage", "drink", "juice", "water", "soda", "coffee", "tea", "wine", "beer", "spirits"))
+            return "Beverages";
+        if (ContainsAny(joined, "bread", "bakery", "pastry", "cake", "biscuit", "cookie", "cracker"))
+            return "Bakery";
+        if (ContainsAny(joined, "frozen"))
+            return "Frozen Foods";
+        if (ContainsAny(joined, "fruit", "vegetable", "produce", "fresh", "salad", "herb"))
+            return "Produce";
+        if (ContainsAny(joined, "household", "cleaning", "detergent", "laundry", "dish"))
+            return "Household";
+        if (ContainsAny(joined, "personal-care", "cosmetic", "hygiene", "shampoo", "soap", "toiletry"))
+            return "Personal Care";
+
+        return "Pantry";
+    }
+
+    private static bool ContainsAny(string source, params string[] terms)
+        => terms.Any(t => source.Contains(t));
 
     private async Task LogMetricAsync(string barcode, string status, string? productName, ILambdaContext context)
     {
@@ -136,4 +166,7 @@ public class ProductData
 {
     public string ProductName { get; set; }
     public string ImageUrl { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("categories_tags")]
+    public List<string>? CategoriesTags { get; set; }
 }

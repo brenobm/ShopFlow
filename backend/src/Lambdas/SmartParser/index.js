@@ -30,10 +30,19 @@ exports.handler = async (event) => {
     };
 
     return new Promise((resolve, reject) => {
+        let settled = false;
+        const done = (fn, val) => { if (!settled) { settled = true; fn(val); } };
+
+        const timer = setTimeout(() => {
+            req.destroy();
+            done(reject, new Error('Gemini API request timed out after 25s'));
+        }, 25000);
+
         const req = https.request(options, (res) => {
             let body = '';
             res.on('data', (chunk) => body += chunk);
             res.on('end', () => {
+                clearTimeout(timer);
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                     try {
                         const jsonResponse = JSON.parse(body);
@@ -45,24 +54,25 @@ exports.handler = async (event) => {
                             if (parts && parts.length > 0) {
                                 const textResult = parts[0].text;
                                 // Return the parsed object directly to AppSync
-                                resolve(JSON.parse(textResult));
+                                done(resolve, JSON.parse(textResult));
                             } else {
-                                reject(new Error("No parts in Gemini response"));
+                                done(reject, new Error("No parts in Gemini response"));
                             }
                         } else {
-                            reject(new Error("No candidates in Gemini response"));
+                            done(reject, new Error("No candidates in Gemini response"));
                         }
                     } catch (e) {
-                        reject(new Error(`Failed to parse response: ${e.message}`));
+                        done(reject, new Error(`Failed to parse response: ${e.message}`));
                     }
                 } else {
-                    reject(new Error(`Gemini API Error: ${res.statusCode} ${body}`));
+                    done(reject, new Error(`Gemini API Error: ${res.statusCode} ${body}`));
                 }
             });
         });
 
         req.on('error', (e) => {
-            reject(new Error(`Request Error: ${e.message}`));
+            clearTimeout(timer);
+            done(reject, new Error(`Request Error: ${e.message}`));
         });
 
         req.write(data);

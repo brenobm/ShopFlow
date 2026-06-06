@@ -82,9 +82,17 @@ namespace Backend
                 PartitionKey = new Attribute { Name = "userId", Type = AttributeType.STRING },
                 SortKey = new Attribute { Name = "id", Type = AttributeType.STRING },
                 BillingMode = BillingMode.PAY_PER_REQUEST,
-                RemovalPolicy = RemovalPolicy.DESTROY
+                RemovalPolicy = RemovalPolicy.RETAIN
             });
-            
+
+            // GSI so getItems can be queried by listId (needed for shared list members)
+            itemsTable.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps
+            {
+                IndexName = "listId-index",
+                PartitionKey = new Attribute { Name = "listId", Type = AttributeType.STRING },
+                ProjectionType = ProjectionType.ALL
+            });
+
             // 5. DynamoDB Table (Lists - New)
              var listsTable = new Table(this, "ShopFlowLists", new TableProps
             {
@@ -92,7 +100,7 @@ namespace Backend
                 PartitionKey = new Attribute { Name = "id", Type = AttributeType.STRING },
                 BillingMode = BillingMode.PAY_PER_REQUEST,
                 Stream = StreamViewType.NEW_AND_OLD_IMAGES,
-                RemovalPolicy = RemovalPolicy.DESTROY
+                RemovalPolicy = RemovalPolicy.RETAIN
             });
 
             // 5.1. DynamoDB Table (Global Products)
@@ -101,7 +109,7 @@ namespace Backend
                 TableName = "ShopFlow_GlobalProducts",
                 PartitionKey = new Attribute { Name = "barcode", Type = AttributeType.STRING },
                 BillingMode = BillingMode.PAY_PER_REQUEST,
-                RemovalPolicy = RemovalPolicy.DESTROY
+                RemovalPolicy = RemovalPolicy.RETAIN
             });
 
             // 5.2. DynamoDB Table (Device Tokens - New for Notifications)
@@ -110,7 +118,7 @@ namespace Backend
                 TableName = "ShopFlow_DeviceTokens",
                 PartitionKey = new Attribute { Name = "userId", Type = AttributeType.STRING },
                 BillingMode = BillingMode.PAY_PER_REQUEST,
-                RemovalPolicy = RemovalPolicy.DESTROY
+                RemovalPolicy = RemovalPolicy.RETAIN
             });
 
             deviceTokensTable.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps
@@ -228,8 +236,7 @@ namespace Backend
             });
 
             // ITEMS Mapping
-            // getItems(listId: ID!) -> Query where userId = $ctx.identity.username AND filter listId = $args.listId
-            // Note: Ideally we should allow members to get items too, but for now we trust they have the ListId from getLists
+            // getItems(listId: ID!) -> Query listId-index GSI so both owners and shared members can fetch items
             itemsDS.CreateResolver("GetItemsResolver", new ResolverProps
             {
                 TypeName = "Query",
@@ -238,16 +245,11 @@ namespace Backend
                 {
                     ""version"" : ""2017-02-28"",
                     ""operation"" : ""Query"",
+                    ""index"" : ""listId-index"",
                     ""query"" : {
-                        ""expression"" : ""userId = :userId"",
-                        ""expressionValues"" : {
-                            "":userId"" : { ""S"" : ""${context.identity.username}"" }
-                        }
-                    },
-                    ""filter"" : {
                         ""expression"" : ""listId = :listId"",
                         ""expressionValues"" : {
-                             "":listId"" : { ""S"" : ""${context.arguments.listId}"" }
+                            "":listId"" : { ""S"" : ""${context.arguments.listId}"" }
                         }
                     }
                 }"),
@@ -538,7 +540,7 @@ namespace Backend
                 PartitionKey = new Attribute { Name = "barcode", Type = AttributeType.STRING },
                 SortKey = new Attribute { Name = "timestamp", Type = AttributeType.STRING },
                 BillingMode = BillingMode.PAY_PER_REQUEST,
-                RemovalPolicy = RemovalPolicy.DESTROY
+                RemovalPolicy = RemovalPolicy.RETAIN
             });
 
         // Product Search Lambda
