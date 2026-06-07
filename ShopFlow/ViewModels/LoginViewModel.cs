@@ -89,9 +89,8 @@ namespace BrenoMachado.ShopFlow.ViewModels
 
                 if (success)
                 {
-                    // Navigate to Main App (Swap MainPage)
-                    Console.WriteLine("[LoginViewModel] Swapping MainPage to AppShell.");
-                    Application.Current.MainPage = new AppShell(_authService, _pushService);
+                    Console.WriteLine("[LoginViewModel] Swapping to AppShell.");
+                    Application.Current!.Windows[0].Page = new AppShell(_authService, _pushService);
                 }
                 else
                 {

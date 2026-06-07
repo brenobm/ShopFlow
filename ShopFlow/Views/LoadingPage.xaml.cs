@@ -42,7 +42,7 @@ public partial class LoadingPage : ContentPage
                 FileLoggerService.LogStatic("[LoadingPage] Auth check timed out!");
                 // Don't hang. Go to Login.
                 var loginPage = _serviceProvider.GetService<LoginPage>();
-                Application.Current.MainPage = loginPage;
+                Application.Current!.Windows[0].Page =loginPage;
                 return;
             }
 
@@ -54,7 +54,7 @@ public partial class LoadingPage : ContentPage
                 FileLoggerService.LogStatic("[LoadingPage] Preparing to navigate to AppShell (Authenticated)...");
                 // REVERT: Uncommented to enable auto-navigation
                 var pushService = _serviceProvider.GetService<IPushService>();
-                Application.Current.MainPage = new AppShell(_authService, pushService);
+                Application.Current!.Windows[0].Page =new AppShell(_authService, pushService);
                 
                 // await DisplayAlert("Debug", "Authenticated! Ready to navigate to AppShell. Check Logs.", "OK");
             }
@@ -63,7 +63,7 @@ public partial class LoadingPage : ContentPage
                  FileLoggerService.LogStatic("[LoadingPage] Not Authenticated. Preparing to navigate to LoginPage...");
                  // REVERT: Uncommented to enable auto-navigation
                  var loginPage = _serviceProvider.GetService<LoginPage>();
-                 Application.Current.MainPage = loginPage;
+                 Application.Current!.Windows[0].Page =loginPage;
                  
                  // await DisplayAlert("Debug", "Not Authenticated. Ready to navigate to LoginPage. Check Logs.", "OK");
             }
@@ -75,7 +75,7 @@ public partial class LoadingPage : ContentPage
             
             // REVERT: Uncomment to enable auto-navigation
             // var loginPage = _serviceProvider.GetService<LoginPage>();
-            // Application.Current.MainPage = loginPage;
+            // Application.Current!.Windows[0].Page =loginPage;
         }
     }
     
@@ -101,7 +101,7 @@ public partial class LoadingPage : ContentPage
         try
         {
              var loginPage = _serviceProvider.GetService<LoginPage>();
-             Application.Current.MainPage = loginPage;
+             Application.Current!.Windows[0].Page =loginPage;
         }
         catch(Exception ex)
         {

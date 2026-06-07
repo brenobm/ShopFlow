@@ -552,7 +552,7 @@ namespace BrenoMachado.ShopFlow.ViewModels
              var popup = new QuickTunePopup(item, _shoppingRepository);
              
              // Find valid page to show popup
-             var page = Shell.Current.CurrentPage ?? App.Current.MainPage;
+             var page = Shell.Current.CurrentPage ?? Application.Current!.Windows[0].Page;
              await page.ShowPopupAsync(popup);
              
              // After popup closes (it waits), refresh UI if needed?
